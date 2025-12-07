@@ -1,0 +1,46 @@
+# Semantic Similarity Test Queries
+# Testing vocabulary mismatch handling with embeddings
+# Each pair tests the same concept using different vocabulary
+
+## Pair 1: Word Embeddings Concept
+[PAIR 1A - Exact Match]
+What are word embeddings?
+
+[PAIR 1B - Vocabulary Mismatch]
+How do learned parameters encode relationships between linguistic tokens?
+
+---
+
+## Pair 2: Attention Mechanism Concept
+[PAIR 2A - Exact Match]
+What is the attention mechanism?
+
+[PAIR 2B - Vocabulary Mismatch]
+What mechanism allows neural models to weigh importance of different input elements?
+
+---
+
+## Pair 3: Backpropagation Concept
+[PAIR 3A - Exact Match]
+How does backpropagation work in neural networks?
+
+[PAIR 3B - Vocabulary Mismatch]
+How do neural networks propagate errors backwards through layers to update weights?
+
+---
+
+## Pair 4: Transformer Architecture Concept
+[PAIR 4A - Exact Match]
+How do transformers work?
+
+[PAIR 4B - Vocabulary Mismatch]
+What neural architecture processes sequences in parallel using self-attention?
+
+---
+
+## Pair 5: N-gram Language Models Concept
+[PAIR 5A - Exact Match]
+What are n-grams?
+
+[PAIR 5B - Vocabulary Mismatch]
+What are contiguous sequences of words used for statistical language modeling?

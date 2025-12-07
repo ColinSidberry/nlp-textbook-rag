@@ -1,0 +1,465 @@
+[
+  {
+    "question": "What are word embeddings?",
+    "answer": "Word embeddings, as discussed in Chapters 8 and 10 of Speech and Language Processing by Jurafsky & Martin, are vector representations of words that capture their meaning based on their usage and neighboring words within a language. This concept derives from its mathematical sense where \"embedding\" refers to the process of integrating objects from one space into another. In simpler terms, word embeddings aim to represent words in a continuous vector space such that words with similar meanings are closer together.",
+    "citations": [
+      "[Chapter: Embeddings] (Source: embeddings.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: Embeddings\n\nChapter 10 and Chapter 8.\nThe linguistic field that studies embeddings and their meanings is called",
+        "chapter": "Embeddings",
+        "filename": "embeddings.txt",
+        "similarity": 0.8021899461746216
+      },
+      {
+        "text": "Chapter: Embeddings\n\nwords are called embeddings.\nThe word \u201cembedding\u201d derives historically from its mathematical sense",
+        "chapter": "Embeddings",
+        "filename": "embeddings.txt",
+        "similarity": 0.7989625930786133
+      },
+      {
+        "text": "Chapter: Embeddings\n\nutions of word neighbors. Vectors for representing words are called embeddings.\nThe word \u201cembedding\u201d",
+        "chapter": "Embeddings",
+        "filename": "embeddings.txt",
+        "similarity": 0.7966965436935425
+      },
+      {
+        "text": "Chapter: Embeddings\n\nundesirable word embedding associations. ACL.\nFinkelstein, L., E. Gabrilovich, Y. Matias, E. Rivlin,",
+        "chapter": "Embeddings",
+        "filename": "embeddings.txt",
+        "similarity": 0.7832669615745544
+      },
+      {
+        "text": "Chapter: Embeddings\n\ndefine the meaning of a word by its distribution in language\nuse, meaning its neighboring words or g",
+        "chapter": "Embeddings",
+        "filename": "embeddings.txt",
+        "similarity": 0.7753614783287048
+      }
+    ],
+    "query_time": 10.971965074539185,
+    "pair_id": 1,
+    "concept": "Word Embeddings",
+    "query_type": "Exact Match",
+    "avg_similarity": 0.7912955045700073,
+    "max_similarity": 0.8021899461746216,
+    "min_similarity": 0.7753614783287048
+  },
+  {
+    "question": "How do learned parameters encode relationships between linguistic tokens?",
+    "answer": "Based on the provided excerpts from your NLP textbook, it appears that the book discusses several methods for pretraining language models (LMs) and encoding linguistic tokens. However, the question asks about how learned parameters encode relationships between these tokens, which is not explicitly stated in the given context.\n\nTo answer this question, I will need to provide some additional information beyond what's mentioned in the excerpts you provided. In the field of Natural Language Processing (NLP), language models are trained on large corpora of text data to learn statistical patterns between words and sentences. During training, these models learn parameters that represent the probability distribution over possible next words given a sequence of previous words.\n\nIn the context of your textbook, Chapter 12: Transformers, discusses how these models are pretrained using techniques like sampling. This chapter does not explicitly mention how parameters encode relationships between tokens but rather focuses on the architecture and training methods used for transformer-based language models.\n\nChapter 7: Words and Tokens, however, provides more information about encoding methods for linguistic tokens. One such method mentioned is Byte Pair Encoding (BPE) (Sennrich et al., 2016), which is a vocabulary construction algorithm that combines frequent subwords into larger, less frequent units. BPE helps reduce the size of the vocabulary and the number of unique words in the training data, making it more manageable for LM training and inference.\n\nAnother method mentioned is unigram language modeling (ULM) (Kudo, 2018), which involves training a model to predict the next word given the current word, effectively capturing relationships between adjacent words. This method can be extended to n-gram models, which consider sequences of n words instead of just two.\n\nIn summary, learned parameters in language models encode statistical relationships between linguistic tokens based on the patterns observed during training. These relationships are captured by the probability distribution over possible next words given a sequence of previous words, as represented by the model's parameters. The textbook mentions methods like Byte Pair Encoding (BPE) and unigram language modeling (ULM) for encoding linguistic tokens, but it does not provide a detailed explanation of how these parameters encode relationships between tokens within the given excerpts. For a more thorough understanding,",
+    "citations": [
+      "[Chapter: Transformers] (Source: transformers.txt)",
+      "[Chapter: Words and Tokens] (Source: words-and-tokens.txt)",
+      "[Chapter: Neural Networks] (Source: neural-networks.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: Transformers\n\ndiscussed how language models\nare pretrained, and how tokens are generated via sampling. In the next",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.637265682220459
+      },
+      {
+        "text": "Chapter: Words and Tokens\n\nalgorithm has two parts: a trainer,\nand an encoder. In general in the token training phase we take",
+        "chapter": "Words and Tokens",
+        "filename": "words-and-tokens.txt",
+        "similarity": 0.6352706551551819
+      },
+      {
+        "text": "Chapter: Neural Networks\n\neceding tokens and what order they were in.\nFig. 6.14 shows the language modeling task, sketched wit",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.622247576713562
+      },
+      {
+        "text": "Chapter: Words and Tokens\n\nit can lead to shorter token sequences, lowering the computational costs of\nLM training and inferen",
+        "chapter": "Words and Tokens",
+        "filename": "words-and-tokens.txt",
+        "similarity": 0.6198224425315857
+      },
+      {
+        "text": "Chapter: Words and Tokens\n\nencoding (BPE) (Sennrich et al., 2016), and unigram language modeling\n(ULM) (Kudo, 2018).2 In this s",
+        "chapter": "Words and Tokens",
+        "filename": "words-and-tokens.txt",
+        "similarity": 0.6147346496582031
+      }
+    ],
+    "query_time": 30.74231457710266,
+    "pair_id": 1,
+    "concept": "Word Embeddings",
+    "query_type": "Vocabulary Mismatch",
+    "avg_similarity": 0.6258682012557983,
+    "max_similarity": 0.637265682220459,
+    "min_similarity": 0.6147346496582031
+  },
+  {
+    "question": "What is the attention mechanism?",
+    "answer": "The attention mechanism is a key component in natural language processing (NLP), specifically in models like Transformers. It allows the model to focus on certain parts of an input sequence when producing an output for another position.\n\nThe textbook mentions that there are two types of attention mechanisms: RNN attention and self-attention or multi-head attention. The RNN attention mechanism is discussed in Chapter 13, while self-attention evolved from it.\n\nIn simple terms, the attention output (ai) for a specific token position is calculated based on the relevance of other tokens in the input sequence. This way, the model can focus more on important words or phrases when generating an output. The multi-head attention approach allows the model to consider different aspects of the input simultaneously by computing attention from multiple perspectives.\n\nIn the Transformers chapter, it is also mentioned that attention mechanisms are often implemented at each layer of the transformer model rather than being added once at the beginning or end. This design choice enables the model to dynamically adjust its focus throughout the processing of a sequence.",
+    "citations": [
+      "[Chapter: Transformers] (Source: transformers.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: Transformers\n\nm the RNN attention mechanism (Chapter 13), we\u2019ll define attention from scratch here.\n\n1\n\n\f2\n\nC HAPT",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6621409058570862
+      },
+      {
+        "text": "Chapter: Transformers\n\ns a\nmechanism called self-attention or multi-head attention.1 Attention can be thought\nof as a way t",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6520769000053406
+      },
+      {
+        "text": "Chapter: Transformers\n\nion, often implemented in the attention mechanism at each layer rather\nthan being added once at the",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.5969486236572266
+      },
+      {
+        "text": "Chapter: Transformers\n\ngh multi-head attention developed historically from the RNN attention mechanism (Chapter 13), we\u2019ll",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.5914558172225952
+      },
+      {
+        "text": "Chapter: Transformers\n\nrst describe a\nsimplified intuition of attention, in which the attention output ai at token position",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.5900585055351257
+      }
+    ],
+    "query_time": 14.810733079910278,
+    "pair_id": 2,
+    "concept": "Attention Mechanism",
+    "query_type": "Exact Match",
+    "avg_similarity": 0.6185361504554748,
+    "max_similarity": 0.6621409058570862,
+    "min_similarity": 0.5900585055351257
+  },
+  {
+    "question": "What mechanism allows neural models to weigh importance of different input elements?",
+    "answer": "The mechanism that allows neural models to weigh the importance of different input elements is through the use of weights (w1, w2, ..., wn) associated with each neuron or unit in a neural network. These weights act as coefficients that multiply the corresponding input values, thus determining the significance of each input element in relation to the neuron's output.\n\nIn a neural network, each neuron receives multiple inputs (x1, x2, ..., xn) and has its own set of weights for those inputs. The sum of the products of the input values and their respective weights, along with a bias term (b), is then passed through an activation function to produce the final output of that neuron. This concept is further explained in Chapter: Neural Networks (pages 364-381) of Speech and Language Processing by Jurafsky & Martin.",
+    "citations": [
+      "[Chapter: Neural Networks] (Source: neural-networks.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: Neural Networks\n\ndevice.\n\u2022 Each neural unit multiplies input values by a weight vector, adds a bias, and\nthen applie",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.5464918613433838
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nof inputs x1 ...xn , a unit has\na set of corresponding weights w1 ...wn and a bias b, so the weighte",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.532728910446167
+      },
+      {
+        "text": "Chapter: Neural Networks\n\numming\n[1]\n\nthe three nodes that feed into it (the two products, and the bias term bi ).\n\nThe weight",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.5207773447036743
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nentations of the input, is one of their key advantages,\nand one that we will return to again and aga",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.5105977654457092
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nm useful representations. This intuition, that neural networks can automatically learn useful repres",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.5102423429489136
+      }
+    ],
+    "query_time": 12.64861798286438,
+    "pair_id": 2,
+    "concept": "Attention Mechanism",
+    "query_type": "Vocabulary Mismatch",
+    "avg_similarity": 0.5241676449775696,
+    "max_similarity": 0.5464918613433838,
+    "min_similarity": 0.5102423429489136
+  },
+  {
+    "question": "How does backpropagation work in neural networks?",
+    "answer": "Backpropagation is a fundamental algorithm used primarily in artificial neural networks to calculate the gradient or the rate of change of the loss function with respect to the weights of the network. This process allows for the optimization of the network by adjusting these weights in the direction that minimizes the loss (or error).\n\nIn other words, during training, backpropagation computes the gradient of the loss function for each weight in the neural network. This is done by propagating the error or gradient from the output layer through the entire network, backward, which is where the name \"backpropagation\" comes from.\n\nThe concept of backpropagation is introduced and discussed extensively in Chapter 5: Neural Networks of Jurafsky & Martin's Speech and Language Processing textbook. Additionally, you can find references to the original work on backpropagation by Rumelhart et al. (1986) and Boser et al. (1989) in this chapter as well.\n\nTo summarize, backpropagation is a crucial technique for training neural networks, allowing them to learn from data by adjusting their weights to minimize the error between predicted and actual outputs. This process is performed iteratively during the training phase of the network.",
+    "citations": [
+      "[Chapter: Neural Networks] (Source: neural-networks.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: Neural Networks\n\non to computing this gradient is an algorithm called error backpropagation or backprop (Rumelhart et",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.7252206802368164
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nbackpropagation, backward differentiation on a computation graph,\nis used to compute the gradients o",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.6937353014945984
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nal., 1986). While backprop was invented specially for neural networks, it turns out to be the same",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.6806886792182922
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nover all those\nintermediate layers? The answer is the algorithm called error backpropagation or\nback",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.6670003533363342
+      },
+      {
+        "text": "Chapter: Neural Networks\n\n. Boser, J. S. Denker, D. Henderson, R. E.\nHoward, W. Hubbard, and L. D. Jackel. 1989. Backpropagati",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.6408182382583618
+      }
+    ],
+    "query_time": 17.109215021133423,
+    "pair_id": 3,
+    "concept": "Backpropagation",
+    "query_type": "Exact Match",
+    "avg_similarity": 0.6814926505088806,
+    "max_similarity": 0.7252206802368164,
+    "min_similarity": 0.6408182382583618
+  },
+  {
+    "question": "How do neural networks propagate errors backwards through layers to update weights?",
+    "answer": "The process you're asking about is known as \"Error Backpropagation\", which is a method used in neural networks for training them automatically. This technique allows errors (or differences between predicted and actual values) to be propagated backwards through layers of the network, enabling the adjustment (updating) of weights.\n\nIn other words, during the training phase, the error signal from the output layer is computed and then propagated backward through each intermediate layer in the neural network. At each layer, the gradients (partial derivatives) are multiplied to determine how much each weight should be adjusted to minimize the overall error. This process helps the network learn from its mistakes and improve its performance over time.\n\nThe concept of Error Backpropagation is discussed extensively in Chapter 6 of Speech and Language Processing by Jurafsky & Martin, specifically in Sections 6.6 and following. It became popular during the 1980s as mentioned in Section 6.5 (Rumelhart et al., 1986).",
+    "citations": [
+      "[Chapter: Neural Networks] (Source: neural-networks.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: Neural Networks\n\nating an error signal backwards, multiplying gradients (partial derivatives) from each layer of the",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.7145476341247559
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nover all those\nintermediate layers? The answer is the algorithm called error backpropagation or\nback",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.7015618681907654
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nut for real examples\nthe weights for neural networks are learned automatically using the error backp",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.7012624144554138
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nsee in Section 6.6, we\u2019ll train networks by propagating an error signal backwards, multiplying gradi",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.6367664933204651
+      },
+      {
+        "text": "Chapter: Neural Networks\n\nerror backpropagation became widespread (Rumelhart et al.,\n1986). During the 1980s a wide variety of",
+        "chapter": "Neural Networks",
+        "filename": "neural-networks.txt",
+        "similarity": 0.6237567067146301
+      }
+    ],
+    "query_time": 14.545685052871704,
+    "pair_id": 3,
+    "concept": "Backpropagation",
+    "query_type": "Vocabulary Mismatch",
+    "avg_similarity": 0.675579023361206,
+    "max_similarity": 0.7145476341247559,
+    "min_similarity": 0.6237567067146301
+  },
+  {
+    "question": "How do transformers work?",
+    "answer": "Based on the provided context from the \"Transformers\" chapter in Speech and Language Processing by Jurafsky & Martin, the exact workings of transformers are not explicitly detailed. However, there are some intriguing ideas about how they function suggested within the chapter.\n\nIn general, transformers are a type of model architecture used for processing sequences of data like text or speech. They have gained significant attention due to their impressive performance in various natural language processing (NLP) tasks.\n\nThe key component of transformer models is the self-attention mechanism, which allows the model to weigh and combine representations from different positions within the input sequence. This mechanism enables the model to focus on relevant information and ignore less important details, making it well-suited for tasks such as language translation or text summarization.\n\nIn terms of the specific self-attention calculation, the textbook presents a simplified example using a square attention matrix (K) and four queries (Q1, Q2, Q3, Q4). Each query is multiplied with every key in the K matrix to produce a set of scores that determine the relevance of each key for the corresponding query. The attention score for each key is then calculated by applying a softmax function to these raw scores.\n\nIt's worth noting that there are several variants and improvements to the transformer architecture, such as BERT (Bidirectional Encoder Representations from Transformers) and RoBERTa (Robustly Optimized BERT), which have been developed by researchers like P. Dhariwal, A. Neelakantan, P. Shyam, G. Sastry, A. Askell, S. Agarwal, A. Herbert-Voss, and G. Kruege, as mentioned in the textbook excerpts.\n\nFor a more thorough understanding of transformers and their workings, I would recommend reading chapters 20 (Self-Attention Mechanisms) and 21 (Transformer Models) in Speech and Language Processing by Jurafsky & Martin. These chapters provide a detailed introduction to self-attention mechanisms and transformer models, including their applications and the mathematical underpinnings behind them.",
+    "citations": [
+      "[Chapter: Transformers] (Source: transformers.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: Transformers\n\ns the mechanism in the transformer that weighs and combines the\nrepresentations from appropriate oth",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6929538249969482
+      },
+      {
+        "text": "Chapter: Transformers\n\nwork? While we don\u2019t know for sure, there are\nsome intriguing ideas. One hypothesis is based on the",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6910940408706665
+      },
+      {
+        "text": "Chapter: Transformers\n\nP. Dhariwal, A. Neelakantan, P. Shyam, G. Sastry,\nA. Askell, S. Agarwal, A. Herbert-Voss, G. Kruege",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6671674251556396
+      },
+      {
+        "text": "Chapter: Transformers\n\nchapter, we\u2019ll focus for this chapter on the use of transformers\nto model left-to-right (sometimes",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6581832766532898
+      },
+      {
+        "text": "Chapter: Transformers\n\n8.\nq1\u2022k1 q1\u2022k2 q1\u2022k3 q1\u2022k4\nq2\u2022k1 q2\u2022k2 q2\u2022k3 q2\u2022k4\n\nN\nq3\u2022k1 q3\u2022k2 q3\u2022k3 q3\u2022k4\nq4\u2022k1 q4\u2022k2 q4\u2022k3 q4\u2022k",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.652305006980896
+      }
+    ],
+    "query_time": 29.233009099960327,
+    "pair_id": 4,
+    "concept": "Transformer Architecture",
+    "query_type": "Exact Match",
+    "avg_similarity": 0.6723407149314881,
+    "max_similarity": 0.6929538249969482,
+    "min_similarity": 0.652305006980896
+  },
+  {
+    "question": "What neural architecture processes sequences in parallel using self-attention?",
+    "answer": "Based on the excerpts provided from the \"Transformers\" chapter in Jurafsky & Martin's Speech and Language Processing textbook, it is apparent that the Transformer neural architecture processes sequences in parallel using self-attention mechanisms.\n\nThe concept of self-attention is introduced as a key component of the Transformer model. In this model, each token position in an input sequence (x1, ..., xn) is attended to simultaneously by the self-attention layer, which allows the model to focus on relevant information across the entire sequence rather than being confined to local dependencies as in Recurrent Neural Networks (RNNs).\n\nMore specifically, the text mentions that this self-attention computation happens in parallel at each token position within a single causal self-attention layer. Additionally, there is a mention of computing self-attention for a single self-attention output vector ai from a single input vector, indicating that the attention mechanism is applied to individual tokens within the sequence.\n\nIn summary, the Transformer neural architecture processes sequences in parallel using self-attention mechanisms, allowing it to efficiently capture long-range dependencies and achieve state-of-the-art performance on various natural language processing tasks. (Cited Chapter: Transformers)",
+    "citations": [
+      "[Chapter: Transformers] (Source: transformers.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: Transformers\n\nparallel at each token position\ni. Thus a self-attention layer maps input sequences (x1 , ..., xn )",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6399004459381104
+      },
+      {
+        "text": "Chapter: Transformers\n\nm the RNN attention mechanism (Chapter 13), we\u2019ll define attention from scratch here.\n\n1\n\n\f2\n\nC HAPT",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6128866672515869
+      },
+      {
+        "text": "Chapter: Transformers\n\nwhich this same attention computation happens in parallel at each token position\ni. Thus a self-att",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.6009393334388733
+      },
+      {
+        "text": "Chapter: Transformers\n\nation in an entire causal self-attention layer,\nin which this same attention computation happens in",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.5820598602294922
+      },
+      {
+        "text": "Chapter: Transformers\n\nfor computing self-attention for a single selfattention output vector ai from a single input vector",
+        "chapter": "Transformers",
+        "filename": "transformers.txt",
+        "similarity": 0.5731015205383301
+      }
+    ],
+    "query_time": 17.317254781723022,
+    "pair_id": 4,
+    "concept": "Transformer Architecture",
+    "query_type": "Vocabulary Mismatch",
+    "avg_similarity": 0.6017775654792785,
+    "max_similarity": 0.6399004459381104,
+    "min_similarity": 0.5731015205383301
+  },
+  {
+    "question": "What are n-grams?",
+    "answer": "N-grams are a type of statistical model used in Natural Language Processing (NLP) to predict the likelihood of a sequence of words or phrases appearing together. The term \"n-gram\" refers to contiguous sequences of n items from a given sample of text.\n\nFor example, if n = 2, we have bigrams such as \"the sky,\" \"sky blue,\" and \"blue ocean.\" If n = 3, we have trigrams like \"the sky is,\" \"sky blue sea,\" or \"blue ocean water.\"\n\nThe concept of n-grams is discussed in detail in Chapter 3: N-Gram Language Models. The textbook mentions that higher-order n-grams help to distribute probability mass for lower order n-grams, and there are techniques like hierarchical n-grams that can handle longer sequences (Excerpt 1).\n\nMoreover, it is mentioned that han n-grams, a specific technique, can address two major problems with regular n-grams: the large number of parameters required to store all possible n-grams and the issue of sparse data (Excerpt 2).\n\nAdditionally, n-grams are created by adding special boundary symbols like '<' and '>' to each word. For example, if we have the sentence \"the sky is blue,\" with n = 3 and boundary symbols, we get: \"<the> <sky> <is> <blue>\". (Excerpt 4)\n\nLastly, the textbook mentions that multiplying together enough n-grams would result in a smaller product as you go further down the sequence. (Excerpt 5)",
+    "citations": [
+      "[Chapter: N-gram Language Models] (Source: n-gram.txt)",
+      "[Chapter: Embeddings] (Source: embeddings.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: N-gram Language Models\n\nthe higher-order n-grams\nto save some probability mass for the lower order n-grams. In practice, ins",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.5437605381011963
+      },
+      {
+        "text": "Chapter: N-gram Language Models\n\nhan n-grams, enabling them to solve the two major problems with n-grams: (1) the number of parameter",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.5234037041664124
+      },
+      {
+        "text": "Chapter: N-gram Language Models\n\nan the n-gram\n\n\f4\n\nC HAPTER 3\n\n\u2022\n\nN- GRAM L ANGUAGE M ODELS\n\nsize, so N = 2 means bigrams and N = 3",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.5040015578269958
+      },
+      {
+        "text": "Chapter: Embeddings\n\nn-grams, with special boundary symbols < and > added to each word. For example,\nwith n = 3 the word",
+        "chapter": "Embeddings",
+        "filename": "embeddings.txt",
+        "similarity": 0.5006608366966248
+      },
+      {
+        "text": "Chapter: N-gram Language Models\n\nmultiply together, the\nsmaller the product becomes. Multiplying enough n-grams together would result",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.5006235241889954
+      }
+    ],
+    "query_time": 22.851094007492065,
+    "pair_id": 5,
+    "concept": "N-gram Language Models",
+    "query_type": "Exact Match",
+    "avg_similarity": 0.5144900321960449,
+    "max_similarity": 0.5437605381011963,
+    "min_similarity": 0.5006235241889954
+  },
+  {
+    "question": "What are contiguous sequences of words used for statistical language modeling?",
+    "answer": "Contiguous sequences of words, or n-grams, are used for statistical language modeling in various fields such as engineering, linguistics, and psychology. The purpose is to model word sequences in a manner that can predict future words based on their historical occurrence within a given language (Chapter: N-gram Language Models).\n\nN-gram models work by approximating the probability distribution over word sequences of any length. These models use Markov assumptions, which state that the probability of a word depends only on its immediately preceding context (the previous one or more words), not on any longer context (Chapter: N-gram Language Models).\n\nThe perplexity of a given word sequence W is calculated using the formula presented in equation (3.17) from Chapter: N-gram Language Models:\n\nperplexity(W) = t\u207b\u00b9 \u220f\u2090=1 P(wa\u2090 | wa\u2090-\u2081)\n\nWhere t is the total number of words in the sequence W, and P(wa\u2090 | wa\u2090-\u2081) represents the conditional probability of word aw\u2090 given its preceding context (aw\u2090-\u2081). A lower perplexity score implies a better model's ability to predict the sequence accurately.\n\nIn summary, contiguous sequences of words (n-grams) are essential for statistical language modeling as they provide a means to approximate the probability distribution over word sequences in various fields and calculate the model's accuracy through perplexity scores.",
+    "citations": [
+      "[Chapter: N-gram Language Models] (Source: n-gram.txt)"
+    ],
+    "retrieved_chunks": [
+      {
+        "text": "Chapter: N-gram Language Models\n\ns to compute approximations to English\nword sequences. Based on Shannon\u2019s work, Markov models were c",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.6914442777633667
+      },
+      {
+        "text": "Chapter: N-gram Language Models\n\n:\nv\nuN\nuY\nN\nperplexity(W ) = t\ni=1\n\n1\nP(wi |wi\u22121 )\n\n(3.17)\n\nWhat we generally use for word sequence",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.6881186366081238
+      },
+      {
+        "text": "Chapter: N-gram Language Models\n\nommonly used in\nengineering, linguistic, and psychological work on modeling word sequences by the\n19",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.6818796396255493
+      },
+      {
+        "text": "Chapter: N-gram Language Models\n\nequences will reoccur in the longer sequence\naccording to their probabilities.\nA stochastic process",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.6755771636962891
+      },
+      {
+        "text": "Chapter: N-gram Language Models\n\na stochastic process L that produces a\nsequence of words, and allow W to represent the sequence of",
+        "chapter": "N-gram Language Models",
+        "filename": "n-gram.txt",
+        "similarity": 0.6747230887413025
+      }
+    ],
+    "query_time": 21.23431086540222,
+    "pair_id": 5,
+    "concept": "N-gram Language Models",
+    "query_type": "Vocabulary Mismatch",
+    "avg_similarity": 0.6823485612869262,
+    "max_similarity": 0.6914442777633667,
+    "min_similarity": 0.6747230887413025
+  }
+]

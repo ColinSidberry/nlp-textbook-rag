@@ -1,0 +1,71 @@
+{
+  "queries": [
+    {
+      "query": "What is retrieval-augmented generation?",
+      "time": 20.50388813018799,
+      "type": "Concept",
+      "similarity": 0.8013628602027894
+    },
+    {
+      "query": "What are word embeddings?",
+      "time": 17.387669801712036,
+      "type": "Definition",
+      "similarity": 0.7912955045700073
+    },
+    {
+      "query": "How does backpropagation work in neural networks?",
+      "time": 18.23979115486145,
+      "type": "Concept",
+      "similarity": 0.6814926505088806
+    },
+    {
+      "query": "How do transformers work?",
+      "time": 25.44734525680542,
+      "type": "Concept",
+      "similarity": 0.6723407149314881
+    },
+    {
+      "query": "What are n-grams?",
+      "time": 19.884445905685425,
+      "type": "Definition",
+      "similarity": 0.5144900321960449
+    },
+    {
+      "query": "Compare word2vec and contextual embeddings",
+      "time": 24.669429063796997,
+      "type": "Comparison",
+      "similarity": 0.77135169506073
+    },
+    {
+      "query": "How do you evaluate n-gram language models?",
+      "time": 15.608856916427612,
+      "type": "Technical",
+      "similarity": 0.8228390455245972
+    },
+    {
+      "query": "What is the attention mechanism?",
+      "time": 14.554521083831787,
+      "type": "Concept",
+      "similarity": 0.6185361504554748
+    },
+    {
+      "query": "What is tokenization?",
+      "time": 15.97815203666687,
+      "type": "Definition",
+      "similarity": 0.6758869051933288
+    },
+    {
+      "query": "What is logistic regression?",
+      "time": 17.630428075790405,
+      "type": "Definition",
+      "similarity": 0.6479006290435791
+    }
+  ],
+  "statistics": {
+    "average": 18.9904527425766,
+    "median": 17.935109615325928,
+    "min": 14.554521083831787,
+    "max": 25.44734525680542,
+    "stdev": 3.6848134593191686
+  }
+}

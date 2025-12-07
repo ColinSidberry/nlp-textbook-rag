@@ -1,0 +1,34 @@
+# Test Query Set - 20 Diverse Queries
+# Format: [Query Type] Query Text
+
+# Concept Explanations (5 queries)
+[Concept] How do transformers work?
+[Concept] What is the attention mechanism?
+[Concept] How does backpropagation work in neural networks?
+[Concept] What is retrieval-augmented generation?
+[Concept] Explain how word embeddings capture semantic meaning
+
+# Definitions (4 queries)
+[Definition] What are word embeddings?
+[Definition] What is tokenization?
+[Definition] What are n-grams?
+[Definition] What is logistic regression?
+
+# Comparisons (3 queries)
+[Comparison] What's the difference between n-grams and neural language models?
+[Comparison] How do transformers differ from RNNs?
+[Comparison] Compare word2vec and contextual embeddings
+
+# Applications (3 queries)
+[Application] How is RAG used to reduce hallucinations?
+[Application] What are practical applications of word embeddings?
+[Application] How are transformers used in modern NLP?
+
+# Technical (3 queries)
+[Technical] How does self-attention compute relationships between words?
+[Technical] What is the softmax function in logistic regression?
+[Technical] How do you evaluate n-gram language models?
+
+# Edge Cases (2 queries)
+[Edge] What is perplexity?
+[Edge] How do you handle out-of-vocabulary words?
