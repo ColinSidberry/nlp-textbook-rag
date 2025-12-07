@@ -12,6 +12,7 @@ Features:
 
 from pathlib import Path
 from typing import List, Dict, Tuple
+import os
 import chromadb
 from sentence_transformers import SentenceTransformer
 from langchain_ollama import OllamaLLM
@@ -57,10 +58,13 @@ class NLPTextbookRAG:
 
         # Initialize Ollama LLM
         print(f"Initializing Ollama with model: {llm_model}...")
+        ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        print(f"Using Ollama at: {ollama_base_url}")
         self.llm = OllamaLLM(
             model=llm_model,
             temperature=temperature,
-            num_predict=max_tokens
+            num_predict=max_tokens,
+            base_url=ollama_base_url
         )
 
         # Configuration

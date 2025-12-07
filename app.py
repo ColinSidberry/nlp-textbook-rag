@@ -42,7 +42,7 @@ st.markdown("""
         margin-bottom: 2rem;
     }
     .citation-box {
-        background-color: #f0f2f6;
+        background-color: #262730;
         padding: 1rem;
         border-radius: 0.5rem;
         border-left: 4px solid #1E88E5;
