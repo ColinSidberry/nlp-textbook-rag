@@ -10,11 +10,13 @@ import streamlit as st
 import time
 from pathlib import Path
 import sys
+import os
 
 # Add src directory to path
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from rag_pipeline import NLPTextbookRAG
+from auto_index import ensure_chroma_ready
 
 
 # Page configuration
@@ -62,7 +64,20 @@ def initialize_rag():
     """
     Initialize RAG pipeline with caching
     This ensures the pipeline is only loaded once and reused across sessions
+
+    Also checks if ChromaDB exists and rebuilds if necessary
     """
+    # Ensure ChromaDB is ready (will rebuild if missing)
+    chroma_path = str(Path(__file__).parent / "data" / "chroma")
+
+    if not ensure_chroma_ready(chroma_path):
+        raise RuntimeError(
+            "Failed to initialize ChromaDB. Please check:\n"
+            "- Normalized data exists at data/normalized/nlp_textbook.json\n"
+            "- Sufficient disk space for indexing\n"
+            "- All dependencies installed"
+        )
+
     return NLPTextbookRAG(
         temperature=0.7,
         max_tokens=500,
@@ -120,11 +135,18 @@ def main():
 
     # Initialize RAG pipeline with error handling
     try:
-        with st.spinner("Initializing RAG pipeline..."):
+        with st.spinner("Initializing RAG pipeline (this may take a few minutes on first run)..."):
             rag = initialize_rag()
+        st.success("✓ RAG pipeline ready!")
     except Exception as e:
         st.error(f"Failed to initialize RAG pipeline: {str(e)}")
-        st.info("Please ensure:\n- ChromaDB data exists at `/data/chroma/`\n- Ollama is running with the Mistral model\n- All dependencies are installed")
+        st.info(
+            "**Troubleshooting:**\n\n"
+            "1. **Ollama not running:** Start Ollama with `ollama run mistral:7b-instruct`\n"
+            "2. **Missing dependencies:** Run `pip install -r requirements.txt`\n"
+            "3. **Missing source data:** Ensure `data/normalized/nlp_textbook.json` exists\n\n"
+            "The system will automatically rebuild the ChromaDB index if it's missing."
+        )
         st.stop()
 
     # Query interface
