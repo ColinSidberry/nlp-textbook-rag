@@ -7,6 +7,7 @@
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{enumitem}
+\usepackage{graphicx}
 
 \geometry{margin=0.6in}
 
@@ -29,6 +30,15 @@
 Built a Retrieval-Augmented Generation (RAG) system that enables semantic search and question-answering across NLP textbook content (Jurafsky \& Martin's \emph{Speech and Language Processing}), providing students with accurate, cited answers to conceptual questions.
 
 \section{Technical Architecture}
+
+\noindent\textbf{Full System Diagram:} \href{https://github.com/ColinSidberry/nlp-textbook-rag/blob/main/System_Diagram.png}{github.com/ColinSidberry/nlp-textbook-rag/blob/main/System\_Diagram.png}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\textwidth]{System_Diagram.png}
+\caption{Complete RAG System Architecture: Data pipeline (offline preprocessing), query processing layers (enhancement, embedding, retrieval, filtering), and generation layer with multi-layer hallucination prevention.}
+\label{fig:system_diagram}
+\end{figure}
 
 \textbf{System Components:}
 \begin{itemize}[noitemsep]
