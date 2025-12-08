@@ -1,0 +1,184 @@
+\documentclass[paper=a4, fontsize=10pt]{scrartcl}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+\geometry{margin=0.6in}
+
+\newcommand{\assignment}{NLP Textbook RAG System}
+\newcommand{\duedate}{\today}
+
+\title{\assignment}
+\author{
+    \textbf{Colin Sidberry} \\
+    \href{mailto:sidberry.c@northeastern.edu}{sidberry.c@northeastern.edu}
+}
+\date{\duedate}
+
+\begin{document}
+
+\maketitle
+
+\section{Project Objective}
+
+Built a Retrieval-Augmented Generation (RAG) system that enables semantic search and question-answering across NLP textbook content (Jurafsky \& Martin's \emph{Speech and Language Processing}), providing students with accurate, cited answers to conceptual questions.
+
+\section{Technical Architecture}
+
+\textbf{System Components:}
+\begin{itemize}[noitemsep]
+    \item \textbf{Data Pipeline:} 35 chapters (2.2MB) $\rightarrow$ 10,170 text chunks $\rightarrow$ 384-dim embeddings
+    \item \textbf{Vector Database:} ChromaDB with persistent storage
+    \item \textbf{Embedding Model:} sentence-transformers/all-MiniLM-L6-v2
+    \item \textbf{Language Model:} Mistral 7B-Instruct (via Ollama)
+    \item \textbf{User Interface:} Streamlit web application
+    \item \textbf{Deployment:} Hybrid architecture (Streamlit Cloud + Google Cloud VM)
+    \item \textbf{Quality Assurance:} Automated testing (11 quality tests + 20 edge cases, 100\% \& 90\% pass rates)
+\end{itemize}
+
+\textbf{Query Pipeline:}
+\begin{enumerate}[noitemsep]
+    \item User question $\rightarrow$ acronym expansion (RAG $\rightarrow$ retrieval-augmented generation)
+    \item Query embedding vector generation (sentence-transformers)
+    \item Cosine similarity search across 10,170 chunks (ChromaDB)
+    \item Similarity threshold filtering (blocks out-of-scope questions)
+    \item Top-5 relevant chunks retrieved ($\sim$1-2s)
+    \item LLM generates comprehensive answer with strong anti-hallucination guardrails ($\sim$17-23s)
+    \item Display answer, citations, and source chunks
+\end{enumerate}
+
+\section{Key Design Decisions \& Trade-offs}
+
+\subsection*{Quality over Speed}
+Chose Mistral 7B-Instruct over smaller models (e.g., Llama 3.2:3b) to generate comprehensive 400-500 word educational responses. This results in 19-second average query times, but provides thorough explanations appropriate for learning contexts.
+
+\subsection*{Zero-Loss Chunking Strategy}
+Implemented 280-character chunks with 20\% overlap (56 characters) using raw text sliding window to achieve 10,170 chunks from 35 chapters. Key innovation: Complete text preservation (100\% coverage verified) with no stripping or text manipulation, preventing information loss between chunks while maintaining semantic continuity.
+
+\subsection*{Hybrid Deployment Architecture}
+Deployed UI on Streamlit Cloud (free tier) and LLM on GCP VM (n1-standard-4). Provides professional public interface while leveraging dedicated compute for model inference.
+
+\section{Performance Metrics \& Validation}
+
+\textbf{Quality Test Suite (11 tests, 100\% pass rate):}
+\begin{itemize}[noitemsep]
+    \item \textbf{Out-of-scope handling:} 4/4 tests passed (current events, general knowledge correctly declined)
+    \item \textbf{Valid NLP questions:} 4/4 tests passed (transformers, embeddings, n-grams, RAG)
+    \item \textbf{Context grounding:} No hallucination detected
+    \item \textbf{Citation accuracy:} 100\% match between citations and retrieved chunks
+\end{itemize}
+
+\textbf{Edge Case Test Suite (20 tests, 90\% pass rate):}
+\begin{itemize}[noitemsep]
+    \item Multi-acronym queries (2/2), case sensitivity (2/2), typos (2/2)
+    \item Comparison questions, special characters, negative questions (all passed)
+    \item Very long queries (50+ words), multiple questions in one (passed)
+    \item Empty/invalid queries handled gracefully
+\end{itemize}
+
+\textbf{Text Coverage Verification:}
+\begin{itemize}[noitemsep]
+    \item 100\% text coverage across all 35 chapters (no missing text)
+    \item Perfect 20\% overlap between consecutive chunks
+    \item 10,170 chunks indexed with complete metadata
+\end{itemize}
+
+\section{Technical Challenges \& Solutions}
+
+\textbf{Challenge 1: Hallucination \& Out-of-Scope Questions}\\
+\textbf{Solution:} Implemented multi-layer defense: (1) Similarity threshold filtering (avg $>$ 0.4 OR max $>$ 0.42), (2) Strengthened prompt with 7 critical anti-hallucination instructions, (3) 15 common NLP acronym expansions (RAG, BERT, LSTM, etc.), (4) Comparison query enhancement. Result: 100\% pass rate on quality tests, 90\% on edge cases.
+
+\textbf{Challenge 2: Text Loss Between Chunks}\\
+\textbf{Solution:} Eliminated all text stripping/cleaning operations. Implemented pure sliding window (280 chars, step 224) with completely raw text. Verification script confirms 100\% text coverage across all 35 chapters with perfect 20\% overlap.
+
+\textbf{Challenge 3: Deployment without committing large database}\\
+\textbf{Solution:} Implemented automatic index rebuilding from source data (2.2MB JSON) on first run. ChromaDB stays in .gitignore; rebuilt from normalized data when deployed.
+
+\textbf{Challenge 4: Connecting Streamlit Cloud to GCP-hosted Ollama}\\
+\textbf{Solution:} Configured Ollama to accept external connections (0.0.0.0:11434), created GCP firewall rule for port 11434, passed VM external IP via Streamlit secrets as OLLAMA\_BASE\_URL environment variable.
+
+\section{Demonstration Highlights}
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Meta-query:} "What is retrieval-augmented generation?" (0.835 similarity) — system explains its own architecture
+    \item \textbf{Semantic understanding:} "How does backpropagation work?" vs. "How do neural networks propagate errors backwards?" (0.725 vs. 0.715 similarity) — demonstrates vocabulary-independent matching
+    \item \textbf{Technical depth:} "How do you evaluate n-gram language models?" (0.838 similarity) — shows system handles methodology questions
+\end{itemize}
+
+\section{Future Enhancements}
+
+\begin{itemize}[noitemsep]
+    \item Implement conversation history for follow-up questions
+    \item Add query caching for common questions
+    \item Explore GPU acceleration for 3x speedup (19s $\rightarrow$ 6-8s)
+    \item Spell correction for more robust typo handling
+    \item Multi-modal support (diagrams, equations from PDF)
+\end{itemize}
+
+\section{Conclusion}
+
+This project demonstrates that RAG systems can deliver educational value by combining semantic search with local LLMs while maintaining high quality and robustness. Key achievements: (1) Zero-loss chunking preserves 100\% of source text, (2) Multi-layer anti-hallucination defenses achieve 100\% quality test pass rate, (3) Acronym expansion and adaptive similarity thresholds handle 90\% of edge cases, (4) Complete coverage of 35 textbook chapters (10,170 chunks). The hybrid deployment architecture balances user experience with cost efficiency, while comprehensive automated testing ensures reliability across diverse query patterns.
+
+\vspace{0.5em}
+\noindent\textbf{Repository:} \href{https://github.com/ColinSidberry/nlp-textbook-rag}{github.com/ColinSidberry/nlp-textbook-rag}\\
+\textbf{Live Demo:} \href{https://nlp-textbook-rag-icexjozmsfxru2ucbpvtbt.streamlit.app}{nlp-textbook-rag.streamlit.app}
+
+\section{References \& Resources}
+
+\textbf{Key Papers:}
+\begin{itemize}[noitemsep]
+    \item Lewis et al. (2020). "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks." arXiv:2005.11401
+    \item Reimers \& Gurevych (2019). "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks." arXiv:1908.10084
+\end{itemize}
+
+\textbf{Documentation \& Tutorials:}
+\begin{itemize}[noitemsep]
+    \item LangChain RAG Tutorial: \href{https://python.langchain.com/docs/use_cases/question_answering/}{python.langchain.com/docs/use\_cases/question\_answering}
+    \item Sentence-Transformers Model Selection: \href{https://www.sbert.net/docs/pretrained_models.html}{sbert.net/docs/pretrained\_models.html}
+    \item ChromaDB Getting Started: \href{https://docs.trychroma.com/getting-started}{docs.trychroma.com/getting-started}
+    \item Pinecone RAG Guide: \href{https://www.pinecone.io/learn/retrieval-augmented-generation/}{pinecone.io/learn/retrieval-augmented-generation}
+\end{itemize}
+
+\appendix
+\section{Test Queries (30 Total)}
+
+\subsection*{Diverse Queries (20)}
+\begin{enumerate}[noitemsep,label=\arabic*.]
+    \item How do transformers work?
+    \item What is the attention mechanism?
+    \item How does backpropagation work in neural networks?
+    \item What is retrieval-augmented generation?
+    \item Explain how word embeddings capture semantic meaning
+    \item What are word embeddings?
+    \item What is tokenization?
+    \item What are n-grams?
+    \item What is logistic regression?
+    \item What's the difference between n-grams and neural language models?
+    \item How do transformers differ from RNNs?
+    \item Compare word2vec and contextual embeddings
+    \item How is RAG used to reduce hallucinations?
+    \item What are practical applications of word embeddings?
+    \item How are transformers used in modern NLP?
+    \item How does self-attention compute relationships between words?
+    \item What is the softmax function in logistic regression?
+    \item How do you evaluate n-gram language models?
+    \item What is perplexity?
+    \item How do you handle out-of-vocabulary words?
+\end{enumerate}
+
+\subsection*{Semantic Similarity Pairs (10)}
+\textit{Testing vocabulary-independent retrieval (5 pairs):}
+\begin{enumerate}[noitemsep,label=\arabic*.]
+    \item "What are word embeddings?" vs. "How do learned parameters encode relationships between linguistic tokens?"
+    \item "What is the attention mechanism?" vs. "What mechanism allows neural models to weigh importance of different input elements?"
+    \item "How does backpropagation work?" vs. "How do neural networks propagate errors backwards through layers?"
+    \item "How do transformers work?" vs. "What neural architecture processes sequences in parallel using self-attention?"
+    \item "What are n-grams?" vs. "What are contiguous sequences of words used for statistical language modeling?"
+\end{enumerate}
+
+\end{document}
