@@ -13,14 +13,64 @@ Features:
 from pathlib import Path
 from typing import List, Dict, Tuple
 import os
+import logging
+import requests
 import chromadb
 from sentence_transformers import SentenceTransformer
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
 class NLPTextbookRAG:
     """RAG pipeline for querying NLP textbook content"""
+
+    @staticmethod
+    def validate_ollama_connection(base_url: str, timeout: int = 5) -> tuple[bool, str]:
+        """
+        Validate that Ollama is accessible at the given URL
+
+        Args:
+            base_url: Ollama base URL to check
+            timeout: Connection timeout in seconds
+
+        Returns:
+            Tuple of (is_valid, error_message)
+        """
+        try:
+            logger.info(f"Validating Ollama connection at: {base_url}")
+            response = requests.get(f"{base_url}/api/tags", timeout=timeout)
+
+            if response.status_code == 200:
+                logger.info(f"Successfully connected to Ollama at {base_url}")
+                models = response.json().get('models', [])
+                logger.info(f"Available models: {[m['name'] for m in models]}")
+                return True, ""
+            else:
+                error_msg = f"Ollama returned status code {response.status_code}"
+                logger.error(error_msg)
+                return False, error_msg
+
+        except requests.exceptions.Timeout:
+            error_msg = f"Connection timeout connecting to Ollama at {base_url}. Is Ollama running?"
+            logger.error(error_msg)
+            return False, error_msg
+
+        except requests.exceptions.ConnectionError as e:
+            error_msg = f"Cannot connect to Ollama at {base_url}. Error: {str(e)}"
+            logger.error(error_msg)
+            return False, error_msg
+
+        except Exception as e:
+            error_msg = f"Unexpected error validating Ollama connection: {str(e)}"
+            logger.error(error_msg)
+            return False, error_msg
 
     # Common NLP acronyms and their expansions
     ACRONYM_EXPANSIONS = {
@@ -67,24 +117,53 @@ class NLPTextbookRAG:
         if chroma_path is None:
             chroma_path = Path(__file__).parent.parent / "data" / "chroma"
 
+        logger.info(f"Initializing RAG pipeline with ChromaDB at: {chroma_path}")
+
         # Initialize ChromaDB
-        self.client = chromadb.PersistentClient(path=str(chroma_path))
-        self.collection = self.client.get_collection(name=collection_name)
+        try:
+            self.client = chromadb.PersistentClient(path=str(chroma_path))
+            self.collection = self.client.get_collection(name=collection_name)
+            logger.info(f"Successfully loaded ChromaDB collection: {collection_name}")
+        except Exception as e:
+            logger.error(f"Failed to initialize ChromaDB: {str(e)}")
+            raise
 
         # Initialize embedding model
-        print(f"Loading embedding model: {embedding_model}...")
-        self.embedding_model = SentenceTransformer(embedding_model, local_files_only=True)
+        logger.info(f"Loading embedding model: {embedding_model}...")
+        try:
+            self.embedding_model = SentenceTransformer(embedding_model, local_files_only=True)
+            logger.info("Embedding model loaded successfully")
+        except Exception as e:
+            logger.error(f"Failed to load embedding model: {str(e)}")
+            raise
 
         # Initialize Ollama LLM
-        print(f"Initializing Ollama with model: {llm_model}...")
         ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        print(f"Using Ollama at: {ollama_base_url}")
-        self.llm = OllamaLLM(
-            model=llm_model,
-            temperature=temperature,
-            num_predict=max_tokens,
-            base_url=ollama_base_url
-        )
+        logger.info(f"Initializing Ollama with model: {llm_model} at {ollama_base_url}")
+
+        # Validate Ollama connection before proceeding
+        is_valid, error_msg = self.validate_ollama_connection(ollama_base_url)
+        if not is_valid:
+            raise ConnectionError(
+                f"Cannot connect to Ollama at {ollama_base_url}. {error_msg}\n\n"
+                f"Troubleshooting:\n"
+                f"1. Ensure Ollama is running: `ollama serve`\n"
+                f"2. Verify the model is installed: `ollama list`\n"
+                f"3. If using a remote Ollama, set OLLAMA_BASE_URL environment variable\n"
+                f"4. Check network connectivity and firewall settings"
+            )
+
+        try:
+            self.llm = OllamaLLM(
+                model=llm_model,
+                temperature=temperature,
+                num_predict=max_tokens,
+                base_url=ollama_base_url
+            )
+            logger.info("Ollama LLM initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize Ollama LLM: {str(e)}")
+            raise
 
         # Configuration
         self.top_k = top_k
@@ -257,15 +336,23 @@ Answer (use ONLY the context above, decline if out-of-scope):"""
         Returns:
             Dict with keys: 'question', 'answer', 'citations', 'retrieved_chunks'
         """
+        logger.info(f"Processing query: '{question}'")
+
         if verbose:
             print(f"\nProcessing query: '{question}'")
             print("=" * 70)
 
         # Step 1: Retrieve relevant chunks
+        logger.info(f"Retrieving top-{self.top_k} chunks from ChromaDB")
+
         if verbose:
             print(f"\n[1] Retrieving top-{self.top_k} chunks from ChromaDB...")
 
-        documents, metadatas = self.retrieve(question)
+        try:
+            documents, metadatas = self.retrieve(question)
+        except Exception as e:
+            logger.error(f"Error during retrieval: {str(e)}", exc_info=True)
+            raise
 
         if not documents:
             return {
@@ -304,13 +391,21 @@ Answer (use ONLY the context above, decline if out-of-scope):"""
             }
 
         # Step 3: Generate response
+        logger.info(f"Generating response with Ollama (avg similarity: {avg_similarity:.3f})")
+
         if verbose:
             print(f"\n[3] Generating response with Ollama (mistral)...")
             print(f"    Average chunk similarity: {avg_similarity:.3f}")
 
         # Format prompt with context and question
         formatted_prompt = self.prompt_template.format(context=context, question=question)
-        response = self.llm.invoke(formatted_prompt)
+
+        try:
+            response = self.llm.invoke(formatted_prompt)
+            logger.info("Successfully generated response from Ollama")
+        except Exception as e:
+            logger.error(f"Error generating response from Ollama: {str(e)}", exc_info=True)
+            raise
 
         # Step 4: Extract citations
         if verbose:
