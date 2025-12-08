@@ -201,20 +201,18 @@ def main():
                 with meta_col4:
                     st.metric("Chunk Index", meta.get('chunk_index', 'N/A'))
 
-                # Content preview
-                preview_length = 300
-                preview = doc[:preview_length]
-                if len(doc) > preview_length:
-                    preview += "..."
-
+                # Full content display
                 st.text_area(
-                    "Content Preview",
-                    value=preview,
-                    height=120,
+                    "Complete Chunk Content",
+                    value=doc,
+                    height=200,
                     disabled=True,
                     key=f"preview_{doc_id}_{entry_num}",
                     label_visibility="collapsed"
                 )
+
+                # Show length info
+                st.caption(f"Length: {len(doc)} characters")
 
                 st.divider()
 
@@ -314,15 +312,9 @@ def main():
             f"""
             **Collection Info:**
             - Total Entries: {total_count:,}
-            - Indexed Chapters: 7
+            - Indexed Chapters: 35
             - Embedding Dimension: 384
-            - Chunk Strategy: Sliding window (100 chars, 50% overlap)
-
-            **Features:**
-            - Browse entries with pagination
-            - Filter by chapter
-            - Search text within documents
-            - Export filtered results to JSON
+            - Chunk Strategy: Sliding window (280 chars, 20% overlap)
 
             **Performance:**
             - Page size: 50 entries

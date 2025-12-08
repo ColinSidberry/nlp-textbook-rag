@@ -1,0 +1,190 @@
+{
+  "summary": {
+    "total": 20,
+    "passed": 16,
+    "failed": 4,
+    "pass_rate": 0.8
+  },
+  "results": [
+    {
+      "name": "Multi-acronym query",
+      "query": "How does BERT use transformers?",
+      "expected_behavior": "Should expand both acronyms and answer",
+      "should_answer": true,
+      "answer": "BERT uses transformers by employing a bidirectional transformer encoder, as introduced in Chapter 10 of the textbook. This model is referred to as the BERT masked bidirectional transformer encoder. The transformer encoder is used to create embeddings for language modeling tasks, as described in Excerpt 3 and Excerpt 4 from Chapter 10. Additionally, it's mentioned in Excerpt 2 from Chapter 8 that each column of the final transformer block output is followed by a language modeling head, which could be related to BERT's use of transformers for masked language modeling.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Mixed acronyms",
+      "query": "Compare RNN and LSTM",
+      "expected_behavior": "Should expand both and provide comparison",
+      "should_answer": true,
+      "answer": "In the provided context, both Recurrent Neural Networks (RNN) and Long Short-Term Memory (LSTM) networks are discussed as types of neural networks. However, LSTMs are presented as an extension to RNNs that help manage long-term dependencies more effectively.\n\n1. RNNs: They have a single activation function and output. The units in RNNs are simpler than those used in LSTMs but can still retain information from the previous hidden layer, extending back to the beginning of the sequence (Excerpt 2).\n\n2. LSTM: They are more complex than RNNs due to their gated units that help manage the flow of information through time. The increased complexity is encapsulated within the LSTM unit itself, with the only additional external complexity being the presence of additional context (Excerpt 4). LSTMs divide the context management problem into two subproblems (Excerpt 5).\n\nIn summary, while RNNs can retain information from previous steps, they struggle with long-term dependencies. LSTMs address this issue by using gated units to manage the flow of information through time, making them more suitable for tasks requiring understanding and remembering information over extended periods.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Single word query",
+      "query": "transformers",
+      "expected_behavior": "Should handle single word (may be ambiguous)",
+      "should_answer": true,
+      "answer": "The text provides information about Transformers, which is a standard architecture for building large language models. According to Vaswani et al. (2017), their work \"Attention is all you need\" discusses the transformer model. The context also mentions that input tokens are encoded, passed through a set of stacked transformer blocks, and then processed by a language model head to predict the next token. However, the text does not provide detailed information about how exactly the transformer works or its specific components like self-attention mechanisms or positional encodings. For more in-depth understanding, it is recommended to refer to the original paper by Vaswani et al. (2017).",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Two word query",
+      "query": "neural networks",
+      "expected_behavior": "Should provide general overview",
+      "should_answer": true,
+      "answer": "The textbook provides information about neural networks as a network of small computing units, each taking a vector of input values and producing a single output value. They are trained by optimization algorithms like gradient descent, error backpropagation, and other methods for backward differentiation on a computation graph. Neural language models also use neural networks as a probabilistic tool. The power of neural networks comes from the ability of early layers to learn representations that can be utilized by later layers in the network. (References: Excerpt 1, 2, 3, and 4)",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Lowercase acronym",
+      "query": "what is rag?",
+      "expected_behavior": "Should still expand RAG correctly",
+      "should_answer": true,
+      "answer": "The term \"RAG\" refers to Retrieval-Augmented Generation. It's a method that combines information retrieval and language generation to answer questions by using documents that are likely to have relevant information (Retriever) and a large language model (Reader). This method is discussed in Chapter: Information Retrieval and 11 Retrieval-Augmented Generation from the textbook \"Speech and Language Processing\" by Jurafsky & Martin.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Mixed case",
+      "query": "What is Bert?",
+      "expected_behavior": "Should recognize BERT",
+      "should_answer": true,
+      "answer": "Bert is a bidirectional transformer encoder language model. It is mentioned in Chapter 10 of the textbook as one of the models that underlies the BERT family, including its descendants like RoBERTa and SpanBERT (Liu et al., 2019 or Joshi et al., unspecified). The BERT language model is also referred to as a masked bidirectional transformer encoder.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Common typo",
+      "query": "What are tranformers?",
+      "expected_behavior": "May still retrieve relevant chunks (embedding similarity)",
+      "should_answer": true,
+      "answer": "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+      "is_declined": true,
+      "passed": false
+    },
+    {
+      "name": "Spelling variant",
+      "query": "What is an embeding?",
+      "expected_behavior": "May still work with similarity matching",
+      "should_answer": true,
+      "answer": "An embedding is a vector for representing words in natural language processing, as described in the text. The word \"embedding\" derives from its mathematical sense as a mapping from one space or structure to another, as mentioned in Landauer et al. (1997). In LSA (Latent Semantic Analysis), it describes the mapping from the space of sparse count vectors to the latent space of singular values.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Empty string",
+      "query": "",
+      "expected_behavior": "Should handle gracefully",
+      "should_answer": false,
+      "answer": "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+      "is_declined": true,
+      "passed": true
+    },
+    {
+      "name": "Only whitespace",
+      "query": "   ",
+      "expected_behavior": "Should handle gracefully",
+      "should_answer": false,
+      "answer": "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+      "is_declined": true,
+      "passed": true
+    },
+    {
+      "name": "Very long query",
+      "query": "I'm writing a research paper about natural language processing and I need to understand how transformer models work, specifically the attention mechanism, and I'm wondering if you could explain in detail how the multi-head attention works and what are the query, key, and value matrices?",
+      "expected_behavior": "Should handle long query and extract main question",
+      "should_answer": true,
+      "answer": "In the context provided, the textbook discusses the concept of multi-head attention in Transformer models. Multi-head attention allows a model to learn different aspects of relationships among inputs by having separate attention heads that reside in parallel layers at the same depth in a model. Each head has its own set of parameters.\n\nThe multi-head attention computation takes an input vector `xi` (corresponding to input token) and maps it to an output `ai` by adding in vectors from prior tokens, weighted by how relevant they are for the processing of the current word. This process involves three matrices: query, key, and value matrices.\n\n1. Query Matrix (Q): The query matrix is used to determine the relevance of each input token with respect to the current token being processed. It computes a score for each input token based on their similarity with the query vector.\n\n2. Key Matrix (K): The key matrix is used in conjunction with the query matrix to compute the attention scores between the query and each input token. Each row of the key matrix corresponds to an input token, and its elements are the keys for that token.\n\n3. Value Matrix (V): Once the attention scores have been computed using the query and key matrices, the value matrix is used to obtain the final output vectors for each input token based on their attention scores. The values in the value matrix correspond to the useful information about each input token that will be combined to produce the final output vector `ai`.\n\nIn summary, multi-head attention works by computing attention scores between the current token and all other tokens using query, key, and value matrices for each head. The scores are then used to weight the contributions from different input tokens in producing the final output vectors for each token.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Comparison",
+      "query": "What's the difference between word embeddings and contextualized embeddings?",
+      "expected_behavior": "Should provide comparison",
+      "should_answer": true,
+      "answer": "The text provided does not explicitly define or compare contextualized embeddings with word embeddings. However, based on the context, we can infer that word embeddings are vector representations of the meaning of words learned directly from word distributions in texts (Excerpt 3). Contextualized embeddings might be a more powerful form of dynamic or contextual embeddings, as they seem to take into account the surrounding words or context (Excerpt 4). But without explicit definitions or comparisons in the provided text, it's best to say that this question is outside the scope of the NLP textbook.",
+      "is_declined": true,
+      "passed": false
+    },
+    {
+      "name": "About the book",
+      "query": "Who wrote this textbook?",
+      "expected_behavior": "May appear in context (Jurafsky & Martin mentioned)",
+      "should_answer": true,
+      "answer": "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+      "is_declined": true,
+      "passed": false
+    },
+    {
+      "name": "Chapter listing",
+      "query": "What chapters are in this book?",
+      "expected_behavior": "May decline or list based on retrieved context",
+      "should_answer": false,
+      "answer": "The textbook contains two chapters mentioned in the provided context: Chapter 22 Lexicons for Sentiment, Affect, and Chapter 12 Machine Translation.",
+      "is_declined": false,
+      "passed": false
+    },
+    {
+      "name": "Code implementation",
+      "query": "How do I implement a transformer in Python?",
+      "expected_behavior": "Should focus on concepts, not code (textbook is conceptual)",
+      "should_answer": true,
+      "answer": "The textbook does not provide an implementation of a transformer in Python. However, it does describe the architecture and computations involved in a transformer block. To implement a transformer, you may refer to existing libraries such as TensorFlow or PyTorch that offer pre-built transformer models.\n\nHere's a simplified description of the components of a transformer block from the context:\n1. The input is encoded using positional encodings (sinusoidal position embeddings).\n2. Each component computation inside the block includes LayerNorm, self-attention, and feedforward neural network layers.\n3. The output of each transformer block can be expressed by breaking it down with one equation for each component computation.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "When question",
+      "query": "When was BERT invented?",
+      "expected_behavior": "Only answer if date appears in textbook",
+      "should_answer": true,
+      "answer": "The textbook does not provide the exact date when BERT was invented. However, it mentions that BERT is introduced in Chapter 10 and its most widely-used version was published in 2019 (Devlin et al., 2019).",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Angle brackets",
+      "query": "What is the <mask> token?",
+      "expected_behavior": "Should handle special chars",
+      "should_answer": true,
+      "answer": "The text does not explicitly mention a \"<mask>\" token in the provided context. However, the concept of a masked language model might involve such a token, but it's not detailed in the excerpts given. If there is any question about a mask token in relation to masked language models, it would be more appropriate to refer to Chapter 10 directly, as that is where the context discusses masked language models.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Limitation question",
+      "query": "Why can't RNNs handle long sequences well?",
+      "expected_behavior": "Should explain limitations",
+      "should_answer": true,
+      "answer": "The textbook does not explicitly state why RNNs struggle with handling long sequences. However, it implies that one reason might be due to the hidden layers' inability to carry forward \"critical information\" as needed while still processing intermediate parts of the sequence correctly (Excerpt 5).",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Multiple questions",
+      "query": "What are transformers and how do they differ from RNNs?",
+      "expected_behavior": "Should answer both parts",
+      "should_answer": true,
+      "answer": "Transformers are a type of sequence architecture introduced in Chapter 8 of the textbook. They were initially described by Vaswani et al. (2017) and later included in encoder-decoder architectures by Bahdanau et al. (2016). Compared to RNNs, transformers differ in their approach to handling sequences, using self-attention mechanisms instead of recurrence. This allows them to process input data in parallel, which can lead to improved performance and efficiency for tasks such as machine translation, automatic speech recognition, and text summarization (as mentioned in Chapters 12, 15, and not explicitly stated but implied in other chapters). However, the exact differences and advantages of transformers over RNNs are explained more thoroughly in Chapter 8.",
+      "is_declined": false,
+      "passed": true
+    },
+    {
+      "name": "Ambiguous term",
+      "query": "What is attention?",
+      "expected_behavior": "Should provide NLP context (attention mechanism)",
+      "should_answer": true,
+      "answer": "Attention can be thought of as a way to build contextual representations of a token's meaning by attending to and integrating information from surrounding tokens. It helps the model learn how tokens relate to each other over large spans (Excerpt 1). In simpler terms, attention is a weighted sum of context vectors with complications added to how the weights are calculated (Excerpt 3). Additionally, it allows the decoder to get information from all the hidden states of the encoder, not just the last hidden state (Excerpt 5).",
+      "is_declined": false,
+      "passed": true
+    }
+  ]
+}

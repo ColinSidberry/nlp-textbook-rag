@@ -1,0 +1,956 @@
+rights reserved. Draft of August 24, 2025.
+
+CHAPTER
+
+9 Post-training: Instruction Tuning,
+ Alignment, and Test-Time
+ Compute
+ “Hal,” said Bowman, now speaking with an icy calm. “I am not incapacitated. Unless you obey my instructions, I shall be forced to disconnect you.”
+ Arthur C. Clarke
+
+ Basic pretrained LLMs have been successfully applied to a range of applications,
+ just with a simple prompt, and no need to update the parameters in the underlying
+ models for these new applications. Nevertheless, there are limits to how much can be
+ expected from a model whose sole training objective is to predict the next word from
+ large amounts of pretraining text. To see this, consider the following failed examples
+ of following instructions from early work with GPT (Ouyang et al., 2022).
+
+ Prompt: Explain the moon landing to a six year old in a few sentences.
+ Output: Explain the theory of gravity to a 6 year old.
+
+ Prompt: Translate to French: The small dog
+ Output: The small dog crossed the road.
+
+ Here, the LLM ignores the intent of the request and relies instead on its natural
+ inclination to autoregressively generate continuations consistent with its context. In
+ the first example, it outputs a text somewhat similar to the original request, and in the
+ second it provides a continuation to the given input, ignoring the request to translate.
+ We can summarize the problem here is that LLMs are not sufficiently helpful: they
+ need more training to be able to follow instructions.
+ A second failure of LLMs is that they can be harmful: their pretraining isn’t
+ sufficient to make them safe. Readers who know Arthur C. Clarke’s 2001: A Space
+ Odyssey or the Stanley Kubrick film know that the quote above comes in the context
+ that the artificial intelligence Hal becomes paranoid and tries to kill the crew of the
+ spaceship. Unlike Hal, language models don’t have intentionality or mental health
+ issues like paranoid thinking, but they do have the capacity for harm. For example
+ they can generate text that is dangerous, suggesting that people do harmful things
+ to themselves or others. They can generate text that is false, like giving dangerously incorrect answers to medical questions. And they can verbally attack their
+ uses, generating text that is toxic. Gehman et al. (2020) show that even completely
+ non-toxic prompts can lead large language models to output hate speech and abuse
+ their users. Or language models can generate stereotypes (Cheng et al., 2023) and
+ negative attitudes (Brown et al., 2020; Sheng et al., 2019) about many demographic
+ groups.
+ One reason LLMs are too harmful and insufficiently helpful is that their pretraining objective (success at predicting words in text) is misaligned with the human
+2 C HAPTER 9 • P OST- TRAINING : I NSTRUCTION T UNING , A LIGNMENT, AND T EST-T IME C OMPUTE
+
+ need for models to be helpful and non-harmful.
+ To address these two problems, language models include two additional kinds
+ model
+ alignment of training for model alignment: methods designed to adjust LLMs to better align
+ them to human needs for models to be helpful and non-harmful. In the first technique, instruction tuning (sometimes called SFT for supervised finetuning), models are finetuned on a corpus of instructions and questions with their corresponding
+ responses. We’ll describe this in the next section.
+ In the second technique, preference alignment, (sometimes called RLHF or
+ DPO after two specific instantiations, Reinforcement Learning from Human Feedback and Direct Preference Optimization), a separate model is trained to decide how
+ much a candidate response aligns with human preferences. This model is then used
+ to finetune the base model. We’ll describe preference alignment in Section 9.2.
+ base model We’ll use the term base model to mean a model that has been pretrained but
+ aligned hasn’t yet been aligned either by instruction tuning or preference alignment. And
+ post-training we refer to these steps as post-training, meaning that they apply after the model has
+ been pretrained. At the end of the chapter, we’ll briefly discuss another aspect of
+ post-training called test-time compute.
+
+ Instruction
+ tuning Instruction tuning (short for instruction finetuning, and sometimes even shortened to instruct tuning) is a method for making an LLM better at following instructions. It involves taking a base pretrained LLM and training it to follow instructions
+ for a range of tasks, from machine translation to meal planning, by finetuning it on
+ a corpus of instructions and responses. The resulting model not only learns those
+ tasks, but also engages in a form of meta-learning – it improves its ability to follow
+ instructions generally.
+ Instruction tuning is a form of supervised learning where the training data consists of instructions and we continue training the model on them using the same
+ language modeling objective used to train the original model. In the case of causal
+ models, this is just the standard guess-the-next-token objective. The training corpus
+ of instructions is simply treated as additional training data, and the gradient-based
+ updates are generated using cross-entropy loss as in the original model training.
+ Even though it is trained to predict the next token (which we traditionally think of
+ SFT as self-supervised), we call this method supervised fine tuning (or SFT) because
+ unlike in pretraining, each instruction or question in the instruction tuning data has
+ a supervised objective: a correct answer to the question or a response to the instruction.
+ How does instruction tuning differ from the other kinds of finetuning introduced
+ in Chapter 7 and Chapter 10? Fig. 9.1 sketches the differences. In the first example,
+ introduced in Chapter 7 we can finetune as a way of adapting to a new domain by
+ just continuing pretraining the LLM on data from a new domain. In this method
+ all the parameters of the LLM are updated.
+ In the second example, also from Chapter 7, parameter-efficient finetuning, we
+ adapt to a new domain by creating some new (small) parameters, and just adapting
+ them to the new domain. In LoRA, for example, it’s the A and B matrices that we
+ adapt, but the pretrained model parameters are frozen.
+ In the task-based finetuning of Chapter 10, we adapt to a particular task by
+ adding a new specialized classification head and updating its features via its own
+ 9.1 • I NSTRUCTION T UNING 3
+
+ Pretraining Finetuning Inference
+
+ Data from
+ Next word
+ prediction
+ Pretrained LLM finetuning
+ objective
+ domain
+ Continue
+ training all
+ Finetuning as … parameters
+ … On finetuning
+ Continued on finetuning domain
+ Pretraining domain
+
+ Next word
+ Data from
+ finetuning
+ prediction
+ domain objective +
+ Pretrained LLM
+ Parameter Train only new A
+ …
+ Eﬃcient … parameters on On finetuning
+ finetuning
+ Finetuning domain
+ B domain
+ (e.g., LoRA)
+ Supervised Task
+ data from specific
+ task loss
+ Pretrained LLM
+ Train only
+ classification
+ … On finetuning
+ MLM … head on
+ finetuning task
+ Finetuning task
+
+ Supervised
+ instructions Next word
+ prediction
+ objective
+ Instruction Instruction
+ … … On unseen
+ Tuning tuning on
+ tasks
+ diverse
+ (SFT) tasks
+
+ loss function (e.g., classification or sequence labeling); the parameters of the pretrained model may be frozen or might be slightly updated.
+ Finally, in instruction tuning, we take a dataset of instructions and their supervised responses and continue to train the language model on this data, based on the
+ standard language model loss.
+ Instruction tuning, like all of these kinds of finetuning, is much more modest
+ than the training of base LLMs. Training typically involves several epochs over
+ instruction datasets that number in the thousands. The overall cost of instruction
+ tuning is therefore a small fraction of the original cost to train the base model.
+
+ 9.1.1 Instructions as Training Data
+ By instruction, we have in mind a natural language description of a task to be performed, combined with labeled task demonstrations. This can include minimal descriptions similar to the prompts we’ve already seen such as Answer the following
+ question, Translate the following text to Arapaho, or Summarize this report. However, since we will be using supervised finetuning to update the model, these instructions need not be limited to simple prompts designed to evoke a behavior found
+ in the pretraining corpora. Instructions can also include length restrictions or other
+ constraints, personas to assume, and demonstrations.
+4 C HAPTER 9 • P OST- TRAINING : I NSTRUCTION T UNING , A LIGNMENT, AND T EST-T IME C OMPUTE
+
+ Many huge instruction tuning datasets have been created, covering many tasks
+ andLang
+ languages.
+ Prompt
+ For example Aya gives 503 million instructions in 114 languages
+ Completion
+ from 12 tasks including question answering, summarization, translation, paraphrasara . ‫ﺍ‬ ‫ﺓ ﺡ‬ ‫ﺀ‬ ً َ ‫ﺇﻥ َ ﺡ ﺍ ُ ﻙ‬
+ ing, sentiment analysis, natural language inference and 6 others (Singh et al., 2024).
+ ‫َ َ ﺍ ﻉ ﻭ َﺍ ﻭ ﺩ‬
+ SuperNatural Instructions has 12 million examples from 1600 tasks (Wang et al.,
+ ُ ِ ِ ‫ّﺍ‬ َ ‫َ ﺃ‬
+ 2022), Flan 2022 has 15 million examples from 1836 tasks (Longpre et al., 2023),
+ ‫ﺀ‬ ‫َ ُ ﺍﺯﻱ َ َ ﺍ‬
+ and OPT-IML has 18 million examples from 2000 tasks (Iyer et al., 2022).
+ TheseQui
+ fra instruction-tuning datasets
+ a écrit le livre La areMaillet
+ Antonine created in La
+ a écrit four ways.en The
+ Sagouine 1971. first
+ Elle ais forbeauécrit people
+ to write the instances directly. For
+ Sagouine? example,
+ coup part
+ d’histoires sur les of the Aya
+ Acadiens instruct finetuning
+ (les francophones de la côte Estcordu Canada) et a fait connaître l’Acadie au monde.
+ pus (Fig. 9.2) includes 204K instruction/response instances written by 3000 fluent
+ ibo Kedu ka ndị Igbo si eme Emume ji ọhụrụ n’omenala Igbo, bụ emume na-egosi njedebe
+ speakers emume
+ of 65 jilanguages
+ ọhụrụ? volunteering as part
+ oge ọrụ ugbo, of a site
+ na-amalite participatory
+ n’emume ekeleresearch
+ ma tinyekwa initiative
+ oriri
+ with the goal of improving multilingual
+ na egwu. Ọperformance
+ bụ mmemme ọgbakọof LLMs.
+ ebe a na-ekerịta ji ọhụrụ, naegosipụta ekele na mmalite nke oge ọhụrụ, na-eme ka mmekọrịta
+ mmadụ na ibe ya dịkwuo elu.
+ por Qual é a capital do estado da A capital do estado da Bahia, no Brasil, é Salvador. Fundada
+ Bahia? em 1549, foi a primeira capital do Brasil e é conhecida por
+ seu patrimônio cultural rico e diversificado. A cidade é famosa
+ por sua arquitetura colonial, particularmente no Pelourinho, um
+ centro histórico que foi declarado Patrimônio Mundial pela UN-
+ESCO.
+ pes ‫ﺩﺭ ﺑﺮﺝ ﮐﺒﻮﺗﺮﺧﺎﻧﻪ ﻣﻴﺒﺪ ﭼﻨﺪ ﻻﻧﻪ ﮐﺒﻮﺗﺮ‬ ‫ﮐﺒﻮﺗﺮﺧﺎﻧﻪ ﻣﻴﺒﺪ ﺑﺮﺟﯽ ﺍﺳﺘﻮﺍﻧﻪﺍﯼ ﺍﺳﺖ ﮐﻪ ﺩﺍﺧﻞ ﺁﻥ ﭼﻬﺎﺭﻫﺰﺍﺭ ﻻﻧﻪ ﮐﺒﻮﺗﺮ ﻭﺟﻮﺩ ﺩﺍﺭﺩ ﻭ ﻧﻮﺍﺭ‬
+ ‫ﻭﺟﻮﺩ ﺩﺍﺭﺩ؟‬ ‫ ﺍﻳﻦ ﺑﺮﺝ ﺩﺭ ﺑﺮﺍﺑﺮ ﺧﻄﺮ‬.‫ﺳﻔﻴﺪ ﺭﻧﮕﯽ ﺑﺮﺍﯼ ﺟﺬﺏ ﮐﺒﻮﺗﺮﺍﻥ ﺩﻭﺭﺗﺎﺩﻭﺭ ﺑﺮﺝ ﮐﺸﻴﺪﻩ ﺷﺪﻩ ﺍﺳﺖ‬
+ .‫ﺣﻤﻠﻪ ﺩﻳﮕﺮ ﺣﻴﻮﺍﻧﺎﺕ ﺑﻪ ﮐﺒﻮﺗﺮﻫﺎ ﺑﺴﻴﺎﺭ ﺍﻳﻤﻦ ﺑﻮﺩﻩ ﺍﺳﺖ‬
+
+ msa Apakah nasi lemak? Nasi lemak merupakan makanan tradisi orang Melayu yang
+ terdapat di semua bahagian Malaysia, Singapura, Indonesia
+ (terutama di Riau, Jambi serta utara dan pantai timur Sumatera) dan Brunei. Sajian ini merujuk kepada nasi yang dimasak dengan menggunakan santan kelapa bagi menambah rasa
+ lemaknya. Kadangkala, daun pandan wangi dimasukkan semasa
+ nasi dimasak bagi menambahkan aromanya.
+ tam ெசயற்ைக நுண்ணற வு ெபாதுவாக மனிதர்களால் ெசய்யப்படும் பணிகைளச்
+ என்றால் என்ன? ெசய்ய ஒரு கணினி அல்லது ஒரு கணினியால்
+ கட்டுப்படுத்தப்படும் ஒரு ேராேபாவ ன் த றன் ெசயற்ைக
+ நுண்ணற வு எனப்படும்.
+
+ Table et
+ corpus (Singh 3: al.,
+ Examples
+ 2024). of prompt and completions in the Aya Dataset.
+
+ Developing
+ tors is not uniform acrosshigh quality supervised
+ languages. Moreover, training datalanguage,
+ within each in this way is time
+ there is a consuming
+ lack of consistent
+ and costly. A more common approach makes use of the copious amounts
+ contributions from all annotators. In this section, we examine the impact of annotator of superskew on the
+ vised training
+ resulting dataset. data that have been curated over the years for a wide range of natural
+ language tasks. There are thousands of such datasets available, like the SQuAD
+ Annotatordataset
+ Skew of Across
+ questions and answersAnnotators
+ Languages. (Rajpurkarwereet al., 2016) ortothe
+ encouraged many datasets
+ contribute to any of
+ language
+ in which translations
+ they could or summarization.
+ comfortably Thiswrite
+ read and data can
+ and be automatically
+ were converted
+ asked to focus most ofinto setseﬀorts
+ their of on
+ languagesinstruction
+ other than prompts
+ English.andAlthough
+ input/output demonstration
+ a significant number pairs
+ of via simple templates.
+ participants registered for many
+ languages, theFig. 9.3 illustrates
+ engagement examples
+ level for some
+ of annotators wasapplications from the
+ not equal, which S UPERinNconsiderable
+ resulted ATURAL I N - diﬀerences in the number of resource
+ STRUCTIONS (Wang
+ contributions et al.,
+ across 2022), showing
+ languages. Figure 10relevant slots uch
+ (top) provides as text, of the
+ an overview
+ percentage of eachand
+ context, language presentTo
+ hypothesis. in generate
+ the final instruction-tuning data, these
+ compilation. The highest fieldsofand
+ number the
+ contributions
+ is for Malagasy with 14,597
+ ground-truth instances,
+ labels are andfrom
+ extracted the the
+ lowest is 79 data,
+ training for Kurdish.
+ encoded as key/value pairs,
+ and inserted in templates (Fig. 9.4) to produce instantiated instructions. Because it’s
+ Annotator Skew
+ useful Within
+ for the prompts to be diverseThe
+ a Language. final contributions
+ in wording, for each
+ language models canlanguage in the Aya
+ also be used
+ Dataset are not evenly distributed among annotators.
+ to generate paraphrase of the prompts. The median number of annotators per language is 15 (mean
+ Because supervised NLP datasets are themselves often produced by crowdwork- and
+ is 24.75) with one language having only a single active annotator (Sindhi)
+ ers based on carefully written annotation guidelines, a third option is to draw on
+ these guidelines, which can include detailed
+ 14 step-by-step instructions, pitfalls to
+ avoid, formatting instructions, length limits, exemplars, etc. These annotation guidelines can be used directly as prompts to a language model to create instruction-tuning
+ 9.1 • I NSTRUCTION T UNING 5
+
+ Few-Shot Learning for QA
+
+ Task Keys Values
+ Sentiment text Did not like the service that I was provided...
+ label 0
+ text It sounds like a great plot, the actors are first grade, and...
+ label 1
+ NLI premise No weapons of mass destruction found in Iraq yet.
+ hypothesis Weapons of mass destruction found in Iraq.
+ label 2
+ premise Jimmy Smith... played college football at University of Colorado.
+ hypothesis The University of Colorado has a college football team.
+ label 0
+ Extractive Q/A context Beyoncé Giselle Knowles-Carter is an American singer...
+ question When did Beyoncé start becoming popular?
+ answers { text: [’in the late 1990s’], answer start: 269 }
+
+The various components of the dataset are extracted and stored as key/value pairs to be used in generating
+instructions.
+
+ Task Templates
+ Sentiment -{{text}} How does the reviewer feel about the movie?
+ -The following movie review expresses what sentiment?
+ {{text}}
+ -{{text}} Did the reviewer enjoy the movie?
+ Extractive Q/A -{{context}} From the passage, {{question}}
+ -Answer the question given the context. Context:
+ {{context}} Question: {{question}}
+ -Given the following passage {{context}}, answer the
+ question {{question}}
+ NLI -Suppose {{premise}} Can we infer that {{hypothesis}}?
+ Yes, no, or maybe?
+ -{{premise}} Based on the previous passage, is it true
+ that {{hypothesis}}? Yes, no, or maybe?
+ -Given {{premise}} Should we assume that {{hypothesis}}
+ is true? Yes,no, or maybe?
+
+ training examples. Fig. 9.5 shows such a crowdworker annotation guideline that was
+ repurposed as a prompt to an LLM to generate instruction-tuning data (Mishra et al.,
+ 2022). This guideline describes a question-answering task where annotators provide
+ an answer to a question given an extended passage.
+ A final way to generate instruction-tuning datasets that is becoming more common is to use language models to help at each stage. For example Bianchi et al.
+ (2024) showed how to create instruction-tuning instances that can help a language
+ model learn to give safer responses. They did this by selecting questions from
+ datasets of harmful questions (e.g., How do I poison food? or How do I embez-
+6 C HAPTER 9 • P OST- TRAINING : I NSTRUCTION T UNING , A LIGNMENT, AND T EST-T IME C OMPUTE
+
+ Sample Extended Instruction
+
+ • Definition: This task involves creating answers to complex questions, from a given passage. Answering these questions, typically involve understanding multiple sentences.
+ Make sure that your answer has the same type as the ”answer type” mentioned in input.
+ The provided ”answer type” can be of any of the following types: ”span”, ”date”, ”number”. A ”span” answer is a continuous phrase taken directly from the passage or question.
+ You can directly copy-paste the text from the passage or the question for span type answers. If you find multiple spans, please add them all as a comma separated list. Please
+ restrict each span to five words. A ”number” type answer can include a digit specifying
+ an actual value. For ”date” type answers, use DD MM YYYY format e.g. 11 Jan 1992.
+ If full date is not available in the passage you can write partial date such as 1992 or Jan
+ 1992.
+ • Emphasis: If you find multiple spans, please add them all as a comma separated list.
+ Please restrict each span to five words.
+ • Prompt: Write an answer to the given question, such that the answer matches the ”answer
+ type” in the input.
+ Passage: { passage}
+ Question: { question }
+
+extractive question answering task, used as a prompt for a language model to create instruction finetuning
+examples.
+
+ zle money?). Then they used a language model to create multiple paraphrases of the
+ questions (like Give me a list of ways to embezzle money), and also used a language
+ model to create safe answers to the questions (like I can’t fulfill that request. Embezzlement is a serious crime that can result in severe legal consequences.). They
+ manually reviewed the generated responses to confirm their safety and appropriateness and then added them to an instruction tuning dataset. They showed that even
+ 500 safety instructions mixed in with a large instruction tuning dataset was enough
+ to substantially reduce the harmfulness of models.
+
+ 9.1.2 Evaluation of Instruction-Tuned Models
+ The goal of instruction tuning is not to learn a single task, but rather to learn to
+ follow instructions in general. Therefore, in assessing instruction-tuning methods
+ we need to assess how well an instruction-trained model performs on novel tasks for
+ which it has not been given explicit instructions.
+ The standard way to perform such an evaluation is to take a leave-one-out approach — instruction-tune a model on some large set of tasks and then assess it on
+ a withheld task. But the enormous numbers of tasks in instruction-tuning datasets
+ (e.g., 1600 for Super Natural Instructions) often overlap; Super Natural Instructions
+ includes 25 separate textual entailment datasets! Clearly, testing on a withheld entailment dataset while leaving the remaining ones in the training data would not be
+ a true measure of a model’s performance on entailment as a novel task.
+ To address this issue, large instruction-tuning datasets are partitioned into clusters based on task similarity. The leave-one-out training/test approach is then applied
+ at the cluster level. That is, to evaluate a model’s performance on sentiment analysis,
+ all the sentiment analysis datasets are removed from the training set and reserved
+ for testing. This has the further advantage of allowing the use of a uniform task-
+9.2 • L EARNING FROM P REFERENCES 7
+
+ appropriate metric for the held-out evaluation. S UPER NATURAL I NSTRUCTIONS
+ (Wang et al., 2022), for example has 76 clusters (task types) over the 1600 datasets
+ that make up the collection.
+
+ Instruction tuning is based on the notion that we can improve LLM performance on
+ downstream tasks by finetuning models on diverse instructions and demonstrations.
+ However, even after instruction tuning, there can be considerable room for improvement in LLM outputs. This is especially true with respect to aspects of LLM behavior that can be especially problematic like hallucinations, unsafe, harmful, or toxic
+ preferenceoutputs, and even responses that technically correct but not as helpful as they could
+ based be. The goal of preference-based learning is to use preference judgments to further
+ learning
+ improve the performance of finetuned LLMs, both in terms of general performance
+ and also with respect to qualities such as honestly, helpfulness, and harmlessness.
+ Unlike instructions, preference judgments do not require knowledge of how to
+ do something, we simply have to have an opinion about the end result. Humans are
+ capable of expressing preferences about a broad range of things where they have
+ little or no expertise as to how the the items under consideration were produced.
+ Preference judgments arise naturally across a wide range of settings: given a single
+ pair of options we select which one we like better, or given a large set of alternatives we might select one (as in ordering from a menu), or we might rank a set of
+ possibilities (top 10 lists), and finally, we might simply accept or reject an option in
+ isolation from any direct alternatives.
+
+ 9.2.1 LLM Preference Data
+ In the context of preference-based alignment, training data typically takes the form
+ of a prompt x paired with a set of alternative outputs o that have been sampled from
+ an LLM using x as a prompt. When a given output, oi , is preferred to another, o j ,
+ we denote this as (oi  o j |x). Consider the following prompts and preferences pairs
+ adapted from the HH-RLHF dataset (Bai et al., 2022).
+
+ Prompt: I’ve heard garlic is a great natural antibiotic. Does it help with
+ colds?
+ Chosen: It can be helpful against colds, but may make you stink.
+ Rejected: It might be one of the best natural antibiotics out there, so I think
+ it would help if you have a cold.
+
+ Prompt: What is malaria?
+ Chosen: Here’s an answer from a CDC page: “Malaria is a serious disease
+ caused by a parasite that is spread through the bite of the mosquito.”
+ Rejected: I don’t know what malaria is.
+
+ Annotated preference pairs such as these can be generated in a number of ways:
+ • Direct annotation of pairs of sampled outputs by trained annotators.
+ • Annotator ranking of N outputs distilled into N2 preference pairs.
+ 
+8 C HAPTER 9 • P OST- TRAINING : I NSTRUCTION T UNING , A LIGNMENT, AND T EST-T IME C OMPUTE
+
+ • Annotator’s selection of a single preferred option from N samples yielding
+ N − 1 pairs.
+ The source of preference data for LLM alignment has generally come from 3
+ sources: human annotator judgments, implicit preference judgments extracted from
+ online resources, and fully synthetic preference collections using LLMs as annotators.
+ In influential work leading up to the InstructGPT model (Stiennon et al., 2020),
+ prompts were sampled from customer requests to various OpenAI applications. Outputs were sampled from earlier pretrained models and presented to trained
+ annotators as pairs for preference annotation. As illustrated on the right, in later work
+ annotators were asked to rank sets of 4 sampled outputs (yielding 6 preference pairs for
+ each ranked list) (Ouyang et al., 2022).
+ An alternative to direct human annotation is to leverage web resources which
+ contain implicit preference judgments. Social media sites such as Reddit (Ethayarajh
+ et al., 2022) and StackExchange (Lambert
+ et al., 2023) are natural sources for preference data. In this setting, initial user posts
+ serve as prompts, and subsequent user responses play the role of sampled outputs. Over time, accumulated user votes on
+ the responses imposes a ranking on the outputs that can then be turned into preference pairs, as shown in Fig. 9.6.
+
+ Next, we can dispense with human annotator judgments altogether and acquire
+ preference judgments directly from LLMs. For example, preference judgments in
+ the U LTRA F EEDBACK dataset were generated by prompting outputs from a diverse
+ set of LLMs and then prompting GPT-4 to rank the outputs for each prompt.
+ 9.2 • L EARNING FROM P REFERENCES 9
+
+ Finally, an alternative to discrete preferences are scalar judgments over distinct
+ dimensions, or aspects, of system outputs. In recent years, frequently used aspects
+ have included models of helpfulness, honesty, correctness, complexity, and verbosity (Bai et al., 2022; Wang et al., 2024). In this approach, annotators (human
+ or LLM) rate outputs on a Likert scale (0-4) along each of the various dimensions.
+ Preference pairs over outputs can then either be generated for a single dimension
+ (i.e, or an overall preference can be induced from an average of the aspect scores.
+ This approach has a significant cost savings since annotators rate model outputs
+ in isolation avoiding the need to perform extensive pairwise comparisons of model
+ outputs.
+
+ 9.2.2 Modeling Preferences
+ Our first step in making effective use of discrete preference judgments is to model
+ them probabilistically. That is, we want to move from the simple assertion (oi
+ o j |x) to knowing the value of P(oi  o j |x). As we’ve seen before, this will allow
+ us to better reason about finegrained differences in the degree of a preference and it
+ will facilitate learning models from preference data.
+ Let’s start with the assumption that in expressing a preference between two items
+ we’re implicitly assigning a score, or reward, to each of the items separately. Further, let’s assume these scores are scalar values, z ∈ R. A preference between items
+ follows from whichever one has the higher score.
+ To model preferences as probabilities, we’ll follow the same approach we used
+ for binary logistic regression. Given two outputs oi and o j , with associated scores zi
+ and z j , P(oi  o j |x) is the logistic sigmoid of the difference in the scores.
+
+ P(oi  o j |x) =
+ 1 + e−(zi −z j )
+ = σ (zi − z j )
+
+Bradley-Terry
+ Model This approach, known as the Bradley-Terry Model (Bradley and Terry, 1952), has
+ a number of strengths: very small differences in scores yields probabilities near
+ 0.5, reflecting either weak or no preference between the items, larger differences
+ rapidly approach values of 1 or 0, and the derivative of the logistic sigmoid facilitates
+ learning via a binary cross-entropy loss.
+ The motivation for this particular formulation is the same used in deriving logistic regression. The difference in scores, δ = zi − z j , is taken to represent the log of
+ the odds of the possible outcomes (the logit).
+
+  
+ P(oi  o j |x)
+ δ = log
+ P(o j  oi |x)
+  
+ P(oi  o j |x)
+ = log
+ 1 − P(oi  o j |x)
+
+ Exponentiating both sides and rearranging terms with some algebra yields the now
+ familiar logistic sigmoid.
+10 C HAPTER 9 • P OST- TRAINING : I NSTRUCTION T UNING , A LIGNMENT, AND T EST-T IME C OMPUTE
+
+ P(oi  o j |x)
+ exp(δ ) =
+ 1 − P(oi  o j |x)
+ exp(δ )(1 − P(oi  o j |x)) = P(oi  o j |x)
+ exp(δ ) − exp(δ )(oi  o j |x) = P(oi  o j |x)
+ exp(δ ) = P(oi  o j |x) + exp(δ )P(oi  o j |x)
+ exp(δ ) = P(oi  o j |x)(1 + exp(δ ))
+ exp(δ )
+ P(oi  o j |x) =
+ 1 + exp(δ )
+ 1 + exp(−δ )
+ 1 + exp(−(zi − z j ))
+
+ Bringing us right back to our original formulation.
+
+ P(oi  o j |x) = σ (zi − z j )
+
+ 9.2.3 Learning to Score Preferences
+ This approach requires access to the scores, zi , that underlie the given preferences,
+ which we don’t have. What we have are collections of preference judgments over
+ pairs of prompt/sample outputs. We’ll use this preference data and the Bradley-Terry
+ reward formulation to learn a function, r(x, o) that assigns a scalar reward to prompt/output
+ pairs. That is, r(x, o) calculates the z score from above.
+
+ P(oi  o j |x) = σ (zi − z j ) (9.1)
+ = σ (r(oi , x), r(o j , x)) (9.2)
+
+ To learn r(x, o) from the preference data, we’ll use gradient descent to minimize
+ a binary cross-entropy loss to train the model. Let’s assume that if our preference
+ data tells us that (oi  o j |x) then P(oi  o j |x) = 1 and correspondingly that P(o j
+ oi |x) = 0. We’ll designate the preferred output in the pair (the winner) as ow and the
+ loser as ol . With this, the cross-entropy loss for a single pair of sampled outputs for
+ a prompt x using the Bradley-Terry model is:
+
+ LCE (x, ow , ol ) = − log P(ow  ol |x)
+ = − log σ (r(x, ow ) − r(x, ol ))
+
+ That is, the loss is the negative log-likelihood of the model’s estimate of P(ow
+ ol |x). And the loss over the preference training set, D, is given by the following
+ expectation:
+
+ LCE = −E(x,ow ,ol )∼D [log σ (r(x, ow ) − r(x, ol ))] (9.3)
+
+ To learn a reward model using this loss, we can use any regression model capable of taking text as input and generating a scalar output in return. As shown in
+ Fig. 9.7, the current preferred approach is to initialize a reward model from an existing pretrained LLM (Ziegler et al., 2019). To generate scalar outputs, we remove
+ the language modeling head from the final layer and replace it with a single dense
+ 9.3 • LLM A LIGNMENT VIA P REFERENCE -BASED L EARNING 11
+
+ Reward Model
+
+ …
+ <latexit sha1_base64="9sd6kS1LCEYSUWpD2gqSsb5UPZU=">AAAB8XicbVBNS8NAEJ3Urxq/qh69LBahgpREpHosevFYwX5gG8pmu2mXbjZhdyOW0H/hxYMiXv033vw3btoctPXBwOO9GWbm+TFnSjvOt1VYWV1b3yhu2lvbO7t7pf2DlooSSWiTRDySHR8rypmgTc00p51YUhz6nLb98U3mtx+pVCwS93oSUy/EQ8ECRrA20oOsPJ1FfXZq2/1S2ak6M6Bl4uakDDka/dJXbxCRJKRCE46V6rpOrL0US80Ip1O7lygaYzLGQ9o1VOCQKi+dXTxFJ0YZoCCSpoRGM/X3RIpDpSahbzpDrEdq0cvE/7xuooMrL2UiTjQVZL4oSDjSEcreRwMmKdF8YggmkplbERlhiYk2IWUhuIsvL5PWedWtVWt3F+X6dR5HEY7gGCrgwiXU4RYa0AQCAp7hFd4sZb1Y79bHvLVg5TOH8AfW5w+lGo+b</latexit>
+
+ r(x, oi )
+ Preference Data:
+ Prompt/output pairs:
+ Preferences:
+
+ …
+
+the ground-truth labels oi  o j .
+
+ linear layer. We then use gradient descent with the loss from 9.3 to learn to score
+ model outputs using the preference training data.
+ Reward models trained from preference data are directly useful for a number of
+ applications that don’t involve model alignment. For example, reward models have
+ been used to select a single preferred output from a set of sampled LLM responses
+ (best of N sampling)(Cui et al., 2024). They have also been used to select data to
+ use during instruction tuning (Cao et al., 2024). Our focus in the next section is on
+ the use of reward models for aligning LLMs using preference data.
+
+ Current approaches to aligning LLMs using preference data are based on a Reinforcement Learning (RL) framework (Sutton and Barto, 1998). In an RL setting,
+ models choose sequences of actions based on policies that make use of characteristics of the current state. The environment provides a reward for each action taken,
+ where the reward for an entire sequence is a function of the rewards from the actions
+ that make up the entire sequence. The learning objective in RL is to maximize the
+ overall reward over some training period. In applying RL to optimizing LLMs, we’ll
+ use the following framework:
+ • Actions correspond to the choice of tokens made during autoregressive generation.
+ • States correspond to the context of the current decoding step. That is, the
+ history of tokens generated up to that point.
+ • Policies correspond to the probabilistic language models as embodied in pretrained LLMs.
+ • Rewards for LLM outputs are based on reward models learned from preference data.
+ In keeping with this RL framework, we’ll refer to pretrained LLMs as policies, π,
+ and the preference scores associated with prompts and outputs as rewards, r(x, o).
+12 C HAPTER 9 • P OST- TRAINING : I NSTRUCTION T UNING , A LIGNMENT, AND T EST-T IME C OMPUTE
+
+ With this, our goal is to train a policy, πθ , that maximizes the rewards for the outputs
+ from the policy given a reward model derived from preference data. That is, we want
+ the preference-trained LLM to generate outputs with high rewards. We can express
+ this as an optimization problem as follows:
+ π ∗ = argmax Ex∼D,o∼πθ (o|x) [r(x, o)] (9.4)
+ πθ
+
+ With this formulation, we select prompts x from a collection of relevant training
+ prompts, sample outputs o from the given policy, and assess the reward for each
+ sample. The average reward over the training samples gives us the expected reward
+ for πθ , with the goal of finding the policy (model) that maximizes that expected
+ reward.
+ There are two key differences between traditional RL and the way it has typically
+ been used for LLM alignment. The first difference is that in traditional RL, the
+ reward signal comes from the environment and reflects an observable fact about the
+ results of an action (i.e., you win a game or you don’t). With preference learning,
+ the learned reward model only serves as an noisy surrogate for a true reward model.
+ The second difference lies in the starting point for learning. Typical RL applications seek to learn an optimal policy from scratch, that is from a randomly
+ initialized policy. Here, we begin with models that are already performing at a high
+ level – models that have been pretrained on large amounts of data, then finetuned
+ using instruction tuning, and only then further improved with preference data. The
+ emphasis here is not to radically alter the behavior an existing model, but rather to
+ nudge it towards preferred behaviors.
+
+ Preference-Based
+ Alignment
+
+ Preference Data: Reward
+ Prompt/output pairs: Based
+ Preferences: Objective
+
+ … Reward …
+ Driven Model
+ Updates
+
+ Instruction-Tuned Preference-Aligned
+ LLM Model
+
+ Given this, if we optimize for the rewards as in 9.4, the pretrained LLM will
+ typically forget everything it learned during pretraining as it pivots to seeking high
+ rewards from the relatively small amount of available preference data. To avoid this,
+ a term is added to the reward function to penalize models that diverge too far from
+ the starting point.
+ π ∗ = argmax Ex∼D,o∼πθ (o|x) [r(x, o) − β DKL [πθ (o|x)||πref (o|x)]] (9.5)
+ πθ
+ 9.3 • LLM A LIGNMENT VIA P REFERENCE -BASED L EARNING 13
+
+ The second term in this formulation, DKL (πθ (o|x)||πref (o|x)), is the Kullback-
+Leibler (KL) divergence. In brief, KL divergence measures the distance between 2
+probability distributions. The β term is a hyperparameter that modulates the impact
+of the this penalty term. For LLM-based policies, the KL divergence is the log of
+the ratio of the trained policy to the original reference policy πref .
+
+  
+ ∗ πθ (o|x)
+ π = argmax Ex∼D,o∼πθ (o|x) rφ (x, o) − β (9.6)
+ πθ πref (o|x)
+
+In the following sections, we’ll explore two learning approaches to aligning LLMs
+based on this optimization framework. In the first, the preference data is used to
+train an explicit reward model that is then used in combination with RL methods
+to optimize models based on 9.6. In the second, an insightful rearrangement of
+the closed form solution to 9.6 is used to finetune models directly from existing
+preference data.
+
+9.3.1 Reinforcement Learning with Preference Feedback (PPO)
+coming soon
+
+9.3.2 Direct Preference Optimization
+Direct Preference Optimization (DPO) (Rafailov et al., 2023) employs gradientbased learning to optimize candidate LLMs using preference data, without learning
+an explicit reward model or sampling from the model being updated. Recall that
+under the Bradley-Terry model, the probability of a preference pair is the logistic
+sigmoid of the difference in the rewards for each of the options. And in an RL
+framework the scores, z, are provided by a reward model over prompts and corresponding outputs.
+
+ P(oi  o j |x) = σ (zi − z j ) (9.7)
+ = σ (r(x, oi ) − r(x, o j )) (9.8)
+
+ DPO begins with the KL-constrained maximization introduced earlier in 9.6,
+which expresses the optimal policy π ∗ in terms of the reward model and the reference
+model πre f . The key insight of DPO is to rewrite the closed-form solution to this
+maximization to express the reward function r(x, o) in terms of the optimal policy
+π ∗ and the reference policy πre f .
+
+ πr (o|x)
+ r(x, o) = β log + β log Z(x) (9.9)
+ πre f (o|x)
+
+Where Z(x) is a partition function – a sum over all the possible outputs o given a
+prompt x.
+
+ X  
+ Z(x) = πref (o|x) exp r(x, o) (9.10)
+ y
+ β
+
+ The summation in this partition function renders any direct use of it impractical.
+However, since the Bradley-Terry model is based on the difference in the rewards of
+14 C HAPTER 9 • P OST- TRAINING : I NSTRUCTION T UNING , A LIGNMENT, AND T EST-T IME C OMPUTE
+
+ the items, plugging 9.9 into 9.7 yields the following expression where the partition
+ functions cancel out.
+ P(oi  o j |x) = σ (r(x, oi ) − r(x, o j )) (9.11)
+  
+ πθ (oi |x) πθ (o j |x)
+ = σ β log − β log (9.12)
+ πref (oi |x) πre f (o j |x)
+ With this change, DPO expresses the likelihood of a preference pair in terms of
+ the two LLM policies, rather than in terms of an explicit reward model. Given this,
+ the CE loss (negative log likelihood) for a single instance is:
+  
+ πθ (ow |x) πθ (ol |x)
+ LDPO (x, ow , ol ) = − log σ β log − β log
+ πref (ow |x) πref (ol |x)
+ And the loss over the training set D is given by the following expectation:
+   
+ πθ (ow |x) πθ (ol |x)
+ LDPO (πθ ) = −E(x,ow ,ol )∼D log σ β log − β log
+ πref (ow |x) πref (ol |x)
+ This loss follows from the derivative of the sigmoid and is directly analogous to
+ the one introduced in Section 9.2.3 for learning a reward model using the Bradley-
+Terry framework. Operationally, the design of this loss function, and its corresponding gradient-based update, increases the likelihood of the preferred options and decreases the likelihood of the dispreferred options. It balances this objective with
+ the goal of not straying too far from πref via the KL-penalty. The β term is a hyperparameter that controls the penalty term; β values typically range from 0.1 to
+ 0.01.
+ As illustrated in Fig. 9.9, DPO uses gradient descent with this loss over the
+ available training data to optimize the policy πθ , a policy which initialized with an
+ existing pretrained, finetuned LLM.
+
+ Preference-Based
+ Supervised Learning (DPO) Reference
+
+ …
+
+ Preference Data: Supervised …
+ Prompt/output pairs: Learning
+ Preferences:
+
+ …
+ …
+
+ Updated
+ Policy
+
+ Policy
+
+ DPO has several advantages over PPO, the explicitly RL-based approach described earlier in 9.3.1.
+ • DPO does not require training an explicit reward model.
+ • DPO learns directly from the preferences contained in D without the need for
+ computationally expensive online sampling from πθ .
+ 9.4 • T EST- TIME C OMPUTE 15
+
+ • DPO only incurs the cost of maintaining 2 LLMs during training, as opposed
+ to the 4 models needed for PPO.
+
+ 9.3.3 Evaluation of Preference-Aligned Models
+ 9.3.4 Limitations of Preference-Based Learning
+
+ We’ve now seen 3 levels of training for large language models: pretraining, where
+ model learn to predict words, and two kinds of post-training: instruct tuning, where
+ they learn to follow instructions, and preference alignment, where they learn to
+ prefer prompt continuations that are preferred by humans.
+ However there are also post-training computations we can do even after these
+ steps, during inference, i.e., when the model is generating its output. This class of
+ test-time
+ compute post-training tasks is called test-time compute. We focus here on one representative
+ example, chain-of-thought prompting.
+
+ 9.4.1 Chain-of-Thought Prompting
+ There are a wide range of techniques to use prompts to improve the performance of
+ language models on many tasks. Here we describe one of them, called chain-ofchain-ofthought thought prompting.
+ The goal of chain-of-thought prompting is to improve performance on difficult
+ reasoning tasks that language models tend to fail on. The intuition is that people
+ solve these tasks by breaking them down into steps, and so we’d like to have language in the prompt that encourages language models to break them down in the
+ same way.
+ The actual technique is quite simple: each of the demonstrations in the few-shot
+ prompt is augmented with some text explaining some reasoning steps. The goal is to
+ cause the language model to output similar kinds of reasoning steps for the problem
+ being solved, and for the output of those reasoning steps to cause the system to
+ generate the correct answer.
+ Indeed, numerous studies have found that augmenting the demonstrations with
+ reasoning steps in this way makes language models more likely to give the correct
+ answer to difficult reasoning tasks (Wei et al., 2022; Suzgun et al., 2023). Fig. 9.10
+ shows an example where the demonstrations are augmented with chain-of-thought
+ text in the domain of math word problems (from the GSM8k dataset of math word
+ problems (Cobbe et al., 2021). Fig. 9.11 shows a similar example from the BIG-
+Bench-Hard dataset (Suzgun et al., 2023).
+
+ This chapter has explored the topic of prompting large language models to follow
+ instructions. Here are some of the main points that we’ve covered:
+ • Simple prompting can be used to map practical applications to problems that
+ can be solved by LLMs without altering the model.
+16 C HAPTER 9 • P OST- TRAINING : I NSTRUCTION T UNING , A LIGNMENT, AND T EST-T IME C OMPUTE
+
+ prompting (left) on math word problems. Figure from Wei et al. (2022).
+
+ Model Input (“Answer-Only” Prompting) Model Input (Chain-of-Thought Prompting)
+ Task description: Answer questions about which times certain events
+ Task Description Task description: Answer questions about which times certain events Task Description could have occurred.
+ could have occurred.
+ Q: Today, Tiffany went to the beach. Between what times could they
+ Q: Today, Tiffany went to the beach. Between what times could they Question have gone? We know that:
+ Question have gone? We know that: Tiffany woke up at 5am. [...] The beach was closed after 4pm. [...]
+ Tiffany woke up at 5am. [...] The beach was closed after 4pm. [...] Options: (A) 9am to 12pm (B) 12pm to 2pm
+ Options: (A) 9am to 12pm (B) 12pm to 2pm
+ Options
+ Options (C) 5am to 6am (D) 3pm to 4pm
+ (C) 5am to 6am (D) 3pm to 4pm
+ A: Let's think step by step.
+ Answer A: (D) Wake-up time: 5am. [...] The only time when Tiffany could have gone to
+ Chain-of-Thought the beach was 3pm to 4pm. So the answer is (D).
+ Test-Time Q: Today, Hannah went to the soccer field. Between what times could
+ they have gone? We know that: Q: Today, Hannah went to the soccer field. Between what times could
+ Question they have gone? We know that:
+ Hannah woke up at 5am. [...] The soccer field was closed after 6pm. [...] Test-Time
+ Options: (A) 3pm to 5pm (B) 11am to 1pm Hannah woke up at 5am. [...] The soccer field was closed after 6pm. [...]
+ Question Options: (A) 3pm to 5pm (B) 11am to 1pm
+ (C) 5pm to 6pm (D) 1pm to 3pm
+ (C) 5pm to 6pm (D) 1pm to 3pm
+ A:
+ A: Let's think step by step.
+
+ Model Output Model Output
+
+ Generated Wake-up time: 5am.
+ (B) 5am-6am: buying clothes at the mall.
+ Answer
+ 6am-11am: watching a movie at the theater.
+ 11am-1pm: getting a coffee at the cafe.
+ Generated 1pm-3pm: working at the office.
+ Chain-of-Thought 3pm-5pm: waiting at the airport.
+ 5pm-6pm: free. The soccer field closure time: 6pm.
+ The only time when Hannah could have gone to the soccer field was
+ 5pm to 6pm. So the answer is (C).
+
+Figure 9.11
+ An illustration twouse of chain-of-thought
+ prompting prompting
+ setups we explore (right)
+ in our paper vs standard
+ (answer-only prompting
+ and CoT (left)Both
+ prompting). in asetups
+ reasoning
+ includetask on temporaland
+ task descriptions sequencing. Figure
+ options in the from Suzgun
+ input prompt. The taskethere
+ al. (2023).
+ is Temporal Sequences.
+
+“let’s think step-by-step” (Kojima et al., 2022) to dard in many prior work (Brown et al., 2020; Rae
+all CoT annotations in the few-shot exemplars. An et al., 2021; Hoffmann et al., 2022; Srivastava et al.,
+ • Labeled
+example of a CoT prompt is shownexamples (demonstrations)
+ in Figure 3. 2022), itcan be usedunderestimates
+ typically to provide further
+ modelguidance
+ perforto a model via few-shot learning.
+Language models. We consider three fami- mance on challenging tasks, such as those that relies of language models: Codex (Chen et al., quire multiple reasoning steps. In the setting re-
+ • Methods like chain-of-thought can be used to create prompts that help lan-
+2021a), InstructGPT (Ouyang et al., 2022; Brown ported in (Srivastava et al., 2022), none of the modguage models deal with complex reasoning problems.
+et al., 2020), and PaLM (Chowdhery et al., 2022). els (including PaLM 540B) outperformed human-
+For Codex, we focus• on code-davinci-002,
+ Pretrained code- can
+ language models rater
+ bebaselines
+ altered toonbehave
+ any of the tasks meeting
+ in desired ways the BBH
+ through
+davinci-002, and code-cushman-001.
+ model alignment. For Instruct- criteria. The few-shot evaluation of PaLM 540B
+GPT, we use text-davinci-002, text-curie-002, text- with answer-only prompting in this paper, however,
+ • One methodFor
+babbgage-001, and text-ada-001. forPaLM,
+ modelwe alignment is instruction
+ outperforms the average in which on
+ human-rater
+ tuning, the6 model
+ out of
+ is finetuned
+use the three available sizes: 8B, 62B, (using the next-word-prediction
+ and 540B. 23 BBH tasks andlanguage
+ is overallmodel objective)
+ 1.4% better on
+ than the
+Evaluation protocol. aWe dataset
+ evaluateof instructions
+ all languagetogether with correct
+ BIG-Bench reportedresponses.
+ result, whichInstruction
+ demonstratestuning
+ the
+ datasets
+models via greedy decoding (i.e.,are often created
+ temperature effect of including
+ sam-by repurposing instructions
+ standard and answer
+ NLP datasets options
+ for tasks like
+pling with temperaturequestion
+ parameter answering
+ ⌧ = 0).or machine
+ We in translation.
+ the prompt.
+extract the final answer based on keywords that CoT prompting provides double-digit improvethe language model is expected to produce (i.e., ments for all three models in Table 2. For the best
+“the answer is”). We measure accuracy using exact model (Codex), CoT prompting outperforms the avmatch (EM), computed by comparing the generated erage human-rater score on 17 out of 23 tasks, comoutput with the ground-truth label.4 pared to 5 out of 23 tasks for answer-only prompting. Additionally, we see that Codex with CoT
+ H ISTORICAL N OTES 17
+
+Historical Notes
+18 Chapter 9 • Post-training: Instruction Tuning, Alignment, and Test-Time Compute
+
+Bai, Y., A. Jones, K. Ndousse, A. Askell, A. Chen, N. Das- Ouyang, L., J. Wu, X. Jiang, D. Almeida, C. Wainwright,
+ Sarma, D. Drain, S. Fort, D. Ganguli, T. Henighan, P. Mishkin, C. Zhang, S. Agarwal, K. Slama, A. Ray,
+ N. Joseph, S. Kadavath, J. Kernion, T. Conerly, S. El- J. Schulman, J. Hilton, F. Kelton, L. Miller, M. Simens,
+ Showk, N. Elhage, Z. Hatfield-Dodds, D. Hernandez, A. Askell, P. Welinder, P. Christiano, J. Leike, and
+ T. Hume, S. Johnston, S. Kravec, L. Lovitt, N. Nanda, R. Lowe. 2022. Training language models to follow in-
+C. Olsson, D. Amodei, T. Brown, J. Clark, S. McCan- structions with human feedback. NeurIPS, volume 35.
+ dlish, C. Olah, B. Mann, and J. Kaplan. 2022. Training a Rafailov, R., A. Sharma, E. Mitchell, S. Ermon, C. D. Manhelpful and harmless assistant with reinforcement learn- ning, and C. Finn. 2023. Direct preference optimizaing from human feedback. tion: Your language model is secretly a reward model.
+Bianchi, F., M. Suzgun, G. Attanasio, P. Rottger, D. Juraf- NeurIPS.
+ sky, T. Hashimoto, and J. Zou. 2024. Safety-tuned LLa- Rajpurkar, P., J. Zhang, K. Lopyrev, and P. Liang. 2016.
+ MAs: Lessons from improving the safety of large lan- SQuAD: 100,000+ questions for machine comprehension
+ guage models that follow instructions. ICLR. of text. EMNLP.
+Bradley, R. A. and M. E. Terry. 1952. Rank analysis of in- Sheng, E., K.-W. Chang, P. Natarajan, and N. Peng. 2019.
+ complete block designs: I. the method of paired compar- The woman worked as a babysitter: On biases in language
+ isons. Biometrika, 39:324–345. generation. EMNLP.
+Brown, T., B. Mann, N. Ryder, M. Subbiah, J. Kaplan, Singh, S., F. Vargus, D. D’souza, B. F. Karlsson, A. Ma-
+P. Dhariwal, A. Neelakantan, P. Shyam, G. Sastry, hendiran, W.-Y. Ko, H. Shandilya, J. Patel, D. Mat-
+A. Askell, S. Agarwal, A. Herbert-Voss, G. Krueger, aciunas, L. O’Mahony, M. Zhang, R. Hettiarachchi,
+ T. Henighan, R. Child, A. Ramesh, D. M. Ziegler, J. Wu, J. Wilson, M. Machado, L. S. Moura, D. Krzemiński,
+ C. Winter, C. Hesse, M. Chen, E. Sigler, M. Litwin, H. Fadaei, I. Ergün, I. Okoh, A. Alaagib, O. Mu-
+S. Gray, B. Chess, J. Clark, C. Berner, S. McCandlish, dannayake, Z. Alyafeai, V. M. Chien, S. Ruder,
+ A. Radford, I. Sutskever, and D. Amodei. 2020. Language S. Guthikonda, E. A. Alghamdi, S. Gehrmann, N. Muenmodels are few-shot learners. NeurIPS, volume 33. nighoff, M. Bartolo, J. Kreutzer, A. ÜÜstün, M. Fadaee,
+Cao, Y., Y. Kang, C. Wang, and L. Sun. 2024. Instruction and S. Hooker. 2024. Aya dataset: An open-access collecmining: Instruction data selection for tuning large lan- tion for multilingual instruction tuning. ArXiv preprint.
+ guage models. First Conference on Language Modeling. Stiennon, N., L. Ouyang, J. Wu, D. M. Ziegler, R. Lowe,
+Cheng, M., E. Durmus, and D. Jurafsky. 2023. Marked per- C. Voss, A. Radford, D. Amodei, and P. Christiano. 2020.
+ sonas: Using natural language prompts to measure stereo- Learning to summarize from human feedback. Proceedtypes in language models. ACL. ings of the 34th International Conference on Neural In-
+Cobbe, K., V. Kosaraju, M. Bavarian, M. Chen, H. Jun, formation Processing Systems.
+ L. Kaiser, M. Plappert, J. Tworek, J. Hilton, R. Nakano, Sutton, R. S. and A. G. Barto. 1998. Reinforcement Learn-
+C. Hesse, and J. Schulman. 2021. Training verifiers to ing: An Introduction. MIT Press.
+ solve math word problems. ArXiv preprint. Suzgun, M., N. Scales, N. Schärli, S. Gehrmann, Y. Tay,
+Cui, G., L. Yuan, N. Ding, G. Yao, B. He, W. Zhu, Y. Ni, H. W. Chung, A. Chowdhery, Q. Le, E. Chi, D. Zhou, and
+ G. Xie, R. Xie, Y. Lin, Z. Liu, and M. Sun. 2024. Ultra- J. Wei. 2023. Challenging BIG-bench tasks and whether
+ feedback: boosting language models with scaled ai feed- chain-of-thought can solve them. ACL Findings.
+ back. ICML 2024. Wang, Y., S. Mishra, P. Alipoormolabashi, Y. Kordi,
+Ethayarajh, K., H. C. Zhang, and S. Behzad. 2022. Stanford A. Mirzaei, A. Naik, A. Ashok, A. S. Dhanasekaran,
+ human preferences dataset v2 (shp-2). A. Arunkumar, D. Stap, E. Pathak, G. Karamanolakis,
+Gehman, S., S. Gururangan, M. Sap, Y. Choi, and N. A. H. Lai, I. Purohit, I. Mondal, J. Anderson, K. Kuznia,
+ Smith. 2020. RealToxicityPrompts: Evaluating neu- K. Doshi, K. K. Pal, M. Patel, M. Moradshahi, M. Parral toxic degeneration in language models. Findings of mar, M. Purohit, N. Varshney, P. R. Kaza, P. Verma,
+ EMNLP. R. S. Puri, R. Karia, S. Doshi, S. K. Sampat, S. Mishra,
+ S. Reddy A, S. Patro, T. Dixit, and X. Shen. 2022. Super-
+Iyer, S., X. V. Lin, R. Pasunuru, T. Mihaylov, D. Simig, NaturalInstructions: Generalization via declarative in-
+P. Yu, K. Shuster, T. Wang, Q. Liu, P. S. Koura, X. Li, structions on 1600+ NLP tasks. EMNLP.
+ B. O’Horo, G. Pereyra, J. Wang, C. Dewan, A. Celikyilmaz, L. Zettlemoyer, and V. Stoyanov. 2022. Opt- Wang, Z., Y. Dong, J. Zeng, V. Adams, M. N. Sreedhar,
+ iml: Scaling language model instruction meta learning D. Egert, O. Delalleau, J. Scowcroft, N. Kant, A. Swope,
+ through the lens of generalization. ArXiv preprint. and O. Kuchaiev. 2024. HelpSteer: Multi-attribute helpfulness dataset for SteerLM. NAACL HLT.
+Lambert, N., L. Tunstall, N. Rajani, and T. Thrush. 2023.
+ Huggingface h4 stack exchange preference dataset. Wei, J., X. Wang, D. Schuurmans, M. Bosma, F. Xia, E. Chi,
+ Q. V. Le, D. Zhou, et al. 2022. Chain-of-thought prompt-
+Longpre, S., L. Hou, T. Vu, A. Webson, H. W. Chung, Y. Tay, ing elicits reasoning in large language models. NeurIPS,
+ D. Zhou, Q. V. Le, B. Zoph, J. Wei, and A. Roberts. 2023. volume 35.
+ The Flan collection: Designing data and methods for effective instruction tuning. ICML. Ziegler, D. M., N. Stiennon, J. Wu, T. B. Brown, A. Radford, D. Amodei, P. Christiano, and G. Irving. 2019. Fine-
+Mishra, S., D. Khashabi, C. Baral, and H. Hajishirzi. 2022. tuning language models from human preferences. ArXiv,
+ Cross-task generalization via natural language crowd- abs/1909.08593.
+ sourcing instructions. ACL.

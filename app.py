@@ -152,18 +152,20 @@ def main():
     # Query interface
     st.markdown("---")
 
-    # Text input
-    query = st.text_input(
-        "Your Question",
-        placeholder="e.g., How do transformers use attention mechanisms?",
-        help="Enter a question about NLP concepts from the textbook",
-        label_visibility="collapsed"
-    )
+    # Use form to enable Enter key submission
+    with st.form("query_form", clear_on_submit=False):
+        # Text input
+        query = st.text_input(
+            "Your Question",
+            placeholder="e.g., How do transformers use attention mechanisms?",
+            help="Enter a question about NLP concepts from the textbook (press Enter to submit)",
+            label_visibility="collapsed"
+        )
 
-    # Submit button
-    col1, col2 = st.columns([1, 5])
-    with col1:
-        ask_button = st.button("🔍 Ask", type="primary", use_container_width=True)
+        # Submit button
+        col1, col2 = st.columns([1, 5])
+        with col1:
+            ask_button = st.form_submit_button("🔍 Ask", type="primary", use_container_width=True)
 
     # Process query
     if ask_button:

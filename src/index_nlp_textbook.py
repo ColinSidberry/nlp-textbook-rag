@@ -12,6 +12,57 @@ from pathlib import Path
 from typing import Dict, List
 
 
+def get_chapter_order(filename: str) -> tuple:
+    """
+    Determine the sorting order for a chapter file.
+    Returns (chapter_type, chapter_num, filename) where:
+    - chapter_type: 0 for main chapters, 1 for appendices
+    - chapter_num: integer chapter/appendix number
+
+    Chapter mapping based on Speech and Language Processing 3rd ed:
+    """
+    name = filename.lower()
+
+    # Chapter 2: Words and Tokens
+    if 'words-and-tokens' in name or 'words_and_tokens' in name:
+        return (0, 2, filename)
+    # Chapter 3: N-gram Language Models
+    elif 'n-gram' in name:
+        return (0, 3, filename)
+    # Chapter 4: Logistic Regression
+    elif 'logistic-regression' in name or 'logistic_regression' in name:
+        return (0, 4, filename)
+    # Chapter 5: Embeddings
+    elif name == 'embeddings.txt':
+        return (0, 5, filename)
+    # Chapter 6: Neural Networks
+    elif 'neural-networks' in name or 'neural_networks' in name:
+        return (0, 6, filename)
+    # Chapter 7: Large Language Models (7.txt)
+    elif name == '7.txt':
+        return (0, 7, filename)
+    # Chapter 8: Transformers
+    elif name == 'transformers.txt':
+        return (0, 8, filename)
+    # Chapter 16: Text-to-Speech (16.txt)
+    elif name == '16.txt':
+        return (0, 16, filename)
+    # Numbered chapters 9-25
+    elif name[0].isdigit():
+        # Extract leading number
+        match = re.match(r'^(\d+)', name)
+        if match:
+            return (0, int(match.group(1)), filename)
+    # Appendices A-K
+    elif name[0] in 'abcdefghijk':
+        appendix_order = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5,
+                         'f': 6, 'g': 7, 'h': 8, 'i': 9, 'j': 10, 'k': 11}
+        return (1, appendix_order.get(name[0], 99), filename)
+
+    # Default: put at end
+    return (2, 999, filename)
+
+
 def find_textbook_files(directory: str) -> List[Path]:
     """
     Find all .txt files in the specified directory.
@@ -20,13 +71,13 @@ def find_textbook_files(directory: str) -> List[Path]:
         directory: Path to the directory containing textbook files
 
     Returns:
-        List of Path objects for .txt files
+        List of Path objects sorted by chapter order
     """
     directory_path = Path(directory)
     txt_files = list(directory_path.glob("*.txt"))
 
-    # Sort files for consistent processing order
-    txt_files.sort()
+    # Sort files by chapter order
+    txt_files.sort(key=lambda f: get_chapter_order(f.name))
 
     print(f"Found {len(txt_files)} .txt files in {directory}")
     for file in txt_files:
@@ -187,7 +238,7 @@ def main():
     Discovers textbook files, parses them, and saves to JSON.
     """
     # Configuration
-    textbook_directory = "/Users/colinsidberry/Downloads/NLP_Textbook"
+    textbook_directory = "/Users/colinsidberry/nlp-textbook-rag/data/extracted_text/"
     output_file = "/Users/colinsidberry/nlp-textbook-rag/data/normalized/nlp_textbook.json"
 
     print("=" * 60)

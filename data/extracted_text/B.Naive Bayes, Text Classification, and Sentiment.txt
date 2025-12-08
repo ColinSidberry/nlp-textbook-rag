@@ -1,0 +1,1153 @@
+rights reserved. Draft of August 24, 2025.
+
+CHAPTER
+
+ Naive Bayes, Text Classification,
+B and Sentiment
+ Classification lies at the heart of both human and machine intelligence. Deciding
+ what letter, word, or image has been presented to our senses, recognizing faces
+ or voices, sorting mail, assigning grades to homeworks; these are all examples of
+ assigning a category to an input. The potential challenges of this task are highlighted
+ by the fabulist Jorge Luis Borges (1964), who imagined classifying animals into:
+ (a) those that belong to the Emperor, (b) embalmed ones, (c) those that
+ are trained, (d) suckling pigs, (e) mermaids, (f) fabulous ones, (g) stray
+ dogs, (h) those that are included in this classification, (i) those that
+ tremble as if they were mad, (j) innumerable ones, (k) those drawn with
+ a very fine camel’s hair brush, (l) others, (m) those that have just broken
+ a flower vase, (n) those that resemble flies from a distance.
+ Many language processing tasks involve classification, although luckily our classes
+ are much easier to define than those of Borges. In this chapter we introduce the naive
+ text
+ categorization Bayes algorithm and apply it to text categorization, the task of assigning a label or
+ category to an entire text or document.
+ sentiment
+ analysis We focus on one common text categorization task, sentiment analysis, the extraction of sentiment, the positive or negative orientation that a writer expresses
+ toward some object. A review of a movie, book, or product on the web expresses the
+ author’s sentiment toward the product, while an editorial or political text expresses
+ sentiment toward a candidate or political action. Extracting consumer or public sentiment is thus relevant for fields from marketing to politics.
+ The simplest version of sentiment analysis is a binary classification task, and
+ the words of the review provide excellent cues. Consider, for example, the following phrases extracted from positive and negative reviews of movies and restaurants.
+ Words like great, richly, awesome, and pathetic, and awful and ridiculously are very
+ informative cues:
+ + ...zany characters and richly applied satire, and some great plot twists
+ − It was pathetic. The worst part about it was the boxing scenes...
+ + ...awesome caramel sauce and sweet toasty almonds. I love this place!
+ − ...awful pizza and ridiculously overpriced...
+spam detection Spam detection is another important commercial application, the binary classification task of assigning an email to one of the two classes spam or not-spam.
+ Many lexical and other features can be used to perform this classification. For example you might quite reasonably be suspicious of an email containing phrases like
+ “online pharmaceutical” or “WITHOUT ANY COST” or “Dear Winner”.
+ Another thing we might want to know about a text is the language it’s written
+ in. Texts on social media, for example, can be in any number of languages and
+ language id we’ll need to apply different processing. The task of language id is thus the first
+ step in most language processing pipelines. Related text classification tasks like auauthorship thorship attribution— determining a text’s author— are also relevant to the digital
+ attribution
+ humanities, social sciences, and forensic linguistics.
+2 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ Finally, one of the oldest tasks in text classification is assigning a library subject category or topic label to a text. Deciding whether a research paper concerns
+ epidemiology or instead, perhaps, embryology, is an important component of information retrieval. Various sets of subject categories exist, such as the MeSH (Medical
+ Subject Headings) thesaurus. In fact, as we will see, subject category classification
+ is the task for which the naive Bayes algorithm was invented in 1961 (Maron, 1961).
+ Classification is essential for tasks below the level of the document as well.
+ We’ve already seen period disambiguation (deciding if a period is the end of a sentence or part of a word), and word tokenization (deciding if a character should be
+ a word boundary). Even language modeling can be viewed as classification: each
+ word can be thought of as a class, and so predicting the next word is classifying the
+ context-so-far into a class for each next word. A part-of-speech tagger (Chapter 17)
+ classifies each occurrence of a word in a sentence as, e.g., a noun or a verb.
+ The goal of classification is to take a single observation, extract some useful
+ features, and thereby classify the observation into one of a set of discrete classes.
+ One method for classifying text is to use rules handwritten by humans. Handwritten rule-based classifiers can be components of state-of-the-art systems in language
+ processing. But rules can be fragile, as situations or data change over time, and for
+ some tasks humans aren’t necessarily good at coming up with the rules.
+ supervised
+ The most common way of doing text classification in language processing is
+ machine instead via supervised machine learning, the subject of this chapter. In supervised
+ learning
+ learning, we have a data set of input observations, each associated with some correct
+ output (a ‘supervision signal’). The goal of the algorithm is to learn how to map
+ from a new observation to a correct output.
+ Formally, the task of supervised classification is to take an input x and a fixed
+ set of output classes Y = {y1 , y2 , ..., yM } and return a predicted class y ∈ Y . For
+ text classification, we’ll sometimes talk about c (for “class”) instead of y as our
+ output variable, and d (for “document”) instead of x as our input variable. In the
+ supervised situation we have a training set of N documents that have each been handlabeled with a class: {(d1 , c1 ), ...., (dN , cN )}. Our goal is to learn a classifier that is
+ capable of mapping from a new document d to its correct class c ∈ C, where C is
+ some set of useful document classes. A probabilistic classifier additionally will tell
+ us the probability of the observation being in the class. This full distribution over
+ the classes can be useful information for downstream decisions; avoiding making
+ discrete decisions early on can be useful when combining systems.
+ Many kinds of machine learning algorithms are used to build classifiers. This
+ chapter introduces naive Bayes; the following one introduces logistic regression.
+ These exemplify two ways of doing classification. Generative classifiers like naive
+ Bayes build a model of how a class could generate some input data. Given an observation, they return the class most likely to have generated the observation. Discriminative classifiers like logistic regression instead learn what features from the
+ input are most useful to discriminate between the different possible classes. While
+ discriminative systems are often more accurate and hence more commonly used,
+ generative classifiers still have a role.
+
+B.1 Naive Bayes Classifiers
+ naive Bayes In this section we introduce the multinomial naive Bayes classifier, so called beclassifier
+ cause it is a Bayesian classifier that makes a simplifying (naive) assumption about
+ B.1 • NAIVE BAYES C LASSIFIERS 3
+
+ how the features interact.
+ The intuition of the classifier is shown in Fig. B.1. We represent a text document
+ bag of words as if it were a bag of words, that is, an unordered set of words with their position
+ ignored, keeping only their frequency in the document. In the example in the figure,
+ instead of representing the word order in all the phrases like “I love this movie” and
+ “I would recommend it”, we simply note that the word I occurred 5 times in the
+ entire excerpt, the word it 6 times, the words love, recommend, and movie once, and
+ so on.
+
+ it 6
+ I 5
+I love this movie! It's sweet, the 4
+but with satirical humor. The fairy always love it to 3
+ it whimsical it to and 3
+dialogue is great and the I
+ and seen are seen 2
+adventure scenes are fun... friend anyone
+It manages to be whimsical happy dialogue yet 1
+and romantic while laughing adventure recommend would 1
+ satirical whimsical 1
+at the conventions of the who sweet of movie it
+fairy tale genre. I would it I to
+ but romantic I times 1
+recommend it to just about several yet sweet 1
+anyone. I've seen it several again it the humor satirical 1
+ the seen would
+times, and I'm always happy adventure 1
+ to scenes I the manages
+to see it again whenever I the genre 1
+ fun I times and fairy 1
+have a friend who hasn't and
+ about while humor 1
+seen it yet! whenever have
+ conventions have 1
+ with great 1
+ … …
+
+Figure B.1 Intuition of the multinomial naive Bayes classifier applied to a movie review. The position of the
+words is ignored (the bag-of-words assumption) and we make use of the frequency of each word.
+
+ Naive Bayes is a probabilistic classifier, meaning that for a document d, out of
+ all classes c ∈ C the classifier returns the class ĉ which has the maximum posterior
+ ˆ probability given the document. In Eq. B.1 we use the hat notation ˆ to mean “our
+ argmax estimate of the correct class”, and we use argmax to mean an operation that selects
+ the argument (in this case the class c) that maximizes a function (in this case the
+ probability P(c|d)).
+
+ ĉ = argmax P(c|d) (B.1)
+ c∈C
+
+ Bayesian This idea of Bayesian inference has been known since the work of Bayes (1763),
+ inference
+ and was first applied to text classification by Mosteller and Wallace (1964). The
+ intuition of Bayesian classification is to use Bayes’ rule to transform Eq. B.1 into
+ other probabilities that have some useful properties. Bayes’ rule is presented in
+ Eq. B.2; it gives us a way to break down any conditional probability P(x|y) into
+ three other probabilities:
+ P(y|x)P(x)
+ P(x|y) = (B.2)
+ P(y)
+4 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ We can then substitute Eq. B.2 into Eq. B.1 to get Eq. B.3:
+
+ P(d|c)P(c)
+ ĉ = argmax P(c|d) = argmax (B.3)
+ c∈C c∈C P(d)
+
+ We can conveniently simplify Eq. B.3 by dropping the denominator P(d). This
+ is possible because we will be computing P(d|c)P(c)
+ P(d) for each possible class. But P(d)
+ doesn’t change for each class; we are always asking about the most likely class for
+ the same document d, which must have the same probability P(d). Thus, we can
+ choose the class that maximizes this simpler formula:
+
+ ĉ = argmax P(c|d) = argmax P(d|c)P(c) (B.4)
+ c∈C c∈C
+
+ We call Naive Bayes a generative model because we can read Eq. B.4 as stating
+ a kind of implicit assumption about how a document is generated: first a class is
+ sampled from P(c), and then the words are generated by sampling from P(d|c). (In
+ fact we could imagine generating artificial documents, or at least their word counts,
+ by following this process). We’ll say more about this intuition of generative models
+ in Chapter 4.
+ To return to classification: we compute the most probable class ĉ given some
+ document d by choosing the class which has the highest product of two probabilities:
+ prior
+ probability the prior probability of the class P(c) and the likelihood of the document P(d|c):
+ likelihood
+ likelihood prior
+ z }| { z}|{
+ ĉ = argmax P(d|c) P(c) (B.5)
+ c∈C
+
+ Without loss of generality, we can represent a document d as a set of features
+ f1 , f2 , ..., fn :
+
+ likelihood prior
+ z }| { z}|{
+ ĉ = argmax P( f1 , f2 , ...., fn |c) P(c) (B.6)
+ c∈C
+
+ Unfortunately, Eq. B.6 is still too hard to compute directly: without some simplifying assumptions, estimating the probability of every possible combination of
+ features (for example, every possible set of words and positions) would require huge
+ numbers of parameters and impossibly large training sets. Naive Bayes classifiers
+ therefore make two simplifying assumptions.
+ The first is the bag-of-words assumption discussed intuitively above: we assume
+ position doesn’t matter, and that the word “love” has the same effect on classification
+ whether it occurs as the 1st, 20th, or last word in the document. Thus we assume
+ that the features f1 , f2 , ..., fn only encode word identity and not position.
+ naive Bayes
+ assumption The second is commonly called the naive Bayes assumption: this is the conditional independence assumption that the probabilities P( fi |c) are independent given
+ the class c and hence can be ‘naively’ multiplied as follows:
+
+ P( f1 , f2 , ...., fn |c) = P( f1 |c) · P( f2 |c) · ... · P( fn |c) (B.7)
+
+ The final equation for the class chosen by a naive Bayes classifier is thus:
+ Y
+ cNB = argmax P(c) P( f |c) (B.8)
+ c∈C f ∈F
+ B.2 • T RAINING THE NAIVE BAYES C LASSIFIER 5
+
+ To apply the naive Bayes classifier to text, we will use each word in the documents
+ as a feature, as suggested above, and we consider each of the words in the document
+ by walking an index through every word position in the document:
+ positions ← all word positions in test document
+ Y
+ cNB = argmax P(c) P(wi |c) (B.9)
+ c∈C i∈positions
+
+ Naive Bayes calculations, like calculations for language modeling, are done in log
+ space, to avoid underflow and increase speed. Thus Eq. B.9 is generally instead
+ expressed1 as
+ X
+ cNB = argmax log P(c) + log P(wi |c) (B.10)
+ c∈C i∈positions
+
+ By considering features in log space, Eq. B.10 computes the predicted class as a linear function of input features. Classifiers that use a linear combination of the inputs
+ to make a classification decision —like naive Bayes and also logistic regression—
+ linear are called linear classifiers.
+ classifiers
+
+B.2 Training the Naive Bayes Classifier
+ How can we learn the probabilities P(c) and P( fi |c)? Let’s first consider the maximum likelihood estimate. We’ll simply use the frequencies in the data. For the class
+ prior P(c) we ask what percentage of the documents in our training set are in each
+ class c. Let Nc be the number of documents in our training data with class c and
+ Ndoc be the total number of documents. Then:
+ Nc
+ P̂(c) = (B.11)
+ Ndoc
+ To learn the probability P( fi |c), we’ll assume a feature is just the existence of a word
+ in the document’s bag of words, and so we’ll want P(wi |c), which we compute as
+ the fraction of times the word wi appears among all words in all documents of topic
+ c. We first concatenate all documents with category c into one big “category c” text.
+ Then we use the frequency of wi in this concatenated document to give a maximum
+ likelihood estimate of the probability:
+ count(wi , c)
+ P̂(wi |c) = P (B.12)
+ w∈V count(w, c)
+ Here the vocabulary V consists of the union of all the word types in all classes, not
+ just the words in one class c.
+ There is a problem, however, with maximum likelihood training. Imagine we
+ are trying to estimate the likelihood of the word “fantastic” given class positive, but
+ suppose there are no training documents that both contain the word “fantastic” and
+ are classified as positive. Perhaps the word “fantastic” happens to occur (sarcastically?) in the class negative. In such a case the probability for this feature will be
+ zero:
+ count(“fantastic”, positive)
+ P̂(“fantastic”|positive) = P =0 (B.13)
+ w∈V count(w, positive)
+
+ 1 In practice throughout this book, we’ll use log to mean natural log (ln) when the base is not specified.
+6 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ But since naive Bayes naively multiplies all the feature likelihoods together, zero
+ probabilities in the likelihood term for any class will cause the probability of the
+ class to be zero, no matter the other evidence!
+ The simplest solution is the add-one (Laplace) smoothing introduced in Chapter 3. While Laplace smoothing is usually replaced by more sophisticated smoothing
+ algorithms in language modeling, it is commonly used in naive Bayes text categorization:
+ count(wi , c) + 1 count(wi , c) + 1
+ P̂(wi |c) = P = P  (B.14)
+ w∈V (count(w, c) + 1) w∈V count(w, c) + |V |
+
+ Note once again that it is crucial that the vocabulary V consists of the union of all the
+ word types in all classes, not just the words in one class c (try to convince yourself
+ why this must be true; see the exercise at the end of the chapter).
+ What do we do about words that occur in our test data but are not in our vocabulary at all because they did not occur in any training document in any class? The
+unknown word solution for such unknown words is to ignore them—remove them from the test
+ document and not include any probability for them at all.
+ Finally, some systems choose to completely ignore another class of words: stop
+ stop words words, very frequent words like the and a. This can be done by sorting the vocabulary by frequency in the training set, and defining the top 10–100 vocabulary entries
+ as stop words, or alternatively by using one of the many predefined stop word lists
+ available online. Then each instance of these stop words is simply removed from
+ both training and test documents as if it had never occurred. In most text classification applications, however, using a stop word list doesn’t improve performance, and
+ so it is more common to make use of the entire vocabulary and not use a stop word
+ list.
+ Fig. B.2 shows the final algorithm.
+
+B.3 Worked example
+ Let’s walk through an example of training and testing naive Bayes with add-one
+ smoothing. We’ll use a sentiment analysis domain with the two classes positive
+ (+) and negative (-), and take the following miniature training and test documents
+ simplified from actual movie reviews.
+ Cat Documents
+ Training - just plain boring
+ - entirely predictable and lacks energy
+ - no surprises and very few laughs
+ + very powerful
+ + the most fun film of the summer
+ Test ? predictable with no fun
+ The prior P(c) for the two classes is computed via Eq. B.11 as NNc :
+ doc
+
+ 3 2
+ P(−) = P(+) =
+ 5 5
+ The word with doesn’t occur in the training set, so we drop it completely (as
+ mentioned above, we don’t use unknown word models for naive Bayes). The likelihoods from the training set for the remaining three words “predictable”, “no”, and
+ B.4 • O PTIMIZING FOR S ENTIMENT A NALYSIS 7
+
+ function T RAIN NAIVE BAYES(D, C) returns V, log P(c), log P(w|c)
+
+ for each class c ∈ C # Calculate P(c) terms
+ Ndoc = number of documents in D
+ Nc = number of documents from D in class c
+ Nc
+ logprior[c] ← log
+ Ndoc
+ V ← vocabulary of D
+ bigdoc[c] ← append(d) for d ∈ D with class c
+ for each word w in V # Calculate P(w|c) terms
+ count(w,c) ← # of occurrences of w in bigdoc[c]
+ count(w, c) + 1
+ loglikelihood[w,c] ← log P 0
+ w0 in V (count (w , c) + 1)
+ return logprior, loglikelihood, V
+
+ function T EST NAIVE BAYES(testdoc, logprior, loglikelihood, C, V) returns best c
+
+ for each class c ∈ C
+ sum[c] ← logprior[c]
+ for each position i in testdoc
+ word ← testdoc[i]
+ if word ∈ V
+ sum[c] ← sum[c]+ loglikelihood[word,c]
+ return argmaxc sum[c]
+
+ Figure B.2 The naive Bayes algorithm, using add-1 smoothing. To use add-α smoothing
+ instead, change the +1 to +α for loglikelihood counts in training.
+
+ “fun”, are as follows, from Eq. B.14 (computing the probabilities for the remainder
+ of the words in the training set is left as an exercise for the reader):
+ 1+1 0+1
+ P(“predictable”|−) = P(“predictable”|+) =
+ 14 + 20 9 + 20
+ 1+1 0+1
+ P(“no”|−) = P(“no”|+) =
+ 14 + 20 9 + 20
+ 0+1 1+1
+ P(“fun”|−) = P(“fun”|+) =
+ 14 + 20 9 + 20
+ For the test sentence S = “predictable with no fun”, after removing the word ‘with’,
+ the chosen class, via Eq. B.9, is therefore computed as follows:
+ 3 2×2×1
+ P(−)P(S|−) = × = 6.1 × 10−5
+ 5 343
+ 2 1×1×2
+ P(+)P(S|+) = × = 3.2 × 10−5
+ 5 293
+ The model thus predicts the class negative for the test sentence.
+
+B.4 Optimizing for Sentiment Analysis
+ While standard naive Bayes text classification can work well for sentiment analysis,
+ some small changes are generally employed that improve performance.
+8 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ First, for sentiment classification and a number of other text classification tasks,
+ whether a word occurs or not seems to matter more than its frequency. Thus it often
+ improves performance to clip the word counts in each document at 1 (see the end
+ of the chapter for pointers to these results). This variant is called binary multinobinary naive
+ Bayes mial naive Bayes or binary naive Bayes. The variant uses the same algorithm as in
+ Fig. B.2 except that for each document we remove all duplicate words before concatenating them into the single big document during training and we also remove
+ duplicate words from test documents. Fig. B.3 shows an example in which a set
+ of four documents (shortened and text-normalized for this example) are remapped
+ to binary, with the modified counts shown in the table on the right. The example
+ is worked without add-1 smoothing to make the differences clearer. Note that the
+ results counts need not be 1; the word great has a count of 2 even for binary naive
+ Bayes, because it appears in multiple documents.
+
+ NB Binary
+ Counts Counts
+ Four original documents: + − + −
+ − it was pathetic the worst part was the and 2 0 1 0
+ boxing scenes boxing 0 1 0 1
+ film 1 0 1 0
+ − no plot twists or great scenes great 3 1 2 1
+ + and satire and great plot twists it 0 1 0 1
+ + great scenes great film no 0 1 0 1
+ or 0 1 0 1
+ After per-document binarization: part 0 1 0 1
+ − it was pathetic the worst part boxing pathetic 0 1 0 1
+ plot 1 1 1 1
+ scenes satire 1 0 1 0
+ − no plot twists or great scenes scenes 1 2 1 2
+ + and satire great plot twists the 0 2 0 1
+ + great scenes film twists 1 1 1 1
+ was 0 2 0 1
+ worst 0 1 0 1
+ Figure B.3 An example of binarization for the binary naive Bayes algorithm.
+
+ A second important addition commonly made when doing text classification for
+ sentiment is to deal with negation. Consider the difference between I really like this
+ movie (positive) and I didn’t like this movie (negative). The negation expressed by
+ didn’t completely alters the inferences we draw from the predicate like. Similarly,
+ negation can modify a negative word to produce a positive review (don’t dismiss this
+ film, doesn’t let us get bored).
+ A very simple baseline that is commonly used in sentiment analysis to deal with
+ negation is the following: during text normalization, prepend the prefix NOT to
+ every word after a token of logical negation (n’t, not, no, never) until the next punctuation mark. Thus the phrase
+ didn’t like this movie , but I
+ becomes
+ didn’t NOT_like NOT_this NOT_movie , but I
+ Newly formed ‘words’ like NOT like, NOT recommend will thus occur more
+ often in negative document and act as cues for negative sentiment, while words
+ like NOT bored, NOT dismiss will acquire positive associations. Syntactic parsing
+ (Chapter 18) can be used to deal more accurately with the scope relationship between
+ B.5 • NAIVE BAYES FOR OTHER TEXT CLASSIFICATION TASKS 9
+
+ these negation words and the predicates they modify, but this simple baseline works
+ quite well in practice.
+ Finally, in some situations we might have insufficient labeled training data to
+ train accurate naive Bayes classifiers using all words in the training set to estimate
+ positive and negative sentiment. In such cases we can instead derive the positive
+ sentiment and negative word features from sentiment lexicons, lists of words that are prelexicons
+ annotated with positive or negative sentiment. Four popular lexicons are the General
+ General
+ Inquirer Inquirer (Stone et al., 1966), LIWC (Pennebaker et al., 2007), the opinion lexicon
+ LIWC of Hu and Liu (2004) and the MPQA Subjectivity Lexicon (Wilson et al., 2005).
+ For example the MPQA subjectivity lexicon has 6885 words each marked for
+ whether it is strongly or weakly biased positive or negative. Some examples:
+ + : admirable, beautiful, confident, dazzling, ecstatic, favor, glee, great
+ − : awful, bad, bias, catastrophe, cheat, deny, envious, foul, harsh, hate
+ A common way to use lexicons in a naive Bayes classifier is to add a feature
+ that is counted whenever a word from that lexicon occurs. Thus we might add a
+ feature called ‘this word occurs in the positive lexicon’, and treat all instances of
+ words in the lexicon as counts for that one feature, instead of counting each word
+ separately. Similarly, we might add as a second feature ‘this word occurs in the
+ negative lexicon’ of words in the negative lexicon. If we have lots of training data,
+ and if the test data matches the training data, using just two features won’t work as
+ well as using all the words. But when training data is sparse or not representative of
+ the test set, using dense lexicon features instead of sparse individual-word features
+ may generalize better.
+ We’ll return to this use of lexicons in Chapter 22, showing how these lexicons
+ can be learned automatically, and how they can be applied to many other tasks beyond sentiment classification.
+
+B.5 Naive Bayes for other text classification tasks
+ In the previous section we pointed out that naive Bayes doesn’t require that our
+ classifier use all the words in the training data as features. In fact features in naive
+ Bayes can express any property of the input text we want.
+spam detection Consider the task of spam detection, deciding if a particular piece of email is
+ an example of spam (unsolicited bulk email)—one of the first applications of naive
+ Bayes to text classification (Sahami et al., 1998).
+ A common solution here, rather than using all the words as individual features,
+ is to predefine likely sets of words or phrases as features, combined with features
+ that are not purely linguistic. For example the open-source SpamAssassin tool2
+ predefines features like the phrase “one hundred percent guaranteed”, or the feature
+ mentions millions of dollars, which is a regular expression that matches suspiciously
+ large sums of money. But it also includes features like HTML has a low ratio of text
+ to image area, that aren’t purely linguistic and might require some sophisticated
+ computation, or totally non-linguistic features about, say, the path that the email
+ took to arrive. More sample SpamAssassin features:
+ • Email subject line is all capital letters
+ • Contains phrases of urgency like “urgent reply”
+ 2 https://spamassassin.apache.org
+10 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ • Email subject line contains “online pharmaceutical”
+ • HTML has unbalanced “head” tags
+ • Claims you can be removed from the list
+ language id For other tasks, like language id—determining what language a given piece
+ of text is written in—the most effective naive Bayes features are not words at all,
+ but character n-grams, 2-grams (‘zw’) 3-grams (‘nya’, ‘ Vo’), or 4-grams (‘ie z’,
+ ‘thei’), or, even simpler byte n-grams, where instead of using the multibyte Unicode
+ character representations called codepoints, we just pretend everything is a string of
+ raw bytes. Because spaces count as a byte, byte n-grams can model statistics about
+ the beginning or ending of words. A widely used naive Bayes system, langid.py
+ (Lui and Baldwin, 2012) begins with all possible n-grams of lengths 1-4, using feature selection to winnow down to the most informative 7000 final features.
+ Language ID systems are trained on multilingual text, such as Wikipedia (Wikipedia text in 68 different languages was used by (Lui and Baldwin, 2011)), or
+ newswire. To make sure that this multilingual text correctly reflects different regions, dialects, and socioeconomic classes, systems also add Twitter text in many
+ languages geotagged to many regions (important for getting world English dialects
+ from countries with large Anglophone populations like Nigeria or India), Bible and
+ Quran translations, slang websites like Urban Dictionary, corpora of African American Vernacular English (Blodgett et al., 2016), and so on (Jurgens et al., 2017).
+
+B.6 Naive Bayes as a Language Model
+ As we saw in the previous section, naive Bayes classifiers can use any sort of feature:
+ dictionaries, URLs, email addresses, network features, phrases, and so on. But if,
+ as in Section B.3, we use only individual word features, and we use all of the words
+ in the text (not a subset), then naive Bayes has an important similarity to language
+ modeling. Specifically, a naive Bayes model can be viewed as a set of class-specific
+ unigram language models, in which the model for each class instantiates a unigram
+ language model.
+ Since the likelihood features from the naive Bayes model assign a probability to
+ each word P(word|c), the model also assigns a probability to each sentence:
+ Y
+ P(s|c) = P(wi |c) (B.15)
+ i∈positions
+
+ Thus consider a naive Bayes model with the classes positive (+) and negative (-)
+ and the following model parameters:
+
+ w P(w|+) P(w|-)
+ I 0.1 0.2
+ love 0.1 0.001
+ this 0.01 0.01
+ fun 0.05 0.005
+ film 0.1 0.1
+ ... ... ...
+
+ Each of the two columns above instantiates a language model that can assign a
+ probability to the sentence “I love this fun film”:
+ B.7 • E VALUATION : P RECISION , R ECALL , F- MEASURE 11
+
+ P(“I love this fun film”|+) = 0.1 × 0.1 × 0.01 × 0.05 × 0.1 = 5 × 10−7
+ P(“I love this fun film”|−) = 0.2 × 0.001 × 0.01 × 0.005 × 0.1 = 1.0 × 10−9
+
+ As it happens, the positive model assigns a higher probability to the sentence:
+ P(s|pos) > P(s|neg). Note that this is just the likelihood part of the naive Bayes
+ model; once we multiply in the prior a full naive Bayes model might well make a
+ different classification decision.
+
+B.7 Evaluation: Precision, Recall, F-measure
+ To introduce the methods for evaluating text classification, let’s first consider some
+ simple binary detection tasks. For example, in spam detection, our goal is to label
+ every text as being in the spam category (“positive”) or not in the spam category
+ (“negative”). For each item (email document) we therefore need to know whether
+ our system called it spam or not. We also need to know whether the email is actually
+ spam or not, i.e. the human-defined labels for each document that we are trying to
+ gold labels match. We will refer to these human labels as the gold labels.
+ Or imagine you’re the CEO of the Delicious Pie Company and you need to know
+ what people are saying about your pies on social media, so you build a system that
+ detects tweets concerning Delicious Pie. Here the positive class is tweets about
+ Delicious Pie and the negative class is all other tweets.
+ In both cases, we need a metric for knowing how well our spam detector (or
+ pie-tweet-detector) is doing. To evaluate any system for detecting things, we start
+ confusion by building a confusion matrix like the one shown in Fig. B.4. A confusion matrix
+ matrix
+ is a table for visualizing how an algorithm performs with respect to the human gold
+ labels, using two dimensions (system output and gold labels), and each cell labeling
+ a set of possible outcomes. In the spam detection case, for example, true positives
+ are documents that are indeed spam (indicated by human-created gold labels) that
+ our system correctly said were spam. False negatives are documents that are indeed
+ spam but our system incorrectly labeled as non-spam.
+ To the bottom right of the table is the equation for accuracy, which asks what
+ percentage of all the observations (for the spam or pie examples that means all emails
+ or tweets) our system labeled correctly. Although accuracy might seem a natural
+ metric, we generally don’t use it for text classification tasks. That’s because accuracy
+ doesn’t work well when the classes are unbalanced (as indeed they are with spam,
+ which is a large majority of email, or with tweets, which are mainly not about pie).
+ To make this more explicit, imagine that we looked at a million tweets, and
+ let’s say that only 100 of them are discussing their love (or hatred) for our pie,
+ while the other 999,900 are tweets about something completely unrelated. Imagine a
+ simple classifier that stupidly classified every tweet as “not about pie”. This classifier
+ would have 999,900 true negatives and only 100 false negatives for an accuracy of
+ 999,900/1,000,000 or 99.99%! What an amazing accuracy level! Surely we should
+ be happy with this classifier? But of course this fabulous ‘no pie’ classifier would
+ be completely useless, since it wouldn’t find a single one of the customer comments
+ we are looking for. In other words, accuracy is not a good metric when the goal is
+ to discover something that is rare, or at least not completely balanced in frequency,
+ which is a very common situation in the world.
+12 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ gold standard labels
+ gold positive gold negative
+ system system tp
+ positive true positive false positive precision = tp+fp
+ output
+ labels system
+ negative false negative true negative
+ tp tp+tn
+ recall = accuracy =
+ tp+fn tp+fp+tn+fn
+
+ Figure B.4 A confusion matrix for visualizing how well a binary classification system performs against gold standard labels.
+
+ That’s why instead of accuracy we generally turn to two other metrics shown in
+ precision Fig. B.4: precision and recall. Precision measures the percentage of the items that
+ the system detected (i.e., the system labeled as positive) that are in fact positive (i.e.,
+ are positive according to the human gold labels). Precision is defined as
+
+ true positives
+ Precision =
+ true positives + false positives
+ recall Recall measures the percentage of items actually present in the input that were
+ correctly identified by the system. Recall is defined as
+
+ true positives
+ Recall =
+ true positives + false negatives
+
+ Precision and recall will help solve the problem with the useless “nothing is
+ pie” classifier. This classifier, despite having a fabulous accuracy of 99.99%, has
+ a terrible recall of 0 (since there are no true positives, and 100 false negatives, the
+ recall is 0/100). You should convince yourself that the precision at finding relevant
+ tweets is equally problematic. Thus precision and recall, unlike accuracy, emphasize
+ true positives: finding the things that we are supposed to be looking for.
+ There are many ways to define a single metric that incorporates aspects of both
+ F-measure precision and recall. The simplest of these combinations is the F-measure (van
+ Rijsbergen, 1975) , defined as:
+ (β 2 + 1)PR
+ Fβ =
+ β 2P + R
+ The β parameter differentially weights the importance of recall and precision,
+ based perhaps on the needs of an application. Values of β > 1 favor recall, while
+ values of β < 1 favor precision. When β = 1, precision and recall are equally bal-
+F1 anced; this is the most frequently used metric, and is called Fβ =1 or just F1 :
+ 2PR
+ F1 = (B.16)
+ P+R
+ F-measure comes from a weighted harmonic mean of precision and recall. The
+ harmonic mean of a set of numbers is the reciprocal of the arithmetic mean of reciprocals:
+ n
+ HarmonicMean(a1 , a2 , a3 , a4 , ..., an ) = 1 1 1 1
+ (B.17)
+ a1 + a2 + a3 + ... + an
+ B.7 • E VALUATION : P RECISION , R ECALL , F- MEASURE 13
+
+ and hence F-measure is
+
+ (β 2 + 1)PR
+  
+ 1 1−α
+ F= or with β 2 = F= (B.18)
+ α P + (1 − α) R1 α β 2P + R
+
+ Harmonic mean is used because the harmonic mean of two values is closer to the
+ minimum of the two values than the arithmetic mean is. Thus it weighs the lower of
+ the two numbers more heavily, which is more conservative in this situation.
+
+ B.7.1 Evaluating with more than two classes
+ Up to now we have been describing text classification tasks with only two classes.
+ But lots of classification tasks in language processing have more than two classes.
+ For sentiment analysis we generally have 3 classes (positive, negative, neutral) and
+ even more classes are common for tasks like part-of-speech tagging, word sense
+ disambiguation, semantic role labeling, emotion detection, and so on. Luckily the
+ naive Bayes algorithm is already a multi-class classification algorithm.
+
+ gold labels
+ urgent normal spam
+ urgent 8 10 1 precisionu=
+ 8+10+1
+ system 60
+ output normal 5 60 50 precisionn=
+ 5+60+50
+ spam 3 30 200 precisions=
+ 3+30+200
+ recallu = recalln = recalls =
+ 8 60 200
+ 8+5+3 10+60+30 1+50+200
+
+ Figure B.5 Confusion matrix for a three-class categorization task, showing for each pair of
+ classes (c1 , c2 ), how many documents from c1 were (in)correctly assigned to c2 .
+
+ But we’ll need to slightly modify our definitions of precision and recall. Consider the sample confusion matrix for a hypothetical 3-way one-of email categorization decision (urgent, normal, spam) shown in Fig. B.5. The matrix shows, for
+ example, that the system mistakenly labeled one spam document as urgent, and we
+ have shown how to compute a distinct precision and recall value for each class. In
+ order to derive a single metric that tells us how well the system is doing, we can commacroaveraging bine these values in two ways. In macroaveraging, we compute the performance
+microaveraging for each class, and then average over classes. In microaveraging, we collect the decisions for all classes into a single confusion matrix, and then compute precision and
+ recall from that table. Fig. B.6 shows the confusion matrix for each class separately,
+ and shows the computation of microaveraged and macroaveraged precision.
+ As the figure shows, a microaverage is dominated by the more frequent class (in
+ this case spam), since the counts are pooled. The macroaverage better reflects the
+ statistics of the smaller classes, and so is more appropriate when performance on all
+ the classes is equally important.
+14 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ Class 1: Urgent Class 2: Normal Class 3: Spam Pooled
+ true true true true true true true true
+ urgent not normal not spam not yes no
+ system system system system
+ urgent 8 11 normal 60 55 spam 200 33 yes 268 99
+ system system system system
+ not 8 340 not 40 212 not 51 83 no 99 635
+ 8 60 200 microaverage = 268
+ precision = = .42 precision = = .52 precision = = .86 = .73
+ 8+11 60+55 200+33 precision 268+99
+
+ macroaverage = .42+.52+.86
+ = .60
+ precision 3
+
+Figure B.6 Separate confusion matrices for the 3 classes from the previous figure, showing the pooled confusion matrix and the microaveraged and macroaveraged precision.
+
+B.8 Test sets and Cross-validation
+
+ The training and testing procedure for text classification follows what we saw with
+ language modeling (Section ??): we use the training set to train the model, then use
+ development the development test set (also called a devset) to perhaps tune some parameters,
+ test set
+ devset and in general decide what the best model is. Once we come up with what we think
+ is the best model, we run it on the (hitherto unseen) test set to report its performance.
+ While the use of a devset avoids overfitting the test set, having a fixed training set, devset, and test set creates another problem: in order to save lots of data
+ for training, the test set (or devset) might not be large enough to be representative.
+ Wouldn’t it be better if we could somehow use all our data for training and still use
+cross-validation all our data for test? We can do this by cross-validation.
+ In cross-validation, we choose a number k, and partition our data into k disjoint
+ folds subsets called folds. Now we choose one of those k folds as a test set, train our
+ classifier on the remaining k − 1 folds, and then compute the error rate on the test
+ set. Then we repeat with another fold as the test set, again training on the other k − 1
+ folds. We do this sampling process k times and average the test set error rate from
+ these k runs to get an average error rate. If we choose k = 10, we would train 10
+ different models (each on 90% of our data), test the model 10 times, and average
+ 10-fold these 10 values. This is called 10-fold cross-validation.
+cross-validation
+ The only problem with cross-validation is that because all the data is used for
+ testing, we need the whole corpus to be blind; we can’t examine any of the data
+ to suggest possible features and in general see what’s going on, because we’d be
+ peeking at the test set, and such cheating would cause us to overestimate the performance of our system. However, looking at the corpus to understand what’s going
+ on is important in designing NLP systems! What to do? For this reason, it is common to create a fixed training set and test set, then do 10-fold cross-validation inside
+ the training set, but compute error rate the normal way in the test set, as shown in
+ Fig. B.7.
+ B.9 • S TATISTICAL S IGNIFICANCE T ESTING 15
+
+ Training Iterations Testing
+ 1 Dev Training
+ 2 Dev Training
+ 3 Dev Training
+ 4 Dev Training
+ Test
+ 5 Training Dev Training
+ Set
+ 6 Training Dev
+ 7 Training Dev
+ 8 Training Dev
+ 9 Training Dev
+ 10 Training Dev
+
+ Figure B.7 10-fold cross-validation
+
+B.9 Statistical Significance Testing
+ In building systems we often need to compare the performance of two systems. How
+ can we know if the new system we just built is better than our old one? Or better
+ than some other system described in the literature? This is the domain of statistical
+ hypothesis testing, and in this section we introduce tests for statistical significance
+ for NLP classifiers, drawing especially on the work of Dror et al. (2020) and Berg-
+Kirkpatrick et al. (2012).
+ Suppose we’re comparing the performance of classifiers A and B on a metric M
+ such as F1 , or accuracy. Perhaps we want to know if our logistic regression sentiment classifier A (Chapter 4) gets a higher F1 score than our naive Bayes sentiment
+ classifier B on a particular test set x. Let’s call M(A, x) the score that system A gets
+ on test set x, and δ (x) the performance difference between A and B on x:
+
+ δ (x) = M(A, x) − M(B, x) (B.19)
+
+ We would like to know if δ (x) > 0, meaning that our logistic regression classifier
+ effect size has a higher F1 than our naive Bayes classifier on x. δ (x) is called the effect size; a
+ bigger δ means that A seems to be way better than B; a small δ means A seems to
+ be only a little better.
+ Why don’t we just check if δ (x) is positive? Suppose we do, and we find that
+ the F1 score of A is higher than B’s by .04. Can we be certain that A is better? We
+ cannot! That’s because A might just be accidentally better than B on this particular x.
+ We need something more: we want to know if A’s superiority over B is likely to hold
+ again if we checked another test set x0 , or under some other set of circumstances.
+ In the paradigm of statistical hypothesis testing, we test this by formalizing two
+ hypotheses.
+
+ H0 : δ (x) ≤ 0
+ H1 : δ (x) > 0 (B.20)
+
+null hypothesis The hypothesis H0 , called the null hypothesis, supposes that δ (x) is actually negative or zero, meaning that A is not better than B. We would like to know if we can
+ confidently rule out this hypothesis, and instead support H1 , that A is better.
+ We do this by creating a random variable X ranging over all test sets. Now we
+ ask how likely is it, if the null hypothesis H0 was correct, that among these test sets
+16 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ we would encounter the value of δ (x) that we found, if we repeated the experiment
+ p-value a great many times. We formalize this likelihood as the p-value: the probability,
+ assuming the null hypothesis H0 is true, of seeing the δ (x) that we saw or one even
+ greater
+ P(δ (X) ≥ δ (x)|H0 is true) (B.21)
+
+ So in our example, this p-value is the probability that we would see δ (x) assuming
+ A is not better than B. If δ (x) is huge (let’s say A has a very respectable F1 of .9
+ and B has a terrible F1 of only .2 on x), we might be surprised, since that would be
+ extremely unlikely to occur if H0 were in fact true, and so the p-value would be low
+ (unlikely to have such a large δ if A is in fact not better than B). But if δ (x) is very
+ small, it might be less surprising to us even if H0 were true and A is not really better
+ than B, and so the p-value would be higher.
+ A very small p-value means that the difference we observed is very unlikely
+ under the null hypothesis, and we can reject the null hypothesis. What counts as very
+ small? It is common to use values like .05 or .01 as the thresholds. A value of .01
+ means that if the p-value (the probability of observing the δ we saw assuming H0 is
+ true) is less than .01, we reject the null hypothesis and assume that A is indeed better
+ statistically
+ significant than B. We say that a result (e.g., “A is better than B”) is statistically significant if
+ the δ we saw has a probability that is below the threshold and we therefore reject
+ this null hypothesis.
+ How do we compute this probability we need for the p-value? In NLP we generally don’t use simple parametric tests like t-tests or ANOVAs that you might be
+ familiar with. Parametric tests make assumptions about the distributions of the test
+ statistic (such as normality) that don’t generally hold in our cases. So in NLP we
+ usually use non-parametric tests based on sampling: we artificially create many versions of the experimental setup. For example, if we had lots of different test sets x0
+ we could just measure all the δ (x0 ) for all the x0 . That gives us a distribution. Now
+ we set a threshold (like .01) and if we see in this distribution that 99% or more of
+ those deltas are smaller than the delta we observed, i.e., that p-value(x)—the probability of seeing a δ (x) as big as the one we saw—is less than .01, then we can reject
+ the null hypothesis and agree that δ (x) was a sufficiently surprising difference and
+ A is really a better algorithm than B.
+ There are two common non-parametric tests used in NLP: approximate ranapproximate domization (Noreen, 1989) and the bootstrap test. We will describe bootstrap
+ randomization
+ below, showing the paired version of the test, which again is most common in NLP.
+ paired Paired tests are those in which we compare two sets of observations that are aligned:
+ each observation in one set can be paired with an observation in another. This happens naturally when we are comparing the performance of two systems on the same
+ test set; we can pair the performance of system A on an individual observation xi
+ with the performance of system B on the same xi .
+
+ B.9.1 The Paired Bootstrap Test
+ bootstrap test The bootstrap test (Efron and Tibshirani, 1993) can apply to any metric; from precision, recall, or F1 to the BLEU metric used in machine translation. The word
+ bootstrapping bootstrapping refers to repeatedly drawing large numbers of samples with replacement (called bootstrap samples) from an original set. The intuition of the bootstrap
+ test is that we can create many virtual test sets from an observed test set by repeatedly sampling from it. The method only makes the assumption that the sample is
+ representative of the population.
+ B.9 • S TATISTICAL S IGNIFICANCE T ESTING 17
+
+ Consider a tiny text classification example with a test set x of 10 documents. The
+first row of Fig. B.8 shows the results of two classifiers (A and B) on this test set.
+Each document is labeled by one of the four possibilities (A and B both right, both
+wrong, A right and B wrong, A wrong and B right). A slash through a letter ( B)
+means that that classifier got the answer wrong. On the first document both A and
+B get the correct class (AB), while on the second document A got it right but B got
+it wrong (A B). If we assume for simplicity that our metric is accuracy, A has an
+accuracy of .70 and B of .50, so δ (x) is .20.
+ Now we create a large number b (perhaps 105 ) of virtual test sets x(i) , each of size
+n = 10. Fig. B.8 shows a couple of examples. To create each virtual test set x(i) , we
+repeatedly (n = 10 times) select a cell from row x with replacement. For example, to
+create the first cell of the first virtual test set x(1) , if we happened to randomly select
+the second cell of the x row, we would copy the value A B into our new cell, and
+move on to create the second cell of x(1) , each time sampling (randomly choosing)
+from the original x with replacement.
+
+ 1 2 3 4 5 6 7 8 9 10 A% B% δ ()
+x AB AB  AB AB AB
+  AB AB
+  AB AB
+  AB
+  .70 .50 .20
+x(1) AB AB AB AB AB AB
+  AB AB AB
+  AB .60 .60 .00
+x(2) AB AB AB AB AB AB AB AB
+  AB AB .60 .70 -.10
+...
+x(b)
+Figure B.8 The paired bootstrap test: Examples of b pseudo test sets x(i) being created
+from an initial true test set x. Each pseudo test set is created by sampling n = 10 times with
+replacement; thus an individual sample is a single cell, a document with its gold label and
+the correct or incorrect performance of classifiers A and B. Of course real test sets don’t have
+only 10 examples, and b needs to be large as well.
+
+ Now that we have the b test sets, providing a sampling distribution, we can do
+statistics on how often A has an accidental advantage. There are various ways to
+compute this advantage; here we follow the version laid out in Berg-Kirkpatrick
+et al. (2012). Assuming H0 (A isn’t better than B), we would expect that δ (X),
+estimated over many test sets, would be zero or negative; a much higher value would
+be surprising, since H0 specifically assumes A isn’t better than B. To measure exactly
+how surprising our observed δ (x) is, we would in other circumstances compute the
+p-value by counting over many test sets how often δ (x(i) ) exceeds the expected zero
+value by δ (x) or more:
+
+ b
+ 1 X  (i) 
+ p-value(x) = 1 δ (x ) − δ (x) ≥ 0
+ b
+ i=1
+
+(We use the notation 1(x) to mean “1 if x is true, and 0 otherwise”.) However,
+although it’s generally true that the expected value of δ (X) over many test sets,
+(again assuming A isn’t better than B) is 0, this isn’t true for the bootstrapped test
+sets we created. That’s because we didn’t draw these samples from a distribution
+with 0 mean; we happened to create them from the original test set x, which happens
+to be biased (by .20) in favor of A. So to measure how surprising is our observed
+δ (x), we actually compute the p-value by counting over many test sets how often
+18 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ δ (x(i) ) exceeds the expected value of δ (x) by δ (x) or more:
+ b
+ 1 X  (i) 
+ p-value(x) = 1 δ (x ) − δ (x) ≥ δ (x)
+ b
+ i=1
+ b
+ 1X  
+ = 1 δ (x(i) ) ≥ 2δ (x) (B.22)
+ b
+ i=1
+
+ So if for example we have 10,000 test sets x(i) and a threshold of .01, and in only 47
+ of the test sets do we find that A is accidentally better δ (x(i) ) ≥ 2δ (x), the resulting
+ p-value of .0047 is smaller than .01, indicating that the delta we found, δ (x) is indeed
+ sufficiently surprising and unlikely to have happened by accident, and we can reject
+ the null hypothesis and conclude A is better than B.
+
+ function B OOTSTRAP(test set x, num of samples b) returns p-value(x)
+
+ Calculate δ (x) # how much better does algorithm A do than B on x
+ s=0
+ for i = 1 to b do
+ for j = 1 to n do # Draw a bootstrap sample x(i) of size n
+ Select a member of x at random and add it to x(i)
+ Calculate δ (x(i) ) # how much better does algorithm A do than B on x(i)
+ s ← s + 1 if δ (x(i) ) ≥ 2δ (x)
+ p-value(x) ≈ bs # on what % of the b samples did algorithm A beat expectations?
+ return p-value(x) # if very few did, our observed δ is probably not accidental
+
+ Figure B.9 A version of the paired bootstrap algorithm after Berg-Kirkpatrick et al. (2012).
+
+ The full algorithm for the bootstrap is shown in Fig. B.9. It is given a test set x, a
+ number of samples b, and counts the percentage of the b bootstrap test sets in which
+ δ (x(i) ) > 2δ (x). This percentage then acts as a one-sided empirical p-value.
+
+B.10 Avoiding Harms in Classification
+ It is important to avoid harms that may result from classifiers, harms that exist both
+ for naive Bayes classifiers and for the other classification algorithms we introduce
+ in later chapters.
+representational One class of harms is representational harms (Crawford 2017, Blodgett et al.
+ harms
+ 2020), harms caused by a system that demeans a social group, for example by perpetuating negative stereotypes about them. For example Kiritchenko and Mohammad (2018) examined the performance of 200 sentiment analysis systems on pairs of
+ sentences that were identical except for containing either a common African American first name (like Shaniqua) or a common European American first name (like
+ Stephanie), chosen from the Caliskan et al. (2017) study discussed in Chapter 5.
+ They found that most systems assigned lower sentiment and more negative emotion
+ to sentences with African American names, reflecting and perpetuating stereotypes
+ that associate African Americans with negative emotions (Popp et al., 2003).
+ In other tasks classifiers may lead to both representational harms and other
+ harms, such as silencing. For example the important text classification task of tox-
+B.11 • S UMMARY 19
+
+ toxicity icity detection is the task of detecting hate speech, abuse, harassment, or other
+ detection
+ kinds of toxic language. While the goal of such classifiers is to help reduce societal harm, toxicity classifiers can themselves cause harms. For example, researchers
+ have shown that some widely used toxicity classifiers incorrectly flag as being toxic
+ sentences that are non-toxic but simply mention identities like women (Park et al.,
+ 2018), blind people (Hutchinson et al., 2020) or gay people (Dixon et al., 2018;
+ Dias Oliva et al., 2021), or simply use linguistic features characteristic of varieties
+ like African-American Vernacular English (Sap et al. 2019, Davidson et al. 2019).
+ Such false positive errors could lead to the silencing of discourse by or about these
+ groups.
+ These model problems can be caused by biases or other problems in the training
+ data; in general, machine learning systems replicate and even amplify the biases
+ in their training data. But these problems can also be caused by the labels (for
+ example due to biases in the human labelers), by the resources used (like lexicons,
+ or model components like pretrained embeddings), or even by model architecture
+ (like what the model is trained to optimize). While the mitigation of these biases
+ (for example by carefully considering the training data sources) is an important area
+ of research, we currently don’t have general solutions. For this reason it’s important,
+ when introducing any NLP model, to study these kinds of factors and make them
+ model card clear. One way to do this is by releasing a model card (Mitchell et al., 2019) for
+ each version of a model. A model card documents a machine learning model with
+ information like:
+ • training algorithms and parameters
+ • training data sources, motivation, and preprocessing
+ • evaluation data sources, motivation, and preprocessing
+ • intended use and users
+ • model performance across different demographic or other groups and environmental situations
+
+B.11 Summary
+ This chapter introduced the naive Bayes model for classification and applied it to
+ the text categorization task of sentiment analysis.
+ • Many language processing tasks can be viewed as tasks of classification.
+ • Text categorization, in which an entire text is assigned a class from a finite set,
+ includes such tasks as sentiment analysis, spam detection, language identification, and authorship attribution.
+ • Sentiment analysis classifies a text as reflecting the positive or negative orientation (sentiment) that a writer expresses toward some object.
+ • Naive Bayes is a generative model that makes the bag-of-words assumption
+ (position doesn’t matter) and the conditional independence assumption (words
+ are conditionally independent of each other given the class)
+ • Naive Bayes with binarized features seems to work better for many text classification tasks.
+ • Classifiers are evaluated based on precision and recall.
+ • Classifiers are trained using distinct training, dev, and test sets, including the
+ use of cross-validation in the training set.
+20 A PPENDIX B • NAIVE BAYES , T EXT C LASSIFICATION , AND S ENTIMENT
+
+ • Statistical significance tests should be used to determine whether we can be
+ confident that one version of a classifier is better than another.
+ • Designers of classifiers should carefully consider harms that may be caused
+ by the model, including its training data and other components, and report
+ model characteristics in a model card.
+
+Historical Notes
+ Multinomial naive Bayes text classification was proposed by Maron (1961) at the
+ RAND Corporation for the task of assigning subject categories to journal abstracts.
+ His model introduced most of the features of the modern form presented here, approximating the classification task with one-of categorization, and implementing
+ add-δ smoothing and information-based feature selection.
+ The conditional independence assumptions of naive Bayes and the idea of Bayesian analysis of text seems to have arisen multiple times. The same year as Maron’s
+ paper, Minsky (1961) proposed a naive Bayes classifier for vision and other artificial intelligence problems, and Bayesian techniques were also applied to the text
+ classification task of authorship attribution by Mosteller and Wallace (1963). It had
+ long been known that Alexander Hamilton, John Jay, and James Madison wrote
+ the anonymously-published Federalist papers in 1787–1788 to persuade New York
+ to ratify the United States Constitution. Yet although some of the 85 essays were
+ clearly attributable to one author or another, the authorship of 12 were in dispute
+ between Hamilton and Madison. Mosteller and Wallace (1963) trained a Bayesian
+ probabilistic model on the writing of Hamilton and another model on the writings
+ of Madison, then computed the maximum-likelihood author for each of the disputed
+ essays. Naive Bayes was first applied to spam detection in Heckerman et al. (1998).
+ Metsis et al. (2006), Pang et al. (2002), and Wang and Manning (2012) show
+ that using boolean attributes with multinomial naive Bayes works better than full
+ counts. Binary multinomial naive Bayes is sometimes confused with another variant
+ of naive Bayes that also uses a binary representation of whether a term occurs in
+ a document: Multivariate Bernoulli naive Bayes. The Bernoulli variant instead
+ estimates P(w|c) as the fraction of documents that contain a term, and includes a
+ probability for whether a term is not in a document. McCallum and Nigam (1998)
+ and Wang and Manning (2012) show that the multivariate Bernoulli variant of naive
+ Bayes doesn’t work as well as the multinomial algorithm for sentiment or other text
+ tasks.
+ There are a variety of sources covering the many kinds of text classification
+ tasks. For sentiment analysis see Pang and Lee (2008), and Liu and Zhang (2012).
+ Stamatatos (2009) surveys authorship attribute algorithms. On language identification see Jauhiainen et al. (2019); Jaech et al. (2016) is an important early neural
+ system. The task of newswire indexing was often used as a test case for text classification algorithms, based on the Reuters-21578 collection of newswire articles.
+ See Manning et al. (2008) and Aggarwal and Zhai (2012) on text classification;
+ classification in general is covered in machine learning textbooks (Hastie et al. 2001,
+ Witten and Frank 2005, Bishop 2006, Murphy 2012).
+ Non-parametric methods for computing statistical significance were used first in
+ NLP in the MUC competition (Chinchor et al., 1993), and even earlier in speech
+ recognition (Gillick and Cox 1989, Bisani and Ney 2004). Our description of the
+ bootstrap draws on the description in Berg-Kirkpatrick et al. (2012). Recent work
+ has focused on issues including multiple test sets and multiple metrics (Søgaard et al.
+ E XERCISES 21
+
+ 2014, Dror et al. 2017).
+ Feature selection is a method of removing features that are unlikely to generalize
+ well. Features are generally ranked by how informative they are about the classificainformation
+ gain tion decision. A very common metric, information gain, tells us how many bits of
+ information the presence of the word gives us for guessing the class. Other feature
+ selection metrics include χ 2 , pointwise mutual information, and GINI index; see
+ Yang and Pedersen (1997) for a comparison and Guyon and Elisseeff (2003) for an
+ introduction to feature selection.
+
+Exercises
+ B.1 Assume the following likelihoods for each word being part of a positive or
+ negative movie review, and equal prior probabilities for each class.
+ pos neg
+ I 0.09 0.16
+ always 0.07 0.06
+ like 0.29 0.06
+ foreign 0.04 0.15
+ films 0.08 0.11
+ What class will Naive bayes assign to the sentence “I always like foreign
+ films.”?
+ B.2 Given the following short movie reviews, each labeled with a genre, either
+ comedy or action:
+ 1. fun, couple, love, love comedy
+ 2. fast, furious, shoot action
+ 3. couple, fly, fast, fun, fun comedy
+ 4. furious, shoot, shoot, fun action
+ 5. fly, fast, shoot, love action
+ and a new document D:
+ fast, couple, shoot, fly
+ compute the most likely class for D. Assume a naive Bayes classifier and use
+ add-1 smoothing for the likelihoods.
+ B.3 Train two models, multinomial naive Bayes and binarized naive Bayes, both
+ with add-1 smoothing, on the following document counts for key sentiment
+ words, with positive or negative class assigned as noted.
+ doc “good” “poor” “great” (class)
+ d1. 3 0 3 pos
+ d2. 0 1 2 pos
+ d3. 1 3 0 neg
+ d4. 1 5 2 neg
+ d5. 0 2 0 neg
+ Use both naive Bayes models to assign a class (pos or neg) to this sentence:
+ A good, good plot and great characters, but poor acting.
+ Recall from page 6 that with naive Bayes text classification, we simply ignore
+ (throw out) any word that never occurred in the training document. (We don’t
+ throw out words that appear in some classes but not others; that’s what addone smoothing is for.) Do the two models agree or disagree?
+22 Appendix B • Naive Bayes, Text Classification, and Sentiment
+
+Aggarwal, C. C. and C. Zhai. 2012. A survey of text classi- Heckerman, D., E. Horvitz, M. Sahami, and S. T. Dumais.
+ fication algorithms. In C. C. Aggarwal and C. Zhai, eds, 1998. A bayesian approach to filtering junk e-mail. AAAI-
+Mining text data, 163–222. Springer. 98 Workshop on Learning for Text Categorization.
+Bayes, T. 1763. An Essay Toward Solving a Problem in the Hu, M. and B. Liu. 2004. Mining and summarizing customer
+ Doctrine of Chances, volume 53. Reprinted in Facsimiles reviews. KDD.
+ of Two Papers by Bayes, Hafner Publishing, 1963. Hutchinson, B., V. Prabhakaran, E. Denton, K. Webster,
+Berg-Kirkpatrick, T., D. Burkett, and D. Klein. 2012. An Y. Zhong, and S. Denuyl. 2020. Social biases in NLP
+ empirical investigation of statistical significance in NLP. models as barriers for persons with disabilities. ACL.
+ EMNLP. Jaech, A., G. Mulcaire, S. Hathi, M. Ostendorf, and N. A.
+Bisani, M. and H. Ney. 2004. Bootstrap estimates for confi- Smith. 2016. Hierarchical character-word models for landence intervals in ASR performance evaluation. ICASSP. guage identification. ACL Workshop on NLP for Social
+Bishop, C. M. 2006. Pattern recognition and machine learn- Media.
+ ing. Springer. Jauhiainen, T., M. Lui, M. Zampieri, T. Baldwin, and
+Blodgett, S. L., S. Barocas, H. Daumé III, and H. Wallach. K. Lindén. 2019. Automatic language identification in
+ 2020. Language (technology) is power: A critical survey texts: A survey. JAIR, 65(1):675–682.
+ of “bias” in NLP. ACL. Jurgens, D., Y. Tsvetkov, and D. Jurafsky. 2017. Incorpo-
+Blodgett, S. L., L. Green, and B. O’Connor. 2016. Demo- rating dialectal variability for socially equitable language
+ graphic dialectal variation in social media: A case study identification. ACL.
+ of African-American English. EMNLP. Kiritchenko, S. and S. M. Mohammad. 2018. Examining
+Borges, J. L. 1964. The analytical language of john wilkins. gender and race bias in two hundred sentiment analysis
+ In Other inquisitions 1937–1952. University of Texas systems. *SEM.
+ Press. Trans. Ruth L. C. Simms. Liu, B. and L. Zhang. 2012. A survey of opinion mining and
+Caliskan, A., J. J. Bryson, and A. Narayanan. 2017. Seman- sentiment analysis. In C. C. Aggarwal and C. Zhai, eds,
+ tics derived automatically from language corpora contain Mining text data, 415–464. Springer.
+ human-like biases. Science, 356(6334):183–186. Lui, M. and T. Baldwin. 2011. Cross-domain feature selec-
+Chinchor, N., L. Hirschman, and D. L. Lewis. 1993. Eval- tion for language identification. IJCNLP.
+ uating Message Understanding systems: An analysis of Lui, M. and T. Baldwin. 2012. langid.py: An off-the-shelf
+ the third Message Understanding Conference. Computa- language identification tool. ACL.
+ tional Linguistics, 19(3):409–449. Manning, C. D., P. Raghavan, and H. Schütze. 2008. Intro-
+Crawford, K. 2017. The trouble with bias. Keynote at duction to Information Retrieval. Cambridge.
+ NeurIPS. Maron, M. E. 1961. Automatic indexing: an experimental
+Davidson, T., D. Bhattacharya, and I. Weber. 2019. Racial inquiry. Journal of the ACM, 8(3):404–417.
+ bias in hate speech and abusive language detection McCallum, A. and K. Nigam. 1998. A comparison of event
+ datasets. Third Workshop on Abusive Language Online. models for naive bayes text classification. AAAI/ICML-98
+Dias Oliva, T., D. Antonialli, and A. Gomes. 2021. Fighting Workshop on Learning for Text Categorization.
+ hate speech, silencing drag queens? artificial intelligence Metsis, V., I. Androutsopoulos, and G. Paliouras. 2006.
+ in content moderation and risks to lgbtq voices online. Spam filtering with naive bayes-which naive bayes?
+ Sexuality & Culture, 25:700–732. CEAS.
+Dixon, L., J. Li, J. Sorensen, N. Thain, and L. Vasserman. Minsky, M. 1961. Steps toward artificial intelligence. Pro-
+2018. Measuring and mitigating unintended bias in text ceedings of the IRE, 49(1):8–30.
+ classification. 2018 AAAI/ACM Conference on AI, Ethics,
+ Mitchell, M., S. Wu, A. Zaldivar, P. Barnes, L. Vasserman,
+ and Society.
+ B. Hutchinson, E. Spitzer, I. D. Raji, and T. Gebru. 2019.
+Dror, R., G. Baumer, M. Bogomolov, and R. Reichart. 2017. Model cards for model reporting. ACM FAccT.
+ Replicability analysis for natural language processing:
+ Mosteller, F. and D. L. Wallace. 1963. Inference in an au-
+Testing significance with multiple datasets. TACL, 5:471–
+ thorship problem: A comparative study of discrimination
+ –486.
+ methods applied to the authorship of the disputed feder-
+Dror, R., L. Peled-Cohen, S. Shlomov, and R. Reichart. alist papers. Journal of the American Statistical Associa-
+2020. Statistical Significance Testing for Natural Lan- tion, 58(302):275–309.
+ guage Processing, volume 45 of Synthesis Lectures on
+ Mosteller, F. and D. L. Wallace. 1964. Inference and Dis-
+Human Language Technologies. Morgan & Claypool.
+ puted Authorship: The Federalist. Springer-Verlag. 1984
+Efron, B. and R. J. Tibshirani. 1993. An introduction to the 2nd edition: Applied Bayesian and Classical Inference.
+ bootstrap. CRC press. Murphy, K. P. 2012. Machine learning: A probabilistic per-
+Gillick, L. and S. J. Cox. 1989. Some statistical issues in the spective. MIT Press.
+ comparison of speech recognition algorithms. ICASSP. Noreen, E. W. 1989. Computer Intensive Methods for Testing
+Guyon, I. and A. Elisseeff. 2003. An introduction to variable Hypothesis. Wiley.
+ and feature selection. JMLR, 3:1157–1182. Pang, B. and L. Lee. 2008. Opinion mining and sentiment
+Hastie, T., R. J. Tibshirani, and J. H. Friedman. 2001. The analysis. Foundations and trends in information retrieval,
+ Elements of Statistical Learning. Springer. 2(1-2):1–135.
+ Exercises 23
+
+Pang, B., L. Lee, and S. Vaithyanathan. 2002. Thumbs
+ up? Sentiment classification using machine learning techniques. EMNLP.
+Park, J. H., J. Shin, and P. Fung. 2018. Reducing gender bias
+ in abusive language detection. EMNLP.
+Pennebaker, J. W., R. J. Booth, and M. E. Francis. 2007.
+ Linguistic Inquiry and Word Count: LIWC 2007. Austin,
+ TX.
+Popp, D., R. A. Donovan, M. Crawford, K. L. Marsh, and
+ M. Peele. 2003. Gender, race, and speech style stereotypes. Sex Roles, 48(7-8):317–325.
+Sahami, M., S. T. Dumais, D. Heckerman, and E. Horvitz.
+ 1998. A Bayesian approach to filtering junk e-mail. AAAI
+ Workshop on Learning for Text Categorization.
+Sap, M., D. Card, S. Gabriel, Y. Choi, and N. A. Smith. 2019.
+ The risk of racial bias in hate speech detection. ACL.
+Søgaard, A., A. Johannsen, B. Plank, D. Hovy, and H. M.
+ Alonso. 2014. What’s in a p-value in NLP? CoNLL.
+Stamatatos, E. 2009. A survey of modern authorship attribution methods. JASIST, 60(3):538–556.
+Stone, P., D. Dunphry, M. Smith, and D. Ogilvie. 1966.
+ The General Inquirer: A Computer Approach to Content
+ Analysis. MIT Press.
+van Rijsbergen, C. J. 1975. Information Retrieval. Butterworths.
+Wang, S. and C. D. Manning. 2012. Baselines and bigrams:
+ Simple, good sentiment and topic classification. ACL.
+Wilson, T., J. Wiebe, and P. Hoffmann. 2005. Recognizing contextual polarity in phrase-level sentiment analysis.
+ EMNLP.
+Witten, I. H. and E. Frank. 2005. Data Mining: Practical Machine Learning Tools and Techniques, 2nd edition.
+ Morgan Kaufmann.
+Yang, Y. and J. Pedersen. 1997. A comparative study on
+ feature selection in text categorization. ICML.

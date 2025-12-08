@@ -1,0 +1,1695 @@
+rights reserved. Draft of August 24, 2025.
+
+CHAPTER
+
+24 Discourse Coherence
+
+ And even in our wildest and most wandering reveries, nay in our very dreams,
+ we shall find, if we reflect, that the imagination ran not altogether at adventures, but that there was still a connection upheld among the different ideas,
+ which succeeded each other. Were the loosest and freest conversation to be
+ transcribed, there would immediately be transcribed, there would immediately
+ be observed something which connected it in all its transitions.
+ David Hume, An enquiry concerning human understanding, 1748
+
+ Orson Welles’ movie Citizen Kane was groundbreaking in many ways, perhaps most
+ notably in its structure. The story of the life of fictional media magnate Charles
+ Foster Kane, the movie does not proceed in chronological order through Kane’s
+ life. Instead, the film begins with Kane’s death (famously murmuring “Rosebud”)
+ and is structured around flashbacks to his life inserted among scenes of a reporter
+ investigating his death. The novel idea that the structure of a movie does not have
+ to linearly follow the structure of the real timeline made apparent for 20th century
+ cinematography the infinite possibilities and impact of different kinds of coherent
+ narrative structures.
+ But coherent structure is not just a fact about movies or works of art. Like
+ movies, language does not normally consist of isolated, unrelated sentences, but
+ instead of collocated, structured, coherent groups of sentences. We refer to such
+ discourse a coherent structured group of sentences as a discourse, and we use the word cocoherence herence to refer to the relationship between sentences that makes real discourses
+ different than just random assemblages of sentences. The chapter you are now reading is an example of a discourse, as is a news article, a conversation, a thread on
+ social media, a Wikipedia page, and your favorite novel.
+ What makes a discourse coherent? If you created a text by taking random sentences each from many different sources and pasted them together, would that be a
+ local coherent discourse? Almost certainly not. Real discourses exhibit both local coherglobal ence and global coherence. Let’s consider three ways in which real discourses are
+ locally coherent;
+ First, sentences or clauses in real discourses are related to nearby sentences in
+ systematic ways. Consider this example from Hobbs (1979):
+ (24.1) John took a train from Paris to Istanbul. He likes spinach.
+ This sequence is incoherent because it is unclear to a reader why the second
+ sentence follows the first; what does liking spinach have to do with train trips? In
+ fact, a reader might go to some effort to try to figure out how the discourse could be
+ coherent; perhaps there is a French spinach shortage? The very fact that hearers try
+ to identify such connections suggests that human discourse comprehension involves
+ the need to establish this kind of coherence.
+ By contrast, in the following coherent example:
+ (24.2) Jane took a train from Paris to Istanbul. She had to attend a conference.
+2 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ the second sentence gives a REASON for Jane’s action in the first sentence. Structured relationships like REASON that hold between text units are called coherence
+ coherence relations, and coherent discourses are structured by many such coherence relations.
+ relations
+ Coherence relations are introduced in Section 24.1.
+ A second way a discourse can be locally coherent is by virtue of being “about”
+ someone or something. In a coherent discourse some entities are salient, and the
+ discourse focuses on them and doesn’t go back and forth between multiple entities.
+ This is called entity-based coherence. Consider the following incoherent passage,
+ in which the salient entity seems to wildly swing from John to Jenny to the piano
+ store to the living room, back to Jenny, then the piano again:
+ (24.3) John wanted to buy a piano for his living room.
+ Jenny also wanted to buy a piano.
+ He went to the piano store.
+ It was nearby.
+ The living room was on the second floor.
+ She didn’t find anything she liked.
+ The piano he bought was hard to get up to that floor.
+ Entity-based coherence models measure this kind of coherence by tracking salient
+ Centering
+ Theory entities across a discourse. For example Centering Theory (Grosz et al., 1995), the
+ most influential theory of entity-based coherence, keeps track of which entities in
+ the discourse model are salient at any point (salient entities are more likely to be
+ pronominalized or to appear in prominent syntactic positions like subject or object).
+ In Centering Theory, transitions between sentences that maintain the same salient
+ entity are considered more coherent than ones that repeatedly shift between entities.
+ entity grid The entity grid model of coherence (Barzilay and Lapata, 2008) is a commonly
+ used model that realizes some of the intuitions of the Centering Theory framework.
+ Entity-based coherence is introduced in Section 24.3.
+ topically Finally, discourses can be locally coherent by being topically coherent: nearby
+ coherent
+ sentences are generally about the same topic and use the same or similar vocabulary to discuss these topics. Because topically coherent discourses draw from a
+ single semantic field or topic, they tend to exhibit the surface property known as
+lexical cohesion lexical cohesion (Halliday and Hasan, 1976): the sharing of identical or semantically related words in nearby sentences. For example, the fact that the words house,
+ chimney, garret, closet, and window— all of which belong to the same semantic
+ field— appear in the two sentences in (24.4), or that they share the identical word
+ shingled, is a cue that the two are tied together as a discourse:
+ (24.4) Before winter I built a chimney, and shingled the sides of my house...
+ I have thus a tight shingled and plastered house... with a garret and a
+ closet, a large window on each side....
+ In addition to the local coherence between adjacent or nearby sentences, discourses also exhibit global coherence. Many genres of text are associated with
+ particular conventional discourse structures. Academic articles might have sections
+ describing the Methodology or Results. Stories might follow conventional plotlines
+ or motifs. Persuasive essays have a particular claim they are trying to argue for,
+ and an essay might express this claim together with a structured set of premises that
+ support the argument and demolish potential counterarguments. We’ll introduce
+ versions of each of these kinds of global coherence.
+ Why do we care about the local or global coherence of a discourse? Since coherence is a property of a well-written text, coherence detection plays a part in any
+ 24.1 • C OHERENCE R ELATIONS 3
+
+ task that requires measuring the quality of a text. For example coherence can help
+ in pedagogical tasks like essay grading or essay quality measurement that are trying
+ to grade how well-written a human essay is (Somasundaran et al. 2014, Feng et al.
+ 2014, Lai and Tetreault 2018). Coherence can also help for summarization; knowing
+ the coherence relationship between sentences can help know how to select information from them. Finally, detecting incoherent text may even play a role in mental
+ health tasks like measuring symptoms of schizophrenia or other kinds of disordered
+ language (Ditman and Kuperberg 2010, Elvevåg et al. 2007, Bedi et al. 2015, Iter
+ et al. 2018).
+
+ Recall from the introduction the difference between passages (24.5) and (24.6).
+ (24.5) Jane took a train from Paris to Istanbul. She likes spinach.
+ (24.6) Jane took a train from Paris to Istanbul. She had to attend a conference.
+ The reason (24.6) is more coherent is that the reader can form a connection between the two sentences, in which the second sentence provides a potential REASON
+ for the first sentences. This link is harder to form for (24.5). These connections
+ coherence between text spans in a discourse can be specified as a set of coherence relations.
+ relation
+ The next two sections describe two commonly used models of coherence relations
+ and associated corpora: Rhetorical Structure Theory (RST), and the Penn Discourse
+ TreeBank (PDTB).
+
+ 24.1.1 Rhetorical Structure Theory
+ The most commonly used model of discourse organization is Rhetorical Structure
+ RST Theory (RST) (Mann and Thompson, 1987). In RST relations are defined between
+ nucleus two spans of text, generally a nucleus and a satellite. The nucleus is the unit that
+ satellite is more central to the writer’s purpose and that is interpretable independently; the
+ satellite is less central and generally is only interpretable with respect to the nucleus.
+ Some symmetric relations, however, hold between two nuclei.
+ Below are a few examples of RST coherence relations, with definitions adapted
+ from the RST Treebank Manual (Carlson and Marcu, 2001).
+ Reason: The nucleus is an action carried out by an animate agent and the satellite
+ is the reason for the nucleus.
+ (24.7) [NUC Jane took a train from Paris to Istanbul.] [SAT She had to attend a
+ conference.]
+
+ Elaboration: The satellite gives additional information or detail about the situation
+ presented in the nucleus.
+ (24.8) [NUC Dorothy was from Kansas.] [SAT She lived in the midst of the great
+ Kansas prairies.]
+
+ Evidence: The satellite gives additional information or detail about the situation
+ presented in the nucleus. The information is presented with the goal of convince the
+ reader to accept the information presented in the nucleus.
+ (24.9) [NUC Kevin must be here.] [SAT His car is parked outside.]
+4 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ Attribution: The satellite gives the source of attribution for an instance of reported
+ speech in the nucleus.
+ (24.10) [SAT Analysts estimated] [NUC that sales at U.S. stores declined in the
+ quarter, too]
+
+ List: In this multinuclear relation, a series of nuclei is given, without contrast or
+ explicit comparison:
+ (24.11) [NUC Billy Bones was the mate; ] [NUC Long John, he was quartermaster]
+
+ RST relations are traditionally represented graphically; the asymmetric Nucleus-
+Satellite relation is represented with an arrow from the satellite to the nucleus:
+
+ evidence
+
+ Kevin must be here. His car is parked outside
+
+ We can also talk about the coherence of a larger text by considering the hierarchical structure between coherence relations. Figure 24.1 shows the rhetorical structure of a paragraph from Marcu (2000a) for the text in (24.12) from the Scientific
+ American magazine.
+ (24.12) With its distant orbit–50 percent farther from the sun than Earth–and slim
+ atmospheric blanket, Mars experiences frigid weather conditions. Surface
+ temperatures typically average about -60 degrees Celsius (-76 degrees
+ Fahrenheit) at the equator and can dip to -123 degrees C near the poles. Only
+ the midday sun at tropical latitudes is warm enough to thaw ice on occasion,
+ but any liquid water formed in this way would evaporate almost instantly
+ because of the low atmospheric pressure.
+
+ Title 2-9
+ (1)
+ evidence
+ Mars
+
+ 2-3 4-9
+ background elaboration-additional
+
+ (2) (3) 4-5 6-9
+ WIth its Mars
+ distant orbit experiences
+ <p> -- 50 frigid weather List Contrast
+ percent conditions.
+ farther from (4) (5) 6-7 8-9
+ the sun than Surface and can dip
+ Earth -- </p> temperatures to -123 purpose explanation-argumentative
+ and slim typically average degrees C
+ atmospheric about -60 near the (6) (7) (8) (9)
+ blanket, degrees Celsius poles. Only the to thaw ice but any liquid water because of
+ <p> (-76 degrees midday sun at on occasion, formed in this way the low
+ Fahrenheit)</p> tropical latitudes would evaporate atmospheric
+ at the equator is warm enough almost instantly pressure.
+
+asymmetric relations are represented with a curved arrow from the satellite to the nucleus.
+
+ The leaves in the Fig. 24.1 tree correspond to text spans of a sentence, clause or
+ EDU phrase that are called elementary discourse units or EDUs in RST; these units can
+ also be referred to as discourse segments. Because these units may correspond to
+ arbitrary spans of text, determining the boundaries of an EDU is an important task
+ for extracting coherence relations. Roughly speaking, one can think of discourse
+ 24.1 • C OHERENCE R ELATIONS 5
+
+ segments as being analogous to constituents in sentence syntax, and indeed as we’ll
+ see in Section 24.2 we generally draw on parsing algorithms to infer discourse structure.
+ There are corpora for many discourse coherence models; the RST Discourse
+ TreeBank (Carlson et al., 2001) is the largest available discourse corpus. It consists of 385 English language documents selected from the Penn Treebank, with full
+ RST parses for each one, using a large set of 78 distinct relations, grouped into 16
+ classes. RST treebanks exist also for Spanish, German, Basque, Dutch and Brazilian
+ Portuguese (Braud et al., 2017).
+ Now that we’ve seen examples of coherence, we can see more clearly how a
+ coherence relation can play a role in summarization or information extraction. For
+ example, the nuclei of a text presumably express more important information than
+ the satellites, which might be dropped in a summary.
+
+ 24.1.2 Penn Discourse TreeBank (PDTB)
+ PDTB The Penn Discourse TreeBank (PDTB) is a second commonly used dataset that
+ embodies another model of coherence relations (Miltsakaki et al. 2004, Prasad et al.
+ 2008, Prasad et al. 2014). PDTB labeling is lexically grounded. Instead of asking
+ annotators to directly tag the coherence relation between text spans, they were given
+ discourse a list of discourse connectives, words that signal discourse relations, like because,
+connectives
+ although, when, since, or as a result. In a part of a text where these words marked a
+ coherence relation between two text spans, the connective and the spans were then
+ annotated, as in Fig. 24.13, where the phrase as a result signals a causal relationship
+ between what PDTB calls Arg1 (the first two sentences, here in italics) and Arg2
+ (the third sentence, here in bold).
+ (24.13) Jewelry displays in department stores were often cluttered and uninspired.
+ And the merchandise was, well, fake. As a result, marketers of faux gems
+ steadily lost space in department stores to more fashionable
+ rivals—cosmetics makers.
+ (24.14) In July, the Environmental Protection Agency imposed a gradual ban on
+ virtually all uses of asbestos. (implicit=as a result) By 1997, almost all
+ remaining uses of cancer-causing asbestos will be outlawed.
+ Not all coherence relations are marked by an explicit discourse connective, and
+ so the PDTB also annotates pairs of neighboring sentences with no explicit signal,
+ like (24.14). The annotator first chooses the word or phrase that could have been its
+ signal (in this case as a result), and then labels its sense. For example for the ambiguous discourse connective since annotators marked whether it is using a C AUSAL
+ or a T EMPORAL sense.
+ The final dataset contains roughly 18,000 explicit relations and 16,000 implicit
+ relations. Fig. 24.2 shows examples from each of the 4 major semantic classes, while
+ Fig. 24.3 shows the full tagset.
+ Unlike the RST Discourse Treebank, which integrates these pairwise coherence
+ relations into a global tree structure spanning an entire discourse, the PDTB does not
+ annotate anything above the span-pair level, making no commitment with respect to
+ higher-level discourse structure.
+ There are also treebanks using similar methods for other languages; (24.15)
+ shows an example from the Chinese Discourse TreeBank (Zhou and Xue, 2015).
+ Because Chinese has a smaller percentage of explicit discourse connectives than
+ English (only 22% of all discourse relations are marked with explicit connectives,
+6 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+Class Type
+ Example
+TEMPORAL The parishioners of St. Michael and All Angels stop to chat at
+ SYNCHRONOUS
+ the church door, as members here always have. (Implicit while)
+ In the tower, five men and women pull rhythmically on ropes
+ attached to the same five bells that first sounded here in 1614.
+CONTINGENCY REASON Also unlike Mr. Ruder, Mr. Breeden appears to be in a position
+ to get somewhere with his agenda. (implicit=because) As a former White House aide who worked closely with Congress,
+ he is savvy in the ways of Washington.
+COMPARISON CONTRAST The U.S. wants the removal of what it perceives as barriers to
+ investment; Japan denies there are real barriers.
+EXPANSION CONJUNCTION Not only do the actors stand outside their characters and make
+ it clear they are at odds with them, but they often literally stand
+ on their heads.
+
+Temporal Comparison
+ • Asynchronous • Contrast (Juxtaposition, Opposition)
+ • Synchronous (Precedence, Succession) •Pragmatic Contrast (Juxtaposition, Opposition)
+ • Concession (Expectation, Contra-expectation)
+ • Pragmatic Concession
+
+ Contingency Expansion
+ • Cause (Reason, Result) • Exception
+ • Pragmatic Cause (Justification) • Instantiation
+ • Condition (Hypothetical, General, Unreal • Restatement (Specification, Equivalence, Generalization)
+ Present/Past, Factual Present/Past)
+ • Pragmatic Condition (Relevance, Implicit As- • Alternative (Conjunction, Disjunction, Chosen Alternasertion) tive)
+ • List
+types have subtypes). 11 of the 16 types are commonly used for implicit ¯ argument classification; the 5 types in
+italics are too rare in implicit labeling to be used.
+
+ compared to 47% in English), annotators labeled this corpus by directly mapping
+ pairs of sentences to 11 sense tags, without starting with a lexical discourse connector.
+ (24.15) [Conn 为] [Arg2 推动图们江地区开发] ，[Arg1 韩国捐款一百万美元
+ 设立了图们江发展基金]
+ “[In order to] [Arg2 promote the development of the Tumen River region],
+ [Arg1 South Korea donated one million dollars to establish the Tumen
+ River Development Fund].”
+ These discourse treebanks have been used for shared tasks on multilingual discourse parsing (Xue et al., 2016).
+
+ Given a sequence of sentences, how can we automatically determine the coherence
+ discourse
+ parsing relations between them? This task is often called discourse parsing (even though
+ for PDTB we are only assigning labels to leaf spans and not building a full parse
+ 24.2 • D ISCOURSE S TRUCTURE PARSING 7
+
+tree as we do for RST).
+
+24.2.1 EDU segmentation for RST parsing
+RST parsing is generally done in two stages. The first stage, EDU segmentation,
+extracts the start and end of each EDU. The output of this stage would be a labeling
+like the following:
+(24.16) [Mr. Rambo says]e1 [that a 3.2-acre property]e2 [overlooking the San
+ Fernando Valley]e3 [is priced at $4 million]e4 [because the late actor Erroll
+ Flynn once lived there.]e5
+ Since EDUs roughly correspond to clauses, early models of EDU segmentation
+first ran a syntactic parser, and then post-processed the output. Modern systems
+generally use neural sequence models supervised by the gold EDU segmentation in
+datasets like the RST Discourse Treebank. Fig. 24.4 shows an example architecture
+simplified from the algorithm of Lukasik et al. (2020) that predicts for each token
+whether or not it is a break. Here the input sentence is passed through an encoder
+and then passed through a linear layer and a softmax to produce a sequence of 0s
+and 1, where 1 indicates the start of an EDU.
+
+ EDU break 0 0 0 1
+
+ softmax
+
+ linear layer
+
+ ENCODER
+ Mr. Rambo says that …
+
+24.2.2 RST parsing
+Tools for building RST coherence structure for a discourse have long been based on
+syntactic parsing algorithms like shift-reduce parsing (Marcu, 1999). Many modern
+RST parsers since Ji and Eisenstein (2014) draw on the neural syntactic parsers we
+saw in Chapter 19, using representation learning to build representations for each
+span, and training a parser to choose the correct shift and reduce actions based on
+the gold parses in the training set.
+ We’ll describe the shift-reduce parser of Yu et al. (2018). The parser state consists of a stack and a queue, and produces this structure by taking a series of actions
+on the states. Actions include:
+ • shift: pushes the first EDU in the queue onto the stack creating a single-node
+ subtree.
+ • reduce(l,d): merges the top two subtrees on the stack, where l is the coherence
+ relation label, and d is the nuclearity direction, d ∈ {NN, NS, SN}.
+As well as the pop root operation, to remove the final tree from the stack.
+ Fig. 24.6 shows the actions the parser takes to build the structure in Fig. 24.5.
+ 8 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ elab e1 : American Telephone & Telegraph Co. said it
+ e2 : will lay off 75 to 85 technicians here , effective Nov. 1.
+ e3 : The workers install , maintain and repair its private branch exchanges,
+ attr elab e4 : which are large intracompany telephone networks.
+ e1 e2 e3 e4
+
+ Figure
+Figure 24.5example
+ 1: An ExampleofRST
+ RSTdiscourse tree,tree,
+ discourse showing four{e
+ where EDUs. Figure from Yu et al. (2018).
+ 1 , e2 , e3 , e4 } are EDUs, attr and elab are
+discourse relation labels, and arrows indicate the nuclearities of discourse relations.
+ Step Stack Queue Action Relation
+
+RST discourse parsing. Other 1 studies? still adopt e1 , ediscrete
+ 2 , e3 , e4
+ syntax features SH proposed by statistical ? models,
+ 2 e1 e2 , e3 , e4 SH ?
+feeding them into neural 3network emodels (Braud et al., 2016; Braud et al., 2017).
+ 1 , e2 e3 , e4 RD(attr,SN) ?
+ The above approaches 4model syntax e1:2 trees in ane3explicit , e4 way, requiring SH discrete syntaxed parsing outputs
+ 1 e2
+as inputs for RST parsing.5 These eapproaches 1:2 , e 3 may suffer
+ e 4 from the error SH propagation problem.ed 1 e2 Syntax trees
+produced by a supervised6 syntax , e3 , e4model could
+ e1:2parsing ? have errors, RD(elab,NS)which may propagate ed 1 einto
+ 2 discourse
+parsing models. The problem 7 e1:2 be
+ could , 3:4extremely serious ? when RD(elab,SN)
+ inputs of discourse parsing ed1 e2 , ed 3 e4 different
+ have
+distributions with the training 8 data eof1:4the supervised ? syntax parser. Recently, PR Zhang ed1 e2et
+ , ed , e\
+ 3 e4(2017)
+ al. 1:2 e3:4
+ suggest
+an alternative method, which extracts syntax features from a Bi-Affine dependency parser (Dozat and
+Manning, 2016), Table
+ and 1: An
+ the(2018). example
+ method givesofcompetitive
+ the transition-based
+ performancessystem on relationfor RST discourse
+ extraction. parsing.
+ It actually
+ et al.
+represents syntax trees implicitly, thus it can reduce the error propagation problem.
+ In this work, we investigate
+ The Yu the implicit
+ et al. (2018)syntaxuses anfeature extraction approach
+ encoder-decoder architecture, for RST
+ whereparsing.
+ the encoder In ad-
+The initial
+dition, state ais
+ we propose an empty
+ represents
+ transition-based state,
+ the input andmodel
+ span
+ neural ofthe final
+ words forand state
+ this EDUs represents
+ task, a full
+ using aishierarchical
+ which able to result. biLSTM.
+ incorporate There Theare three kinds of
+ various
+ actionsflexibly.
+features in our transition
+ Wefirst
+ exploitbiLSTM system:layer represents
+ hierarchical bi-directionalthe words LSTMs inside an EDU, and
+ (Bi-LSTMs) the second
+ to encode texts,represents
+ and further
+ the EDU sequence. Given an input
+enhance the transition-based model with dynamic oracle. Based 1on 2the proposed sentence w , w , ..., w m , the words
+ model, canwebestudy
+ repre-the
+ • Shift (SH),
+effectiveness sented
+ of our which
+ proposed as usual (by
+ implicit the
+ removes static embeddings,
+ firstfeatures.
+ syntax EDU inWe combinations
+ theconduct
+ queueexperiments with
+ onto e stack,character embeddings
+ formingRST
+ on a standard or
+ a ingle-node
+ dis- subtree.
+course TreeBank (Carlsontags, or etcontextual
+ al., 2003). embeddings)
+ First, we resulting
+ evaluate thein an input
+ performance word of representation
+ our proposed sequence
+ transition-
+ • Reduce (RD) xw1 ,(l,d),
+ w , ...,which
+ xthat Themerges
+ xwm .model result of the
+ the top two subtrees
+ word-level biLSTM onthen
+ is thea stack,
+ sequence where is a discourse relation
+ of hw lvalues:
+based baseline, finding 2 the is able to achieve strong performances after applying dynamic
+ label, and d 2 {NN, NS,
+oracle. Then we evaluate the effectiveness SN} indicates the relation nuclearity (nuclear (N) or satellite
+ depen- (S)).
+ hw1 of
+ , hw2implicit
+ , ..., hwm syntax
+ = biLSTM(x featuresw1 extracted
+ , w2 , ..., xwmfrom
+ ) a Bi-Affine (24.17)
+dency• Pop
+ parser.Root (PR),
+ Results showwhich that thepops
+ implicit outsyntax
+ the top tree on
+ features the stack,
+ are effective, marking
+ giving better the decodingthan
+ performances being completed,
+ An EDU of span ws , ws+1 , ..., wt then has biLSTM output representation hws , hws+1 , ..., htw ,
+explicitwhen
+ Tree-LSTM
+ the stack(Li et
+ holdsal., 2015b).
+ only one Our codes will
+ subtreepooling: be released
+ and the queue is empty. for public under the Apache License
+ and is represented by average
+ InGiven
+ summary,
+ the weRSTmainly
+ tree makeas shown the following
+ in Figure two1, contributions
+ e it can 1 be X int this
+ generated work:by (1)thewe following
+ propose a transition-action sequence: {SH,
+based neural RST discourse parsing model with x
+ dynamic= oracle, (2) hwew
+ k compare three different syntactic (24.18)
+ SH, RD(attr,SN), SH, SH, RD(elab,NS), RD(elab,SN), t − s + 1 PR}. Table 1 shows the decoding
+integration approaches proposed by us. The rest of the paper is organized k=s
+ as follows. Section 2 describes
+ process in detail.
+our proposed modelsThe
+ By this
+ including
+ way,
+ second layer we naturally
+ uses this input toneural
+ the transition-based
+ convert
+ compute RST discourse
+ a final
+ model, therepresentation
+ parsing
+ dynamic oracle of the intosequence
+ strategy
+ predicting
+ andofthe
+ a sequence of
+ transition
+implicit actions,
+ syntax EDU
+ feature where eachapproach.
+ representations
+ extraction line includes
+ h : Sectiona 3state
+ e
+ presentsand thenext step action
+ experiments referringourtomodels.
+ to evaluate the tree.
+Section 4 shows the related work. Finally,hsection , h , ...,5hdraws
+ e e e conclusions.
+ = biLSTM(x , x , ..., xe )
+ e e
+ (24.19)
+
+2Previous
+ Transition-based
+ The Discourse
+ RSTParsing
+ decoder is then
+ transition-based a feedforward network W that outputs an action o based on a
+ discourse parsing studies exploit statistical models, using manuallyconcatenation of the top three subtrees on the stack (so , s1 , s2 ) plus the first EDU in
+ designed
+We follow Jidiscrete features
+ and Eisenstein
+ the (q(Sagae,
+ queue(2014),0 ):
+ 2009;aHeilman
+ exploiting and Sagae,
+ transition-based framework2015; forWang et al., 2017).
+ RST discourse parsing.In this work, we
+The framework
+ propose is conceptually simple
+ a transition-based neuraland flexible
+ model fortoRST
+ support arbitraryparsing,
+ discourse features, which
+ which has been widely
+ follows an encoder-decoder
+ o =DyerW(h t , ht , ht , he ) (24.20) a
+used in a number
+ framework. of NLP
+ Given tasks (Zhu
+ an input sequenceet al., of
+ 2013;
+ EDUs {eet1s0al., 2015;
+ , ...,s2enZhang
+ , e2s1 q0 theetencoder
+ }, al., 2016). In addition,
+ computes the input representransition-based model formalizes a certain task into predicting a sequence e of actions, which is essential
+ tations {h1 , h2 , ...,
+ e e e
+ hn },
+ where theand the decoder
+ representation of predicts
+ the EDU next on thestepqueue actions
+ h comes conditioned
+ directly on
+ fromthetheencoder outputs.
+similar to sequence-to-sequence models proposed recently (Bahdanau et q0 al., 2014). In the following,
+we first describe encoder, and the three hidden vectors representing partial trees
+ the transition system for RST discourse parsing, and then introduce our neural network are computed by
+ 2.2.1 Encoder average pooling over the encoder output for the EDUs in those trees:
+model by its encoder and decoder parts, respectively. Thirdly, we present our proposed dynamic oracle
+ We follow
+strategy Li toet enhance
+ aiming al. (2016), using hierarchical
+ the transition-based model.Bi-LSTMs
+ Then j to encode the the source method
+ EDU inputs, where the
+ t 1 weX introduce integration of
+ first-layer is used to represent sequencial
+implicit syntax features. Finally we describe the training words inside
+ hs = method of our of EDUs, and the second layer
+ hkneural network models.(24.21)
+ e is used to represent
+ j−i+1
+ sequencial EDUs. Given an input sentence {w1 , w2 , ...,k=i wm }, first we represent each word by its form
+ (e.g., wi ) and POS tag (e.g. ti ), concatenating their neural embeddings. By this way, the input vectors
+The transition-based
+ of the framework converts
+ first-layer Bi-LSTM are {xw a structural learning problem
+ w into a sequence ofemb(t
+ action predic-
+1 , x2 , ..., xm }, where xi = emb(wi ) i ), and then we apply
+ w w
+tions, whose key point is a transition system. A transition system consists of two parts: states and actions.
+ Bi-LSTM directly, obtaining:
+The states are used to store partially-parsed results and the actions are used to control state transitions.
+ w w w w w w
+ 24.2 • D ISCOURSE S TRUCTURE PARSING 9
+
+ Training first maps each RST gold parse tree into a sequence of oracle actions, and
+ then uses the standard cross-entropy loss (with l2 regularization) to train the system
+ to take such actions. Give a state S and oracle action a, we first compute the decoder
+ output using Eq. 24.20, apply a softmax to get probabilities:
+
+ exp(oa )
+ pa = P (24.22)
+ exp(oa0 )
+ a0 ∈A
+
+ and then computing the cross-entropy loss:
+
+ λ
+ LCE () = − log(pa ) + ||Θ||2 (24.23)
+ RST discourse parsers are evaluated on the test section of the RST Discourse Treebank, either with gold EDUs or end-to-end, using the RST-Pareval metrics (Marcu,
+ 2000b). It is standard to first transform the gold RST trees into right-branching binary trees, and to report four metrics: trees with no labels (S for Span), labeled
+ with nuclei (N), with relations (R), or both (F for Full), for each metric computing
+ micro-averaged F1 over all spans from all documents (Marcu 2000b, Morey et al.
+ 2017).
+
+ 24.2.3 PDTB discourse parsing
+ shallow
+ PDTB discourse parsing, the task of detecting PDTB coherence relations between
+discourse spans, is sometimes called shallow discourse parsing because the task just involves
+ parsing
+ flat relationships between text spans, rather than the full trees of RST parsing.
+ The set of four subtasks for PDTB discourse parsing was laid out by Lin et al.
+ (2014) in the first complete system, with separate tasks for explicit (tasks 1-3) and
+ implicit (task 4) connectives:
+ 1. Find the discourse connectives (disambiguating them from non-discourse uses)
+ 2. Find the two spans for each connective
+ 3. Label the relationship between these spans
+ 4. Assign a relation between every adjacent pair of sentences
+ Many systems have been proposed for Task 4: taking a pair of adjacent sentences
+ as input and assign a coherence relation sense label as output. The setup often follows Lin et al. (2009) in assuming gold sentence span boundaries and assigning each
+ adjacent span one of the 11 second-level PDTB tags or none (removing the 5 very
+ rare tags of the 16 shown in italics in Fig. 24.3).
+ A simple but very strong algorithm for Task 4 is to represent each of the two
+ spans by BERT embeddings and take the last layer hidden state corresponding to
+ the position of the [CLS] token, pass this through a single layer tanh feedforward
+ network and then a softmax for sense classification (Nie et al., 2019).
+ Each of the other tasks also have been addressed. Task 1 is to disambiguating discourse connectives from their non-discourse use. For example as Pitler and
+ Nenkova (2009) point out, the word and is a discourse connective linking the two
+ clauses by an elaboration/expansion relation in (24.24) while it’s a non-discourse
+ NP conjunction in (24.25):
+ (24.24) Selling picked up as previous buyers bailed out of their positions and
+ aggressive short sellers—anticipating further declines—moved in.
+ (24.25) My favorite colors are blue and green.
+10 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ Similarly, once is a discourse connective indicating a temporal relation in (24.26),
+ but simply a non-discourse adverb meaning ‘formerly’ and modifying used in (24.27):
+ (24.26) The asbestos fiber, crocidolite, is unusually resilient once it enters the
+ lungs, with even brief exposures to it causing symptoms that show up
+ decades later, researchers said.
+ (24.27) A form of asbestos once used to make Kent cigarette filters has caused a
+ high percentage of cancer deaths among a group of workers exposed to it
+ more than 30 years ago, researchers reported.
+ Determining whether a word is a discourse connective is thus a special case
+ of word sense disambiguation. Early work on disambiguation showed that the 4
+ PDTB high-level sense classes could be disambiguated with high (94%) accuracy
+ used syntactic features from gold parse trees (Pitler and Nenkova, 2009). Recent
+ work performs the task end-to-end from word inputs using a biLSTM-CRF with
+ BIO outputs (B - CONN, I - CONN, O) (Yu et al., 2019).
+ For task 2, PDTB spans can be identified with the same sequence models used to
+ find RST EDUs: a biLSTM sequence model with pretrained contextual embedding
+ (BERT) inputs (Muller et al., 2019). Simple heuristics also do pretty well as a baseline at finding spans, since 93% of relations are either completely within a single
+ sentence or span two adjacent sentences, with one argument in each sentence (Biran
+ and McKeown, 2015).
+
+ A second way a discourse can be coherent is by virtue of being “about” some entity.
+ This idea that at each point in the discourse some entity is salient, and a discourse
+ is coherent by continuing to discuss the same entity, appears early in functional linguistics and the psychology of discourse (Chafe 1976, Kintsch and Van Dijk 1978),
+ and soon made its way to computational models. In this section we introduce two
+ entity-based models of this kind of entity-based coherence: Centering Theory (Grosz et al.,
+ 1995), and the entity grid model of Barzilay and Lapata (2008).
+
+ 24.3.1 Centering
+ Centering
+ Theory Centering Theory (Grosz et al., 1995) is a theory of both discourse salience and
+ discourse coherence. As a model of discourse salience, Centering proposes that at
+ any given point in the discourse one of the entities in the discourse model is salient:
+ it is being “centered” on. As a model of discourse coherence, Centering proposes
+ that discourses in which adjacent sentences CONTINUE to maintain the same salient
+ entity are more coherent than those which SHIFT back and forth between multiple
+ entities (we will see that CONTINUE and SHIFT are technical terms in the theory).
+ The following two texts from Grosz et al. (1995) which have exactly the same
+ propositional content but different saliences, can help in understanding the main
+ Centering intuition.
+ (24.28) a. John went to his favorite music store to buy a piano.
+ b. He had frequented the store for many years.
+ c. He was excited that he could finally buy a piano.
+ d. He arrived just as the store was closing for the day.
+ 24.3 • C ENTERING AND E NTITY-BASED C OHERENCE 11
+
+ (24.29) a. John went to his favorite music store to buy a piano.
+ b. It was a store John had frequented for many years.
+ c. He was excited that he could finally buy a piano.
+ d. It was closing just as John arrived.
+ While these two texts differ only in how the two entities (John and the store) are
+ realized in the sentences, the discourse in (24.28) is intuitively more coherent than
+ the one in (24.29). As Grosz et al. (1995) point out, this is because the discourse
+ in (24.28) is clearly about one individual, John, describing his actions and feelings.
+ The discourse in (24.29), by contrast, focuses first on John, then the store, then back
+ to John, then to the store again. It lacks the “aboutness” of the first discourse.
+ Centering Theory realizes this intuition by maintaining two representations for
+ backwardlooking each utterance Un . The backward-looking center of Un , denoted as Cb (Un ), repcenter
+ resents the current salient entity, the one being focused on in the discourse after Un
+forward-looking
+ center
+ is interpreted. The forward-looking centers of Un , denoted as C f (Un ), are a set
+ of potential future salient entities, the discourse entities evoked by Un any of which
+ could serve as Cb (the salient entity) of the following utterance, i.e. Cb (Un+1 ).
+ The set of forward-looking centers C f (Un ) are ranked according to factors like
+ discourse salience and grammatical role (for example subjects are higher ranked
+ than objects, which are higher ranked than all other grammatical roles). We call the
+ highest-ranked forward-looking center C p (for “preferred center”). C p is a kind of
+ prediction about what entity will be talked about next. Sometimes the next utterance
+ indeed talks about this entity, but sometimes another entity becomes salient instead.
+ We’ll use here the algorithm for centering presented in Brennan et al. (1987),
+ which defines four intersentential relationships between a pair of utterances Un and
+ Un+1 that depend on the relationship between Cb (Un+1 ), Cb (Un ), and C p (Un+1 );
+ these are shown in Fig. 24.7.
+
+ Cb (Un+1 ) = Cb (Un ) Cb (Un+1 ) 6= Cb (Un )
+ or undefined Cb (Un )
+ Cb (Un+1 ) = C p (Un+1 ) Continue Smooth-Shift
+ Cb (Un+1 ) 6= C p (Un+1 ) Retain Rough-Shift
+
+ The following rules are used by the algorithm:
+
+ Rule 1: If any element of C f (Un ) is realized by a pronoun in utterance
+ Un+1 , then Cb (Un+1 ) must be realized as a pronoun also.
+ Rule 2: Transition states are ordered. Continue is preferred to Retain is
+ preferred to Smooth-Shift is preferred to Rough-Shift.
+
+ Rule 1 captures the intuition that pronominalization (including zero-anaphora)
+ is a common way to mark discourse salience. If there are multiple pronouns in an
+ utterance realizing entities from the previous utterance, one of these pronouns must
+ realize the backward center Cb ; if there is only one pronoun, it must be Cb .
+ Rule 2 captures the intuition that discourses that continue to center the same entity are more coherent than ones that repeatedly shift to other centers. The transition
+ table is based on two factors: whether the backward-looking center Cb is the same
+ from Un to Un+1 and whether this discourse entity is the one that is preferred (C p )
+ in the new utterance Un+1 . If both of these hold, a CONTINUE relation, the speaker
+ has been talking about the same entity and is going to continue talking about that
+12 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ entity. In a RETAIN relation, the speaker intends to SHIFT to a new entity in a future
+ utterance and meanwhile places the current entity in a lower rank C f . In a SHIFT
+ relation, the speaker is shifting to a new salient entity.
+ Let’s walk though the start of (24.28) again, repeated as (24.30), showing the
+ representations after each utterance is processed.
+ (24.30) John went to his favorite music store to buy a piano. (U1 )
+ He was excited that he could finally buy a piano. (U2 )
+ He arrived just as the store was closing for the day. (U3 )
+ It was closing just as John arrived (U4 )
+ Using the grammatical role hierarchy to order the C f , for sentence U1 we get:
+ C f (U1 ): {John, music store, piano}
+ C p (U1 ): John
+ Cb (U1 ): undefined
+ and then for sentence U2 :
+ C f (U2 ): {John, piano}
+ C p (U2 ): John
+ Cb (U2 ): John
+ Result: Continue (C p (U2 )=Cb (U2 ); Cb (U1 ) undefined)
+ The transition from U1 to U2 is thus a CONTINUE. Completing this example is left
+ as exercise (1) for the reader
+
+ 24.3.2 Entity Grid model
+ Centering embodies a particular theory of how entity mentioning leads to coherence: that salient entities appear in subject position or are pronominalized, and that
+ discourses are salient by means of continuing to mention the same entity in such
+ ways.
+ entity grid The entity grid model of Barzilay and Lapata (2008) is an alternative way to
+ capture entity-based coherence: instead of having a top-down theory, the entity-grid
+ model using machine learning to induce the patterns of entity mentioning that make
+ a discourse more coherent.
+ The model is based around an entity grid, a two-dimensional array that represents the distribution of entity mentions across sentences. The rows represent sentences, and the columns represent discourse entities (most versions of the entity grid
+ model focus just on nominal mentions). Each cell represents the possible appearance
+ of an entity in a sentence, and the values represent whether the entity appears and its
+ grammatical role. Grammatical roles are subject (S), object (O), neither (X), or absent (–); in the implementation of Barzilay and Lapata (2008), subjects of passives
+ are represented with O, leading to a representation with some of the characteristics
+ of thematic roles.
+ Fig. 24.8 from Barzilay and Lapata (2008) shows a grid for the text shown in
+ Fig. 24.9. There is one row for each of the six sentences. The second column, for
+ the entity ‘trial’, is O – – – X, showing that the trial appears in the first sentence as
+ direct object, in the last sentence as an oblique, and does not appear in the middle
+ sentences. The third column, for the entity Microsoft, shows that it appears as subject in sentence 1 (it also appears as the object of the preposition against, but entities
+ that appear multiple times are recorded with their highest-ranked grammatical function). Computing the entity grids requires extracting entities and doing coreference
+ present in sentences 1 and 6 (as O and X, respectively) but is absent from the rest of the
+ sentences. Also note that the grid in Table 1 takes coreference resolution into account.
+ Even though the same entity appears in different linguistic forms, for example, Microsoft
+ Corp., Microsoft, and the company , it is mapped to a single entry in the grid (see the
+ column introduced by Microsoft in Table 1).
+ Computational Linguistics Volume 34, Number 1
+
+ a feature space with
+ 24.3transitions
+ • C
+ Table
+ of length two is illustrated in Table 3. The second13row
+ 1 ENTERING AND E NTITY-BASED C OHERENCE
+ (introduced by d1 ) is the
+ A feature
+ fragment vector representation
+ of the entity of thearegrid
+ grid. Noun phrases in Table
+ represented by1.
+ their head nouns. Grid cells
+ correspond to grammatical roles: subjects (S), objects (O), or neither (X).
+
+ Government
+ Competitors
+ Department
+
+ Microsoft
+
+ Netscape
+ Evidence
+
+ Earnings
+ Products
+
+ Software
+ Markets
+
+ Brands
+
+ Tactics
+ Case
+ Trial
+
+ Suit
+ One of the central research issues in developing entity-based models of coherence is
+ determining what sources 1 S ofO linguistic
+ S X O – –knowledge
+ – – – – – are – –essential
+ – 1 for accurate prediction,
+ and how to encode them 2 succinctly
+ – – O – – in X a – – – 2
+ O – – – – representation.
+ S discourse Previous approaches
+ 3 – – S O – – – – S O O – – – – 3
+ tend to agree on the 4features – – S of – –entity
+ – – – distribution
+ – – – S – – related
+ – 4 to local coherence—the
+ disagreement
+ Barzilay lies in the5 way
+ and Lapata – – these
+ – – –features
+ – – – –are – modeled.
+ – – S O – 5 Modeling Local Coherence
+ Our study of alternative 6 – X S encodings
+ – – – – – is – –not – O 6duplication of previous ef-
+ – –a –mere
+ forts (Poesio
+Figure 24.8 Part et al.
+ of2004) that grid
+ the entity focusforonthe
+ linguistic aspects
+ text in Fig. 24.9. of parameterization.
+ Entities Because
+ are listed by their head we
+ are interested in an automatically
+noun; each cell represents whether constructed model, we have to take into account
+ an entity appears as subject (S), object (O), neither (X), or computational and learning issues when
+is absent (–). Figure from Barzilay and Lapata (2008).
+ Table 2 considering alternative representations. Therefore,
+ our exploration
+ Summary augmented of thewithparameter space is guided
+ syntactic annotations bycomputation.
+ for grid three considerations: the linguistic
+ importance of a parameter, the accuracy of its automatic computation, and the size of the
+ 1resulting
+ [The Justice Department]
+ feature space. From S is conducting an [anti-trust trial] O against [Microsoft Corp.] X
+ the linguistic side, we focus on properties of entity distriwith [evidence]X that [the company]S is increasingly attempting to crush [competitors]O .
+ bution that are tightly linked
+ 2 [Microsoft]O is accused of trying to to
+ local coherence,
+ forcefully and[markets]
+ buy into at the same time allow for multiple
+ X where [its own
+ interpretations
+ products]S are notduring the encoding
+ competitive enoughprocess.
+ to unseatComputational considerations
+ [established brands] O.
+ prevent us
+ 3from
+ [Theconsidering
+ case]S revolves discourse representations
+ around [evidence] that cannot
+ O of [Microsoft] be computed
+ S aggressively reliably by existpressuring
+ [Netscape]
+ ing tools. For O into merging
+ instance, we[browser
+ could not software] O.
+ experiment with the granularity of an utterance—
+ 4sentence
+ [Microsoft] S claims [its tactics] S are commonplace and good economically.
+ versus clause—because available clause separators introduce substantial noise
+ 5 [The government]S may file [a civil suit]O ruling that [conspiracy]S to curb [competition]O
+ into a grid[collusion]
+ through construction. Finally, we exclude representations that will explode the size of
+ X is [a violation of the Sherman Act] O .
+ 6the feature space,
+ [Microsoft] S
+ thereby
+ continues to increasing
+ show the earnings]
+ [increased amount Oofdespite
+ data required
+ [the trial]for
+ X.
+ training the model.
+
+Figure
+ Entity24.9 A discourse
+ Ex traction. with thecomputation
+ The accurate entities marked and annotated
+ of entity classes iswithkey grammatical
+ to computing funcmean-
+tions.
+ ingfulFigure
+ When entity from
+ a noun Barzilay
+ grids. is and Lapata
+ Inattested
+ previous more (2008).
+ than once with
+ implementations a different grammatical
+ of entity-based models, classes roleof in the
+ corefsame
+ erent sentence,
+ nouns have we default
+ been extractedto the role with the (Miltsakaki
+ manually highest grammatical
+ and Kukich ranking:
+ 2000; subjects
+ Karamanis are
+ ranked
+resolution
+ et al. 2004;higher
+ to clusterthan
+ Poesio them objects,
+ et al. into which
+ 2004), in
+ discourse turn are
+ but thisentities ranked
+ is not (Chapter higher
+ an option23) than
+ forasour the
+ well rest. For
+ as parsing
+ model. example,
+ the
+ An obvious
+ the entityto
+ solution
+sentences forMicrosoft
+ identifying
+ get is mentioned
+ grammatical entity twiceisintoSentence
+ classes
+ roles. employ an 1 with the grammatical
+ automatic coreferenceroles x (for
+ resolution
+ Microsoft
+ tool that Corp.) and s
+ determines (for the
+ which noun company
+ phrases ), but
+ refer istorepresented
+ the same only in
+ entity bya sdocument.
+ in the grid (see
+ In the1 and
+ Tables
+ resulting grid, columns that are dense (like the column for Microsoft) in-
+Current 2). approaches recast coreference resolution as a classification task. A pair
+dicate entities that are mentioned often in the texts; sparse columns (like the column
+ of NPs is classified as coreferring or not based on constraints that are learned from
+foranearnings)
+ annotated indicate
+ corpus. entities
+ A separate that are mentioned rarely.
+ In the entity pairwise
+ contradictory grid model, coherence is
+ classifications andmeasured
+ constructs by apatterns
+ partition of local
+ on theentity
+ set oftran-NPs. In
+sition. For example, Department Ng is
+ and a subject
+ Cardie’s in sentence
+ (2002)
+ A fundamental assumption underlying our approach is that the distribution of system.
+ our experiments, we employ 1,
+ coreference and then not
+ resolution menentities
+tioned
+ The
+ in in sentence
+ system
+ coherent decides
+ texts 2; this
+ whether
+ exhibits thetwo
+ iscertain –].
+ NPs are[ Scoreferent
+ transition
+ regularities The transitions
+ reflected by
+ in exploiting are athus
+ grid topology. sequences
+ wealth
+ Some ofoflexical,
+ these
+ grammatical,
+ , O X , –}n which
+{Sregularities aresemantic,
+ can be
+ formalized and positional
+ extracted
+ in as features.
+ Centering continuous
+ Theory It is trained
+ ascells on the
+ from
+ constraints each MUC
+ on (6–7) data
+ column.
+ transitions Eachof sets
+ the
+ and yields
+transition
+ local focus hasstate-of-the-art
+ ina adjacent
+ probability; performance
+ sentences. Grids (70.4
+ the probability of of F-measure
+ [ S –] intexts
+ coherent fromand
+ MUC-6
+ theongrid
+ are likely Fig.
+ to 63.4
+ 24.8
+ have onisMUC-7).
+ some 0.08dense
+(itcolumns
+ occurs 6(i.e., times columns
+ out of the with 75just
+ totala transitions
+ few gaps, such as Microsoft
+ of length two). Fig. in 24.10
+ Table shows
+ 1) and the many
+distribution over transitions of length 2 for the text of Fig. 24.9 (shown as the first 1).
+ sparse columns which will consist mostly of gaps (see markets and earnings in Table
+ One
+row d1would
+ Table ),3 and 2further expect that entities corresponding to dense columns are more often
+ other documents.
+ subjects
+ Example or of aobjects. These characteristics
+ feature-vector document representationwill be less pronounced
+ using all transitionsin low-coherence
+ of length two given texts.
+ syntactic
+ Inspiredcategories S , O , X , and
+ by Centering –.
+ Theory, our analysis revolves around patterns of local entity
+ transitions. A local entity transition is a sequence {S, O, X, –}n that represents entity
+ SS SO SX S– OS OO OX O– XS XO XX X– –S –O –X ––
+ occurrences and their syntactic roles in n adjacent sentences. Local transitions can be
+ d1 .01
+ easily .01 0 from.08
+ obtained a grid .01as0continuous
+ 0 .09subsequences
+ 0 0 0 of each
+ .03 column.
+ .05 .07 Each .03 transition
+ .59
+ d2 have
+ will .02 .01 .01 .02
+ a certain 0
+ probability .07 in0 a given
+ .02 grid.
+ .14 For .14 instance,
+ .06 .04 .03 .07 0.1 .36of the
+ the probability
+ d3 .02 0 0 .03 .09 0 .09 .06 0 0 0 .05 .03 .07 .17 .39
+ transition [ S –] in the grid from Table 1 is 0.08 (computed as a ratio of its frequency
+ [i.e., six]
+Figure 24.10 divided by the
+ A feature totalfor
+ vector number of transitions
+ representing documentsofusing length all two [i.e., 75]).
+ transitions Each2.text
+ of length
+ can thusdbe
+Document 1 isviewed
+ the textas inaFig.
+ distribution
+ 24.9. Figure defined over transition
+ from Barzilay and Lapatatypes.(2008).
+ We can now go one step further and represent each text by a fixed set of transition
+ sequences using a standard feature vector notation. Each grid rendering j of a document
+ The transitions and their probabilities can then be used as features for a machine
+ di corresponds to a feature vector Φ(x ij ) = (p1 (x ij ), p2 (x ij ), . . . , pm (x ij )), where m is the
+learning model. This model can be a text classifier trained to produce human-labeled
+ number of all predefined entity transitions, and pt (x ij ) the probability of transition t
+coherence
+ in grid x ijscores (for example
+ . This feature vector from humans labeling
+ representation is usefully each text as coherent
+ amenable to machine or learning
+ incoherent).
+ algorithms But such (see data is expensive in
+ our experiments to gather.
+ SectionsBarzilay and Lapata (2005)
+ 4–6). Furthermore, it allows introduced
+ the consida eration
+ simplifying of large innovation:
+ numbers of coherence
+ transitions models
+ whichcan couldbe potentially
+ trained by uncoverself-supervision:
+ novel entity
+ distribution
+trained patterns relevant
+ to distinguish the natural for coherence
+ original order assessment or other in
+ of sentences coherence-related
+ a discourse from tasks.
+ Note that considerable latitude is available when specifying the transition types to
+ be included in a feature vector. These can be all transitions of a given length (e.g., two
+ or three) or the most frequent transitions within a document collection. An example of
+
+14 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ a modified order (such as a randomized order). We turn to these evaluations in the
+ next section.
+
+ 24.3.3 Evaluating Neural and Entity-based coherence
+ Entity-based coherence models, as well as the neural models we introduce in the
+ next section, are generally evaluated in one of two ways.
+ First, we can have humans rate the coherence of a document and train a classifier
+ to predict these human ratings, which can be categorial (high/low, or high/mid/low)
+ or continuous. This is the best evaluation to use if we have some end task in mind,
+ like essay grading, where human raters are the correct definition of the final label.
+ Alternatively, since it’s very expensive to get human labels, and we might not
+ yet have an end-task in mind, we can use natural texts to do self-supervision. In
+ self-supervision we pair up a natural discourse with a pseudo-document created by
+ changing the ordering. Since naturally-ordered discourses are more coherent than
+ random permutation (Lin et al., 2011), a successful coherence algorithm should prefer the original ordering.
+ Self-supervision has been implemented in 3 ways. In the sentence order discrimination task (Barzilay and Lapata, 2005), we compare a document to a random
+ permutation of its sentences. A model is considered correct for an (original, permuted) test pair if it ranks the original document higher. Given k documents, we can
+ compute n permutations, resulting in kn pairs each with one original document and
+ one permutation, to use in training and testing.
+ In the sentence insertion task (Chen et al., 2007) we take a document, remove
+ one of the n sentences s, and create n − 1 copies of the document with s inserted into
+ each position. The task is to decide which of the n documents is the one with the
+ original ordering, distinguishing the original position for s from all other positions.
+ Insertion is harder than discrimination since we are comparing documents that differ
+ by only one sentence.
+ Finally, in the sentence order reconstruction task (Lapata, 2003), we take a
+ document, randomize the sentences, and train the model to put them back in the
+ correct order. Again given k documents, we can compute n permutations, resulting
+ in kn pairs each with one original document and one permutation, to use in training
+ and testing. Reordering is of course a much harder task than simple classification.
+
+ The third kind of local coherence is topical or semantic field coherence. Discourses
+ cohere by talking about the same topics and subtopics, and drawing on the same
+ semantic fields in doing so.
+ The field was pioneered by a series of unsupervised models in the 1990s of this
+lexical cohesion kind of coherence that made use of lexical cohesion (Halliday and Hasan, 1976):
+ the sharing of identical or semantically related words in nearby sentences. Morris
+ and Hirst (1991) computed lexical chains of words (like pine, bush trees, trunk) that
+ occurred through a discourse and that were related in Roget’s Thesaurus (by being in
+ the same category, or linked categories). They showed that the number and density
+ TextTiling of chain correlated with the topic structure. The TextTiling algorithm of Hearst
+ (1997) computed the cosine between neighboring text spans (the normalized dot
+ product of vectors of raw word counts), again showing that sentences or paragraph in
+24.4 • R EPRESENTATION LEARNING MODELS FOR LOCAL COHERENCE 15
+
+a subtopic have high cosine with each other, but not with sentences in a neighboring
+subtopic.
+ A third early model, the LSA Coherence method of Foltz et al. (1998) was the
+first to use embeddings, modeling the coherence between two sentences as the cosine between their LSA sentence embedding vectors1 , computing embeddings for a
+sentence s by summing the embeddings of its words w:
+ sim(s,t) = cos(s, t)
+ X X
+ = cos( w, w) (24.31)
+ w∈s w∈t
+
+and defining the overall coherence of a text as the average similarity over all pairs of
+adjacent sentences si and si+1 :
+ n−1
+ 1 X
+ coherence(T ) = cos(si , si+1 ) (24.32)
+ n−1
+ i=1
+
+ Modern neural representation-learning coherence models, beginning with Li et al.
+(2014), draw on the intuitions of these early unsupervised models for learning sentence representations and measuring how they change between neighboring sentences. But the new models also draw on the idea pioneered by Barzilay and Lapata
+(2005) of self-supervision. That is, unlike say coherence relation models, which
+train on hand-labeled representations for RST or PDTB, these models are trained to
+distinguish natural discourses from unnatural discourses formed by scrambling the
+order of sentences, thus using representation learning to discover the features that
+matter for at least the ordering aspect of coherence.
+ Here we present one such model, the local coherence discriminator (LCD) (Xu
+et al., 2019). Like early models, LCD computes the coherence of a text as the average of coherence scores between consecutive pairs of sentences. But unlike the
+early unsupervised models, LCD is a self-supervised model trained to discriminate
+consecutive sentence pairs (si , si+1 ) in the training documents (assumed to be coherent) from (constructed) incoherent pairs (si , s0 ). All consecutive pairs are positive
+examples, and the negative (incoherent) partner for a sentence si is another sentence
+uniformly sampled from the same document as si .
+ Fig. 24.11 describes the architecture of the model fθ , which takes a sentence
+pair and returns a score, higher scores for more coherent pairs. Given an input
+sentence pair s and t, the model computes sentence embeddings s and t (using any
+sentence embeddings algorithm), and then concatenates four features of the pair: (1)
+the concatenation of the two vectors (2) their difference s − t; (3) the absolute value
+of their difference |s − t|; (4) their element-wise product s t. These are passed
+through a one-layer feedforward network to output the coherence score.
+ The model is trained to make this coherence score higher for real pairs than for
+negative pairs. More formally, the training objective for a corpus C of documents d,
+each of which consists of a list of sentences si , is:
+ XX
+ Lθ = E [L( fθ (si , si+1 ), fθ (si , s ))] (24.33)
+ p(s0 |si )
+ d∈C si ∈d
+
+E p(s0 |si ) is the expectation with respect to the negative sampling distribution conditioned on si : given a sentence si the algorithms samples a negative sentence s0
+1 See Chapter 5 for more on LSA embeddings; they are computed by applying SVD to the termdocument matrix (each cell weighted by log frequency and normalized by entropy), and then the first
+300 dimensions are used as the embedding.
+16 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ computation of the score for a pair of sentences s and t. Figure from Xu et al. (2019).
+
+ uniformly over the other sentences in the same document. L is a loss function that
+ takes two scores, one for a positive pair and one for a negative pair, with the goal of
+ encouraging f + = fθ (si , si+1 ) to be high and f − = fθ (si , s0 )) to be low. Fig. 24.11
+ use the margin loss l( f + , f − ) = max(0, η − f + + f − ) where η is the margin hyperparameter.
+ Xu et al. (2019) also give a useful baseline algorithm that itself has quite high
+ performance in measuring perplexity: train an RNN language model on the data,
+ and compute the log likelihood of sentence si in two ways, once given the preceding
+ context (conditional log likelihood) and once with no context (marginal log likelihood). The difference between these values tells us how much the preceding context
+ improved the predictability of si , a predictability measure of coherence.
+ Training models to predict longer contexts than just consecutive pairs of sentences can result in even stronger discourse representations. For example a Transformer language model trained with a contrastive sentence objective to predict text
+ up to a distance of ±2 sentences improves performance on various discourse coherence tasks (Iter et al., 2020).
+ Language-model style models are generally evaluated by the methods of Section 24.3.3, although they can also be evaluated on the RST and PDTB coherence
+ relation tasks.
+
+ A discourse must also cohere globally rather than just at the level of pairs of sentences. Consider stories, for example. The narrative structure of stories is one of
+ the oldest kinds of global coherence to be studied. In his influential Morphology of
+ the Folktale, Propp (1968) models the discourse structure of Russian folktales via
+ a kind of plot grammar. His model includes a set of character categories he called
+ dramatis personae, like Hero, Villain, Donor, or Helper, and a set of events he
+ called functions (like “Villain commits kidnapping”, “Donor tests Hero”, or “Hero
+ 24.5 • G LOBAL C OHERENCE 17
+
+ is pursued”) that have to occur in particular order, along with other components.
+ Propp shows that the plots of each of the fairy tales he studies can be represented as
+ a sequence of these functions, different tales choosing different subsets of functions,
+ but always in the same order. Indeed Lakoff (1972) showed that Propp’s model
+ amounted to a discourse grammar of stories, and in recent computational work Finlayson (2016) demonstrates that some of these Proppian functions could be induced
+ from corpora of folktale texts by detecting events that have similar actions across
+ stories. Bamman et al. (2013) showed that generalizations over dramatis personae
+ could be induced from movie plot summaries on Wikipedia. Their model induced
+ latent personae from features like the actions the character takes (e.g., Villains strangle), the actions done to them (e.g., Villains are foiled and arrested) or the descriptive
+ words used of them (Villains are evil).
+ In this section we introduce two kinds of such global discourse structure that
+ have been widely studied computationally. The first is the structure of arguments:
+ the way people attempt to convince each other in persuasive essays by offering
+ claims and supporting premises. The second is somewhat related: the structure of
+ scientific papers, and the way authors present their goals, results, and relationship to
+ prior work in their papers.
+
+ 24.5.1 Argumentation Structure
+ The first type of global discourse structure is the structure of arguments. Analyzing
+argumentation
+ mining people’s argumentation computationally is often called argumentation mining.
+ The study of arguments dates back to Aristotle, who in his Rhetorics described
+ pathos three components of a good argument: pathos (appealing to the emotions of the
+ ethos listener), ethos (appealing to the speaker’s personal character), and logos (the logical
+ logos structure of the argument).
+ Most of the discourse structure studies of argumentation have focused on logos,
+ particularly via building and training on annotated datasets of persuasive essays or
+ other arguments (Reed et al. 2008, Stab and Gurevych 2014a, Peldszus and Stede
+ 2016, Habernal and Gurevych 2017, Musi et al. 2018). Such corpora, for examclaims ple, often include annotations of argumentative components like claims (the central
+ premises component of the argument that is controversial and needs support) and premises
+ (the reasons given by the author to persuade the reader by supporting or attacking
+argumentative the claim or other premises), as well as the argumentative relations between them
+ relations
+ like SUPPORT and ATTACK.
+ Consider the following example of a persuasive essay from Stab and Gurevych
+ (2014b). The first sentence (1) presents a claim (in bold). (2) and (3) present two
+ premises supporting the claim. (4) gives a premise supporting premise (3).
+ “(1) Museums and art galleries provide a better understanding
+ about arts than Internet. (2) In most museums and art galleries, detailed descriptions in terms of the background, history and author are
+ provided. (3) Seeing an artwork online is not the same as watching it
+ with our own eyes, as (4) the picture online does not show the texture
+ or three-dimensional structure of the art, which is important to study.”
+ Thus this example has three argumentative relations: SUPPORT(2,1), SUPPORT(3,1)
+ and SUPPORT(4,3). Fig. 24.12 shows the structure of a much more complex argument.
+ While argumentation mining is clearly related to rhetorical structure and other
+ kinds of coherence relations, arguments tend to be much less local; often a persuamilitary purposes]Claim6 , I strongly believe that [this technology is beneficial to
+ humanity]MajorClaim2 . It is likely that [this technology bears some important cures which
+ will significantly improve life conditions]Claim7 .
+ The conclusion of the essay starts with an attacking claim followed by the restatement of
+ the major claim. The last sentence includes another claim that summarizes the most important points of the author’s argumentation. Figure 2 shows the entire argumentation
+ structure of the example essay.
+18 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ Figure
+Figure 2
+ Argumentation structure of the example essay. Arrows indicate argumentative relations.
+ther of SUPPORT (with arrowheads) or ATTACK (with circleheads); P denotes premises. Figure from Stab and
+ Arrowheads denote argumentative support relations and circleheads attack relations. Dashed
+Gurevych (2017).relations that are encoded in the stance attributes of claims. “P” denotes premises.
+ lines indicate
+
+ sive essay will have only a single main claim, with premises spread throughout 629the
+ text, without the local coherence we see in coherence relations.
+ Algorithms for detecting argumentation structure often include classifiers for
+ distinguishing claims, premises, or non-argumentation, together with relation classifiers for deciding if two spans have the SUPPORT, ATTACK, or neither relation
+ (Peldszus and Stede, 2013). While these are the main focus of much computational
+ work, there is also preliminary efforts on annotating and detecting richer semantic
+ relationships (Park and Cardie 2014, Hidey et al. 2017) such as detecting argumenargumentation tation schemes, larger-scale structures for argument like argument from example,
+ schemes
+ or argument from cause to effect, or argument from consequences (Feng and
+ Hirst, 2011).
+ Another important line of research is studying how these argument structure (or
+ other features) are associated with the success or persuasiveness of an argument
+ (Habernal and Gurevych 2016, Tan et al. 2016, Hidey et al. 2017. Indeed, while it
+ is Aristotle’s logos that is most related to discourse structure, Aristotle’s ethos and
+ pathos techniques are particularly relevant in the detection of mechanisms of this
+ persuasion sort of persuasion. For example scholars have investigated the linguistic realization
+ of features studied by social scientists like reciprocity (people return favors), social
+ proof (people follow others’ choices), authority (people are influenced by those
+ with power), and scarcity (people value things that are scarce), all of which can
+ be brought up in a persuasive argument (Cialdini, 1984). Rosenthal and McKeown
+ (2017) showed that these features could be combined with argumentation structure
+ to predict who influences whom on social media, Althoff et al. (2014) found that
+ linguistic models of reciprocity and authority predicted success in online requests,
+ while the semisupervised model of Yang et al. (2019) detected mentions of scarcity,
+ commitment, and social identity to predict the success of peer-to-peer lending platforms.
+ See Stede and Schneider (2018) for a comprehensive survey of argument mining.
+ 24.6 • S UMMARY 19
+
+ 24.5.2 The structure of scientific discourse
+ Scientific papers have a very specific global structure: somewhere in the course of
+ the paper the authors must indicate a scientific goal, develop a method for a solution, provide evidence for the solution, and compare to prior work. One popular
+ annotation scheme for modeling these rhetorical goals is the argumentative zonargumentative
+ zoning ing model of Teufel et al. (1999) and Teufel et al. (2009), which is informed by the
+ idea that each scientific paper tries to make a knowledge claim about a new piece
+ of knowledge being added to the repository of the field (Myers, 1992). Sentences
+ in a scientific paper can be assigned one of 15 tags; Fig. 24.13 shows 7 (shortened)
+ examples of labeled sentences.
+
+Category Description Example
+A IM Statement of specific research goal, or “The aim of this process is to examine the role that
+ hypothesis of current paper training plays in the tagging process”
+OWN M ETHOD New Knowledge claim, own work: “In order for it to be useful for our purposes, the
+ methods following extensions must be made:”
+OWN R ESULTS Measurable/objective outcome of own “All the curves have a generally upward trend but
+ work always lie far below backoff (51% error rate)”
+U SE Other work is used in own work “We use the framework for the allocation and
+ transfer of control of Whittaker....”
+G AP W EAK Lack of solution in field, problem with “Here, we will produce experimental evidence
+ other solutions suggesting that this simple model leads to serious
+ overestimates”
+S UPPORT Other work supports current work or is “Work similar to that described here has been carsupported by current work ried out by Merialdo (1994), with broadly similar
+ conclusions.”
+A NTISUPPORT Clash with other’s results or theory; su- “This result challenges the claims of...”
+ periority of own work
+
+ Teufel et al. (1999) and Teufel et al. (2009) develop labeled corpora of scientific
+ articles from computational linguistics and chemistry, which can be used as supervision for training standard sentence-classification architecture to assign the 15 labels.
+
+ In this chapter we introduced local and global models for discourse coherence.
+ • Discourses are not arbitrary collections of sentences; they must be coherent.
+ Among the factors that make a discourse coherent are coherence relations
+ between the sentences, entity-based coherence, and topical coherence.
+ • Various sets of coherence relations and rhetorical relations have been proposed. The relations in Rhetorical Structure Theory (RST) hold between
+ spans of text and are structured into a tree. Because of this, shift-reduce
+ and other parsing algorithms are generally used to assign these structures.
+ The Penn Discourse Treebank (PDTB) labels only relations between pairs of
+ spans, and the labels are generally assigned by sequence models.
+ • Entity-based coherence captures the intuition that discourses are about an
+ entity, and continue mentioning the entity from sentence to sentence. Centering Theory is a family of models describing how salience is modeled for
+20 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+ discourse entities, and hence how coherence is achieved by virtue of keeping
+ the same discourse entities salient over the discourse. The entity grid model
+ gives a more bottom-up way to compute which entity realization transitions
+ lead to coherence.
+ • Many different genres have different types of global coherence. Persuasive
+ essays have claims and premises that are extracted in the field of argument
+ mining, scientific articles have structure related to aims, methods, results, and
+ comparisons.
+
+Historical Notes
+ Coherence relations arose from the independent development of a number of scholars, including Hobbs (1979) idea that coherence relations play an inferential role for
+ the hearer, and the investigations by Mann and Thompson (1987) of the discourse
+ structure of large texts. Other approaches to coherence relations and their extrac-
+SDRT tion include Segmented Discourse Representation Theory (SDRT) (Asher and Lascarides 2003, Baldridge et al. 2007) and the Linguistic Discourse Model (Polanyi
+ 1988, Scha and Polanyi 1988, Polanyi et al. 2004). Wolf and Gibson (2005) argue
+ that coherence structure includes crossed bracketings, which make it impossible to
+ represent as a tree, and propose a graph representation instead. A compendium of
+ over 350 relations that have been proposed in the literature can be found in Hovy
+ (1990).
+ RST parsing was first proposed by Marcu (1997), and early work was rule-based,
+ focused on discourse markers (Marcu, 2000a). The creation of the RST Discourse
+ TreeBank (Carlson et al. 2001, Carlson and Marcu 2001) enabled a wide variety
+ of machine learning algorithms, beginning with the shift-reduce parser of Marcu
+ (1999) that used decision trees to choose actions, and continuing with a wide variety
+ of machine learned parsing methods (Soricut and Marcu 2003, Sagae 2009, Hernault
+ et al. 2010, Feng and Hirst 2014, Surdeanu et al. 2015, Joty et al. 2015) and chunkers
+ (Sporleder and Lapata, 2005). Subba and Di Eugenio (2009) integrated sophisticated
+ semantic information into RST parsing. Ji and Eisenstein (2014) first applied neural
+ models to RST parsing neural models, leading to the modern set of neural RST
+ models (Li et al. 2014, Li et al. 2016, Braud et al. 2017, Yu et al. 2018, inter alia) as
+ well as neural segmenters (Wang et al. 2018). and neural PDTB parsing models (Ji
+ and Eisenstein 2015, Qin et al. 2016, Qin et al. 2017).
+ Barzilay and Lapata (2005) pioneered the idea of self-supervision for coherence: training a coherence model to distinguish true orderings of sentences from
+ random permutations. Li et al. (2014) first applied this paradigm to neural sentencerepresentation, and many neural self-supervised models followed (Li and Jurafsky
+ 2017, Logeswaran et al. 2018, Lai and Tetreault 2018, Xu et al. 2019, Iter et al.
+ 2020)
+ Another aspect of global coherence is the global topic structure of a text, the way
+ the topics shift over the course of the document. Barzilay and Lee (2004) introduced
+ an HMM model for capturing topics for coherence, and later work expanded this
+ intuition (Soricut and Marcu 2006, Elsner et al. 2007, Louis and Nenkova 2012, Li
+ and Jurafsky 2017).
+ The relationship between explicit and implicit discourse connectives has been
+ a fruitful one for research. Marcu and Echihabi (2002) first proposed to use sen-
+H ISTORICAL N OTES 21
+
+tences with explicit relations to help provide training data for implicit relations, by
+removing the explicit relations and trying to re-predict them as a way of improving performance on implicit connectives; this idea was refined by Sporleder and
+Lascarides (2005), (Pitler et al., 2009), and Rutherford and Xue (2015). This relationship can also be used as a way to create discourse-aware representations. The
+DisSent algorithm (Nie et al., 2019) creates the task of predicting explicit discourse
+markers between two sentences. They show that representations learned to be good
+at this task also function as powerful sentence representations for other discourse
+tasks.
+ The idea of entity-based coherence seems to have arisen in multiple fields in the
+mid-1970s, in functional linguistics (Chafe, 1976), in the psychology of discourse
+processing (Kintsch and Van Dijk, 1978), and in the roughly contemporaneous work
+of Grosz, Sidner, Joshi, and their colleagues. Grosz (1977) addressed the focus of
+attention that conversational participants maintain as the discourse unfolds. She defined two levels of focus; entities relevant to the entire discourse were said to be in
+global focus, whereas entities that are locally in focus (i.e., most central to a particular utterance) were said to be in immediate focus. Sidner 1979; 1983 described a
+method for tracking (immediate) discourse foci and their use in resolving pronouns
+and demonstrative noun phrases. She made a distinction between the current discourse focus and potential foci, which are the predecessors to the backward- and
+forward-looking centers of Centering theory, respectively. The name and further
+roots of the centering approach lie in papers by Joshi and Kuhn (1979) and Joshi
+and Weinstein (1981), who addressed the relationship between immediate focus and
+the inferences required to integrate the current utterance into the discourse model.
+Grosz et al. (1983) integrated this work with the prior work of Sidner and Grosz.
+This led to a manuscript on centering which, while widely circulated since 1986,
+remained unpublished until Grosz et al. (1995). A collection of centering papers appears in Walker et al. (1998). See Karamanis et al. (2004) and Poesio et al. (2004) for
+a deeper exploration of centering and its parameterizations, and the History section
+of Chapter 23 for more on the use of centering on coreference.
+ The grid model of entity-based coherence was first proposed by Barzilay and
+Lapata (2005) drawing on earlier work by Lapata (2003) and Barzilay, and then
+extended by them Barzilay and Lapata (2008) and others with additional features
+(Elsner and Charniak 2008, 2011, Feng et al. 2014, Lin et al. 2011) a model that
+projects entities into a global graph for the discourse (Guinaudeau and Strube 2013,
+Mesgar and Strube 2016), and a convolutional model to capture longer-range entity
+dependencies (Nguyen and Joty, 2017).
+ Theories of discourse coherence have also been used in algorithms for interpreting discourse-level linguistic phenomena, including verb phrase ellipsis and gapping (Asher 1993, Kehler 1993), and tense interpretation (Lascarides and Asher
+1993, Kehler 1994, Kehler 2000). An extensive investigation into the relationship
+between coherence relations and discourse connectives can be found in Knott and
+Dale (1994).
+ Useful surveys of discourse processing and structure include Stede (2011) and
+Webber et al. (2012).
+ Andy Kehler wrote the Discourse chapter for the 2000 first edition of this textbook, which we used as the starting point for the second-edition chapter, and there
+are some remnants of Andy’s lovely prose still in this third-edition coherence chapter.
+22 C HAPTER 24 • D ISCOURSE C OHERENCE
+
+Exercises
+ and show how (24.29) would be processed. Does the algorithm indeed mark
+ (24.29) as less coherent?
+ discourse structure for a 10–20 sentence portion. What problems did you
+ encounter? Were you helped by superficial cues the speaker included (e.g.,
+ discourse connectives) in any places?
+ Exercises 23
+
+Althoff, T., C. Danescu-Niculescu-Mizil, and D. Jurafsky. Elvevåg, B., P. W. Foltz, D. R. Weinberger, and T. E. Gold-
+2014. How to ask for a favor: A case study on the suc- berg. 2007. Quantifying incoherence in speech: an autocess of altruistic requests. ICWSM 2014. mated methodology and novel application to schizophre-
+Asher, N. 1993. Reference to Abstract Objects in Dis- nia. Schizophrenia research, 93(1-3):304–316.
+ course. Studies in Linguistics and Philosophy (SLAP) Feng, V. W. and G. Hirst. 2011. Classifying arguments by
+ 50, Kluwer. scheme. ACL.
+Asher, N. and A. Lascarides. 2003. Logics of Conversation. Feng, V. W. and G. Hirst. 2014. A linear-time bottom-up
+ Cambridge University Press. discourse parser with constraints and post-editing. ACL.
+Baldridge, J., N. Asher, and J. Hunter. 2007. Annotation for Feng, V. W., Z. Lin, and G. Hirst. 2014. The impact of deep
+ and robust parsing of discourse structure on unrestricted hierarchical discourse structures in the evaluation of text
+ texts. Zeitschrift für Sprachwissenschaft, 26:213–239. coherence. COLING.
+Bamman, D., B. O’Connor, and N. A. Smith. 2013. Learning Finlayson, M. A. 2016. Inferring Propp’s functions from selatent personas of film characters. ACL. mantically annotated text. The Journal of American Folklore, 129(511):55–77.
+Barzilay, R. and M. Lapata. 2005. Modeling local coherence:
+ An entity-based approach. ACL. Foltz, P. W., W. Kintsch, and T. K. Landauer. 1998. The
+ measurement of textual coherence with latent semantic
+Barzilay, R. and M. Lapata. 2008. Modeling local coheranalysis. Discourse processes, 25(2-3):285–307.
+ ence: An entity-based approach. Computational Linguistics, 34(1):1–34. Grosz, B. J. 1977. The representation and use of focus in
+ a system for understanding dialogs. IJCAI-77. Morgan
+Barzilay, R. and L. Lee. 2004. Catching the drift: Prob- Kaufmann.
+ abilistic content models, with applications to generation
+ and summarization. HLT-NAACL. Grosz, B. J., A. K. Joshi, and S. Weinstein. 1983. Providing a unified account of definite noun phrases in English.
+Bedi, G., F. Carrillo, G. A. Cecchi, D. F. Slezak, M. Sig- ACL.
+ man, N. B. Mota, S. Ribeiro, D. C. Javitt, M. Copelli,
+ and C. M. Corcoran. 2015. Automated analysis of free Grosz, B. J., A. K. Joshi, and S. Weinstein. 1995. Centerspeech predicts psychosis onset in high-risk youths. npj ing: A framework for modeling the local coherence of
+ Schizophrenia, 1. discourse. Computational Linguistics, 21(2):203–225.
+Biran, O. and K. McKeown. 2015. PDTB discourse parsing Guinaudeau, C. and M. Strube. 2013. Graph-based local coas a tagging task: The two taggers approach. SIGDIAL. herence modeling. ACL.
+ Habernal, I. and I. Gurevych. 2016. Which argument is more
+Braud, C., M. Coavoux, and A. Søgaard. 2017. Cross-lingual
+ convincing? Analyzing and predicting convincingness of
+ RST discourse parsing. EACL.
+ Web arguments using bidirectional LSTM. ACL.
+Brennan, S. E., M. W. Friedman, and C. Pollard. 1987. A
+ Habernal, I. and I. Gurevych. 2017. Argumentation mining
+ centering approach to pronouns. ACL.
+ in user-generated web discourse. Computational Linguis-
+Carlson, L. and D. Marcu. 2001. Discourse tagging manual. tics, 43(1):125–179.
+ Technical Report ISI-TR-545, ISI.
+ Halliday, M. A. K. and R. Hasan. 1976. Cohesion in English.
+Carlson, L., D. Marcu, and M. E. Okurowski. 2001. Building Longman. English Language Series, Title No. 9.
+ a discourse-tagged corpus in the framework of rhetorical Hearst, M. A. 1997. Texttiling: Segmenting text into multistructure theory. SIGDIAL. paragraph subtopic passages. Computational Linguistics,
+Chafe, W. L. 1976. Givenness, contrastiveness, definiteness, 23:33–64.
+ subjects, topics, and point of view. In C. N. Li, ed., Sub- Hernault, H., H. Prendinger, D. A. duVerle, and M. Ishizuka.
+ ject and Topic, 25–55. Academic Press. 2010. Hilda: A discourse parser using support vector ma-
+Chen, E., B. Snyder, and R. Barzilay. 2007. Incre- chine classification. Dialogue & Discourse, 1(3).
+ mental text structuring with online hierarchical ranking. Hidey, C., E. Musi, A. Hwang, S. Muresan, and K. McKe-
+EMNLP/CoNLL. own. 2017. Analyzing the semantic types of claims and
+Cialdini, R. B. 1984. Influence: The psychology of persua- premises in an online persuasive forum. 4th Workshop on
+ sion. Morrow. Argument Mining.
+Ditman, T. and G. R. Kuperberg. 2010. Building coherence: Hobbs, J. R. 1979. Coherence and coreference. Cognitive
+ A framework for exploring the breakdown of links across Science, 3:67–90.
+ clause boundaries in schizophrenia. Journal of neurolin- Hovy, E. H. 1990. Parsimonious and profligate approaches to
+ guistics, 23(3):254–269. the question of discourse structure relations. Proceedings
+Elsner, M., J. Austerweil, and E. Charniak. 2007. A unified of the 5th International Workshop on Natural Language
+ local and global model for discourse coherence. NAACL- Generation.
+ HLT. Iter, D., K. Guu, L. Lansing, and D. Jurafsky. 2020. Pretrain-
+Elsner, M. and E. Charniak. 2008. Coreference-inspired co- ing with contrastive sentence objectives improves disherence modeling. ACL. course performance of language models. ACL.
+Elsner, M. and E. Charniak. 2011. Extending the entity grid Iter, D., J. Yoon, and D. Jurafsky. 2018. Automatic detecwith entity-specific features. ACL. tion of incoherent speech for diagnosing schizophrenia.
+ Fifth Workshop on Computational Linguistics and Clinical Psychology.
+24 Chapter 24 • Discourse Coherence
+
+Ji, Y. and J. Eisenstein. 2014. Representation learning for Louis, A. and A. Nenkova. 2012. A coherence model based
+ text-level discourse parsing. ACL. on syntactic patterns. EMNLP.
+Ji, Y. and J. Eisenstein. 2015. One vector is not enough: Lukasik, M., B. Dadachev, K. Papineni, and G. Simões.
+ Entity-augmented distributed semantics for discourse re- 2020. Text segmentation by cross segment attention.
+ lations. TACL, 3:329–344. EMNLP.
+Joshi, A. K. and S. Kuhn. 1979. Centered logic: The role Mann, W. C. and S. A. Thompson. 1987. Rhetorical structure
+ of entity centered sentence representation in natural lan- theory: A theory of text organization. Technical Report
+ guage inferencing. IJCAI-79. RS-87-190, Information Sciences Institute.
+Joshi, A. K. and S. Weinstein. 1981. Control of inference: Marcu, D. 1997. The rhetorical parsing of natural language
+ Role of some aspects of discourse structure – centering. texts. ACL.
+ IJCAI-81. Marcu, D. 1999. A decision-based approach to rhetorical
+Joty, S., G. Carenini, and R. T. Ng. 2015. CODRA: A novel parsing. ACL.
+ discriminative framework for rhetorical analysis. Compu- Marcu, D. 2000a. The rhetorical parsing of unrestricted
+ tational Linguistics, 41(3):385–435. texts: A surface-based approach. Computational Linguistics, 26(3):395–448.
+Karamanis, N., M. Poesio, C. Mellish, and J. Oberlander.
+ 2004. Evaluating centering-based metrics of coherence Marcu, D., ed. 2000b. The Theory and Practice of Discourse
+ for text structuring using a reliably annotated corpus. Parsing and Summarization. MIT Press.
+ ACL. Marcu, D. and A. Echihabi. 2002. An unsupervised approach
+Kehler, A. 1993. The effect of establishing coherence in el- to recognizing discourse relations. ACL.
+ lipsis and anaphora resolution. ACL. Mesgar, M. and M. Strube. 2016. Lexical coherence graph
+ modeling using word embeddings. ACL.
+Kehler, A. 1994. Temporal relations: Reference or discourse
+ coherence? ACL. Miltsakaki, E., R. Prasad, A. K. Joshi, and B. L. Webber.
+ 2004. The Penn Discourse Treebank. LREC.
+Kehler, A. 2000. Coherence, Reference, and the Theory of
+ Grammar. CSLI Publications. Morey, M., P. Muller, and N. Asher. 2017. How much
+ progress have we made on RST discourse parsing? a
+Kintsch, W. and T. A. Van Dijk. 1978. Toward a model of replication study of recent results on the rst-dt. EMNLP.
+ text comprehension and production. Psychological re-
+Morris, J. and G. Hirst. 1991. Lexical cohesion computed by
+ view, 85(5):363–394.
+ thesaural relations as an indicator of the structure of text.
+Knott, A. and R. Dale. 1994. Using linguistic phenomena Computational Linguistics, 17(1):21–48.
+ to motivate a set of coherence relations. Discourse Pro- Muller, P., C. Braud, and M. Morey. 2019. ToNy: Contextual
+ cesses, 18(1):35–62. embeddings for accurate multilingual discourse segmen-
+Lai, A. and J. Tetreault. 2018. Discourse coherence in the tation of full documents. Workshop on Discourse Relation
+ wild: A dataset, evaluation and methods. SIGDIAL. Parsing and Treebanking.
+Lakoff, G. 1972. Structural complexity in fairy tales. In The Musi, E., M. Stede, L. Kriese, S. Muresan, and A. Rocci.
+ Study of Man, 128–50. School of Social Sciences, Uni- 2018. A multi-layer annotated corpus of argumentaversity of California, Irvine, CA. tive text: From argument schemes to discourse relations.
+Lapata, M. 2003. Probabilistic text structuring: Experiments LREC.
+ with sentence ordering. ACL. Myers, G. 1992. “In this paper we report...”: Speech acts and
+Lascarides, A. and N. Asher. 1993. Temporal interpretation, scientific facts. Journal of Pragmatics, 17(4):295–313.
+ discourse relations, and common sense entailment. Lin- Nguyen, D. T. and S. Joty. 2017. A neural local coherence
+ guistics and Philosophy, 16(5):437–493. model. ACL.
+Li, J. and D. Jurafsky. 2017. Neural net models of open- Nie, A., E. Bennett, and N. Goodman. 2019. DisSent: Learndomain discourse coherence. EMNLP. ing sentence representations from explicit discourse relations. ACL.
+Li, J., R. Li, and E. H. Hovy. 2014. Recursive deep models
+ for discourse parsing. EMNLP. Park, J. and C. Cardie. 2014. Identifying appropriate support
+ for propositions in online user comments. First workshop
+Li, Q., T. Li, and B. Chang. 2016. Discourse parsing with on argumentation mining.
+ attention-based hierarchical neural networks. EMNLP.
+ Peldszus, A. and M. Stede. 2013. From argument diagrams
+Lin, Z., M.-Y. Kan, and H. T. Ng. 2009. Recognizing im- to argumentation mining in texts: A survey. International
+ plicit discourse relations in the Penn Discourse Treebank. Journal of Cognitive Informatics and Natural Intelligence
+ EMNLP. (IJCINI), 7(1):1–31.
+Lin, Z., H. T. Ng, and M.-Y. Kan. 2011. Automatically eval- Peldszus, A. and M. Stede. 2016. An annotated corpus of
+ uating text coherence using discourse relations. ACL. argumentative microtexts. 1st European Conference on
+Lin, Z., H. T. Ng, and M.-Y. Kan. 2014. A pdtb-styled end- Argumentation.
+ to-end discourse parser. Natural Language Engineering, Pitler, E., A. Louis, and A. Nenkova. 2009. Automatic sense
+ 20(2):151–184. prediction for implicit discourse relations in text. ACL
+Logeswaran, L., H. Lee, and D. Radev. 2018. Sentence IJCNLP.
+ ordering and coherence modeling using recurrent neural Pitler, E. and A. Nenkova. 2009. Using syntax to disamnetworks. AAAI. biguate explicit discourse connectives in text. ACL IJC-
+NLP.
+ Exercises 25
+
+Poesio, M., R. Stevenson, B. Di Eugenio, and J. Hitzeman. Stab, C. and I. Gurevych. 2014b. Identifying argumentative
+ 2004. Centering: A parametric theory and its instantia- discourse structures in persuasive essays. EMNLP.
+ tions. Computational Linguistics, 30(3):309–363. Stab, C. and I. Gurevych. 2017. Parsing argumentation struc-
+Polanyi, L. 1988. A formal model of the structure of dis- tures in persuasive essays. Computational Linguistics,
+ course. Journal of Pragmatics, 12. 43(3):619–659.
+Polanyi, L., C. Culy, M. van den Berg, G. L. Thione, and Stede, M. 2011. Discourse processing. Morgan & Claypool.
+ D. Ahn. 2004. A rule based approach to discourse pars- Stede, M. and J. Schneider. 2018. Argumentation Mining.
+ ing. Proceedings of SIGDIAL. Morgan & Claypool.
+Prasad, R., N. Dinesh, A. Lee, E. Miltsakaki, L. Robaldo, Subba, R. and B. Di Eugenio. 2009. An effective discourse
+ A. K. Joshi, and B. L. Webber. 2008. The Penn Discourse parser that uses rich linguistic information. NAACL HLT.
+ TreeBank 2.0. LREC.
+ Surdeanu, M., T. Hicks, and M. A. Valenzuela-Escarcega.
+Prasad, R., B. L. Webber, and A. Joshi. 2014. Reflections on 2015. Two practical rhetorical structure theory parsers.
+ the Penn Discourse Treebank, comparable corpora, and NAACL HLT.
+ complementary annotation. Computational Linguistics,
+ 40(4):921–950. Tan, C., V. Niculae, C. Danescu-Niculescu-Mizil, and
+ L. Lee. 2016. Winning arguments: Interaction dynam-
+Propp, V. 1968. Morphology of the Folktale, 2nd edition. ics and persuasion strategies in good-faith online discus-
+University of Texas Press. Original Russian 1928. Trans- sions. WWW-16.
+ lated by Laurence Scott.
+ Teufel, S., J. Carletta, and M. Moens. 1999. An annotation
+Qin, L., Z. Zhang, and H. Zhao. 2016. A stacking gated scheme for discourse-level argumentation in research arneural architecture for implicit discourse relation classifi- ticles. EACL.
+ cation. EMNLP.
+ Teufel, S., A. Siddharthan, and C. Batchelor. 2009. To-
+Qin, L., Z. Zhang, H. Zhao, Z. Hu, and E. Xing. 2017. Adwards domain-independent argumentative zoning: Evversarial connective-exploiting networks for implicit disidence from chemistry and computational linguistics.
+ course relation classification. ACL.
+ EMNLP.
+Reed, C., R. Mochales Palau, G. Rowe, and M.-F. Moens.
+ Walker, M. A., A. K. Joshi, and E. Prince, eds. 1998. Cen-
+2008. Language resources for studying argument. LREC.
+ tering in Discourse. Oxford University Press.
+Rosenthal, S. and K. McKeown. 2017. Detecting influencers
+ Wang, Y., S. Li, and J. Yang. 2018. Toward fast and accurate
+ in multiple online genres. ACM Transactions on Internet
+ neural discourse segmentation. EMNLP.
+ Technology (TOIT), 17(2).
+ Webber, B. L., M. Egg, and V. Kordoni. 2012. Discourse
+Rutherford, A. and N. Xue. 2015. Improving the inference
+ structure and language technology. Natural Language
+ of implicit discourse relations via classifying explicit dis-
+Engineering, 18(4):437–490.
+ course connectives. NAACL HLT.
+ Wolf, F. and E. Gibson. 2005. Representing discourse coher-
+Sagae, K. 2009. Analysis of discourse structure with synence: A corpus-based analysis. Computational Linguistactic dependencies and data-driven shift-reduce parsing.
+ tics, 31(2):249–287.
+ IWPT-09.
+ Xu, P., H. Saghir, J. S. Kang, T. Long, A. J. Bose, Y. Cao,
+Scha, R. and L. Polanyi. 1988. An augmented context free
+ and J. C. K. Cheung. 2019. A cross-domain transferable
+ grammar for discourse. COLING.
+ neural coherence model. ACL.
+Sidner, C. L. 1979. Towards a computational theory of defi-
+Xue, N., H. T. Ng, S. Pradhan, A. Rutherford, B. L. Webnite anaphora comprehension in English discourse. Techber, C. Wang, and H. Wang. 2016. CoNLL 2016 shared
+ nical Report 537, MIT Artificial Intelligence Laboratory,
+ task on multilingual shallow discourse parsing. CoNLL-
+Cambridge, MA.
+ 16 shared task.
+Sidner, C. L. 1983. Focusing in the comprehension of defi-
+Yang, D., J. Chen, Z. Yang, D. Jurafsky, and E. H. Hovy.
+ nite anaphora. In M. Brady and R. C. Berwick, eds, Com-
+2019. Let’s make your request more persuasive: Modelputational Models of Discourse, 267–330. MIT Press.
+ ing persuasive strategies via semi-supervised neural nets
+Somasundaran, S., J. Burstein, and M. Chodorow. 2014. on crowdfunding platforms. NAACL HLT.
+ Lexical chaining for measuring discourse coherence qual-
+Yu, N., M. Zhang, and G. Fu. 2018. Transition-based neural
+ ity in test-taker essays. COLING.
+ RST parsing with implicit syntax features. COLING.
+Soricut, R. and D. Marcu. 2003. Sentence level discourse
+ Yu, Y., Y. Zhu, Y. Liu, Y. Liu, S. Peng, M. Gong, and
+ parsing using syntactic and lexical information. HLT-
+A. Zeldes. 2019. GumDrop at the DISRPT2019 shared
+ NAACL.
+ task: A model stacking approach to discourse unit seg-
+Soricut, R. and D. Marcu. 2006. Discourse generation using mentation and connective detection. Workshop on Disutility-trained coherence models. COLING/ACL. course Relation Parsing and Treebanking 2019.
+Sporleder, C. and A. Lascarides. 2005. Exploiting linguistic Zhou, Y. and N. Xue. 2015. The Chinese Discourse Treecues to classify rhetorical relations. RANLP-05. Bank: a Chinese corpus annotated with discourse rela-
+Sporleder, C. and M. Lapata. 2005. Discourse chunking and tions. Language Resources and Evaluation, 49(2):397–
+ its application to sentence compression. EMNLP. 431.
+Stab, C. and I. Gurevych. 2014a. Annotating argument components and relations in persuasive essays. COLING.

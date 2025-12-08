@@ -36,8 +36,8 @@ def check_chroma_exists(chroma_path: str = None) -> bool:
         count = collection.count()
 
         # Verify it has a reasonable number of chunks
-        if count < 1000:  # Should have 11k+ chunks
-            print(f"Warning: ChromaDB exists but only has {count} chunks (expected 11k+)")
+        if count < 10000:  # Should have 10k+ chunks
+            print(f"Warning: ChromaDB exists but only has {count} chunks (expected 10k+)")
             return False
 
         return True
@@ -84,7 +84,7 @@ def rebuild_index(chroma_path: str = None, normalized_data_path: str = None) -> 
 
         # Initialize chunker (same settings as original indexing)
         print("\n2. Initializing chunker...")
-        chunker = TextbookChunker(max_chunk_chars=100, min_chunk_chars=30, overlap_ratio=0.5)
+        chunker = TextbookChunker(max_chunk_chars=280, min_chunk_chars=50, overlap_ratio=0.2)
         print("✓ Chunker initialized")
 
         # Chunk all documents

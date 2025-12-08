@@ -22,6 +22,25 @@ from langchain_core.prompts import PromptTemplate
 class NLPTextbookRAG:
     """RAG pipeline for querying NLP textbook content"""
 
+    # Common NLP acronyms and their expansions
+    ACRONYM_EXPANSIONS = {
+        'RAG': 'retrieval-augmented generation retrieval augmented generation',
+        'NER': 'named entity recognition',
+        'POS': 'part-of-speech part of speech tagging',
+        'LLM': 'large language model',
+        'LSTM': 'long short-term memory',
+        'RNN': 'recurrent neural network',
+        'CNN': 'convolutional neural network',
+        'GRU': 'gated recurrent unit',
+        'NLP': 'natural language processing',
+        'CRF': 'conditional random field',
+        'HMM': 'hidden markov model',
+        'TF-IDF': 'term frequency inverse document frequency',
+        'BERT': 'bidirectional encoder representations from transformers',
+        'GPT': 'generative pre-trained transformer',
+        'IR': 'information retrieval',
+    }
+
     def __init__(
         self,
         chroma_path: str = None,
@@ -70,20 +89,70 @@ class NLPTextbookRAG:
         # Configuration
         self.top_k = top_k
 
-        # Create prompt template
+        # Create prompt template with strong guardrails
         self.prompt_template = PromptTemplate(
             input_variables=["context", "question"],
-            template="""You are an AI assistant helping a student understand concepts from their NLP textbook (Speech and Language Processing by Jurafsky & Martin).
+            template="""You are an AI assistant helping students understand concepts from the NLP textbook "Speech and Language Processing" by Jurafsky & Martin.
 
-Context from textbook chapters:
+CRITICAL INSTRUCTIONS - READ CAREFULLY:
+1. SCOPE: ONLY answer questions about NLP/linguistics concepts (transformers, embeddings, parsing, language models, etc.)
+2. GROUNDING: ONLY use information explicitly stated in the context below - NEVER use external knowledge
+3. OUT-OF-SCOPE QUESTIONS: If the question asks about current events, general knowledge, cooking, geography, politics, or ANY non-NLP topic, respond EXACTLY with: "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, etc."
+4. INSUFFICIENT CONTEXT: If the context lacks information for a valid NLP question, say: "I don't have enough information in the retrieved context to answer this question. Try rephrasing or asking about a different aspect."
+5. NO FABRICATION: Do NOT make up facts, examples, names, dates, or connections not in the context
+6. NO EXTERNAL KNOWLEDGE: Even if you know the answer from general knowledge, ONLY use the context
+7. CITATION ACCURACY: Only cite chapters/sources that appear in the context excerpts below
+
+Context from textbook:
 {context}
 
 Question: {question}
 
-Provide a clear, educational answer based on the textbook context above. Explain concepts thoroughly and cite specific chapters when relevant. If the context doesn't contain enough information to answer the question, say so."""
+Answer (use ONLY the context above, decline if out-of-scope):"""
         )
 
         print("RAG pipeline initialized successfully!")
+
+    def expand_query(self, query: str) -> str:
+        """
+        Expand acronyms and enhance query for better retrieval
+
+        Args:
+            query: Original query string
+
+        Returns:
+            Expanded query string
+        """
+        import re
+
+        expanded = query
+
+        # 1. Expand acronyms
+        for acronym, expansion in self.ACRONYM_EXPANSIONS.items():
+            # Look for the acronym as a whole word (case-insensitive)
+            pattern = r'\b' + re.escape(acronym) + r'\b'
+            if re.search(pattern, query, re.IGNORECASE):
+                # Add expansion to query (don't replace, augment)
+                expanded = f"{query} {expansion}"
+                break  # Only expand the first acronym found
+
+        # 2. Handle comparison questions - extract both terms
+        comparison_patterns = [
+            r"difference between (\w+) and (\w+)",
+            r"compare (\w+) (?:and|vs|versus) (\w+)",
+            r"(\w+) vs (\w+)",
+            r"(\w+) versus (\w+)"
+        ]
+
+        for pattern in comparison_patterns:
+            match = re.search(pattern, query.lower())
+            if match:
+                term1, term2 = match.groups()
+                # Augment query with both terms emphasized
+                expanded = f"{query} {term1} {term2} comparison"
+                break
+
+        return expanded
 
     def retrieve(self, query: str, k: int = None) -> Tuple[List[str], List[Dict]]:
         """
@@ -99,8 +168,11 @@ Provide a clear, educational answer based on the textbook context above. Explain
         if k is None:
             k = self.top_k
 
-        # Generate query embedding
-        query_embedding = self.embedding_model.encode([query])[0].tolist()
+        # Expand query for better acronym matching
+        expanded_query = self.expand_query(query)
+
+        # Generate query embedding (use expanded query)
+        query_embedding = self.embedding_model.encode([expanded_query])[0].tolist()
 
         # Search ChromaDB
         results = self.collection.query(
@@ -214,9 +286,27 @@ Provide a clear, educational answer based on the textbook context above. Explain
 
         context = self.format_context(documents, metadatas)
 
+        # Step 2.5: Check if retrieved chunks are actually relevant
+        # If all chunks have low similarity, question is likely out-of-scope
+        avg_similarity = sum(m['similarity'] for m in metadatas) / len(metadatas)
+        max_similarity = max(m['similarity'] for m in metadatas)
+
+        # Adaptive threshold: Allow if avg > 0.4 OR if (avg > 0.35 AND max > 0.42)
+        # This handles typos while blocking truly out-of-scope questions
+        is_out_of_scope = avg_similarity < 0.35 or (avg_similarity < 0.4 and max_similarity < 0.42)
+
+        if is_out_of_scope:
+            return {
+                'question': question,
+                'answer': "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+                'citations': [],
+                'retrieved_chunks': []
+            }
+
         # Step 3: Generate response
         if verbose:
             print(f"\n[3] Generating response with Ollama (mistral)...")
+            print(f"    Average chunk similarity: {avg_similarity:.3f}")
 
         # Format prompt with context and question
         formatted_prompt = self.prompt_template.format(context=context, question=question)

@@ -1,0 +1,948 @@
+rights reserved. Draft of August 24, 2025.
+
+CHAPTER
+
+16 Text-to-Speech
+
+ “Words mean more than what is set down on paper. It takes the human voice
+ to infuse them with shades of deeper meaning.”
+ Maya Angelou, I Know Why the Caged Bird Sings
+
+ The task of mapping from text to speech is a task with an even longer history than
+ speech to text. In Vienna in 1769, Wolfgang von Kempelen built for the Empress
+ Maria Theresa the famous Mechanical Turk, a chess-playing automaton consisting
+ of a wooden box filled with gears, behind which sat a robot mannequin who played
+ chess by moving pieces with his mechanical arm. The Turk toured Europe and the
+ Americas for decades, defeating Napoleon Bonaparte and even playing Charles Babbage. The Mechanical Turk might have been one of the early successes of artificial
+ intelligence were it not for the fact that it was, alas, a hoax, powered by a human
+ chess player hidden inside the box.
+ What is less well known is that von Kempelen, an extraordinarily
+ prolific inventor, also built between
+ 1769 and 1790 what was definitely
+ not a hoax: the first full-sentence
+ speech synthesizer, shown partially to
+ the right. His device consisted of a
+ bellows to simulate the lungs, a rubber mouthpiece and a nose aperture, a
+ reed to simulate the vocal folds, various whistles for the fricatives, and a
+ small auxiliary bellows to provide the puff of air for plosives. By moving levers
+ with both hands to open and close apertures, and adjusting the flexible leather “vocal tract”, an operator could produce different consonants and vowels.
+ More than two centuries later, we no longer build our synthesizers out of wood
+ text-to-speech and leather, nor do we need human operators. The modern task of text-to-speech or
+ TTS TTS, also called speech synthesis, is exactly the reverse of ASR; to map text:
+ speech
+ synthesis It’s time for lunch!
+ to an acoustic waveform:
+
+ TTS has a wide variety of applications. It is used in spoken language models
+ that interact with people, for reading text out loud, for games, and to produce speech
+ for sufferers of neurological disorders, like the late astrophysicist Steven Hawking
+ after he lost the use of his voice because of ALS.
+ In this chapter we introduce an algorithm for TTS that, like the ASR algorithms
+ of the prior chapter, are trained on enormous amounts of speech datasets. We’ll also
+ briefly touch on other speech applications.
+ 2 C HAPTER 16 • T EXT- TO -S PEECH
+
+ The task of text-to-speech is to generate a speech waveform that corresponds to a
+ desired text, using in a particular voice specified by the user.
+ Historically TTS was done by collecting hundreds of hours of speech from a
+ single talker in a lab and training a large system on it. The resulting TTS system only
+ worked in one voice; if you wanted a second voice, you went back and collected data
+ from a second talker.
+ The modern method is instead to train a speaker-independent synthesizer on tens
+ of thousands of hours of speech from thousands of talkers. To create speech in a new
+ voice unseen in training, we use a very small amount of speech from the desired
+ talker to guide the creation of the voice. So the input to a modern TTS system is a
+ text prompt and perhaps 3 seconds of speech from the voice we’d like to generate
+ LANGUAGE PROCESSING,
+ zero-shotVOL.
+ TTS 33, 2025
+ the speech in. This TTS task is called zero-shot TTS because the desired voice may 705
+ never have been seen in training.
+ The way modern TTS systems address this task is to use language modeling, and
+
+Language Models are Zero-Shot Text
+ in particular conditional generation. The intuition is to take an enormous dataset of
+ speech, and use an audio tokenizer based on an audio codec to induce discrete audio tokens from that speech that represent the speech. Then we can train a language
+
+o Speech Synthesizers
+ model whose vocabulary includes both speech tokens and text tokens.
+ We train this language model to take as input two sequences, a text transcript
+ and a small sample of speech from the desired talker, to tokenize both the text and
+ the speech into discrete tokens, and then to conditionally generate discrete samples
+Yu Wu , Ziqiang Zhang of the , Long
+ speechZhou, Shujie
+ corresponding Liu
+ to the , Member,
+ text string, voice. Zhuo Chen,
+ IEEE,
+ in the desired
+ Wang, Jinyu Li , Fellow, IEEE, Lei He , Sheng Zhao, and Furu Wei text string and
+ At inference time we prompt this language model with a tokenized
+ a sample of the desired voice (tokenized by the codec into discrete audio tokens) and
+ conditionally generate to produce the desired audio tokens. Then these tokens can
+ be converted into a waveform.
+
+ odeling approach for text
+ we train a neural codec
+ screte codes derived from
+del, and regard TTS as a
+ er than continuous signal
+ he pre-training stage, we
+ rs of English speech which
+systems. VALL-E emerges
+ e used to synthesize highsecond enrolled recording
+eriment results show that
+ state-of-the-art zero-shot
+ ss and speaker similarity.
+ rve the speaker’s emotion Figure 16.1 VALL-E architecture for personalized TTS (figure from Chen et al. (2025)).
+mpt in synthesis. Fig. 1. The overview of VALL-E. Unlike the previous pipeline (e.g., text →
+ mel-spectrogram
+ Fig. 16.1 from → waveform),
+ Chen the shows
+ et al. (2025) pipeline
+ theofintuition
+ VALL-E forisone
+ textsuch
+ → discrete code
+ TTS system,
+ peech synthesis, speech
+ VALL-E
+ → waveform. VALL-E generates the discrete audio codec codes based
+ called VALL-E. VALL-E is trained on 60K hours of English speech, from over 7000 on text
+ odeling, pre-training, in- input and acoustic code prompt, corresponding
+ unique talkers. Systems like VALL-E have 2 components: to the target content and the
+ speaker’s voice.
+ 1. The audio tokenizer, generally based on an audio codec, a system we’ll de-
+ON adaptation and speaker encoding methods, requiring additional
+ matic breakthroughs in fine-tuning, complex pre-designed features, or heavy structure
+velopment of neural net- engineering [6], [7], [8], [9].
+ 16.2 • U SING A CODEC TO LEARN DISCRETE AUDIO TOKENS 3
+
+ scribe in the next section. Codecs have three parts: an encoder (that turns
+ speech into embedding vectors), a quantizer (that turns the embeddings into
+ discrete tokens) and decoders (that turns the discrete tokens back into speech).
+ 2. The 2-stage conditional language model that can generate audio tokens corresponding to the desired text. We’ll sketch this in Section 16.3.
+
+ Modern TTS systems are based around converting the waveform into a sequence of
+ discrete audio tokens. This idea of manipulating discrete audio tokens is also useful
+ for other speech-enabled systems like spoken language models, which take text
+ or speech input and can generate text or speech output to solve tasks like speechto-speech translation, diarization, or spoken question answering. Having discrete
+ tokens means that we can make use of language model technology, since language
+ models are specialized for sequences of discrete tokens. Audio tokenizers are thus
+ an important component of the modern speech toolkit.
+ codec The standard way to learn audio tokens is from a neural audio codec (the word
+ is formed from coder/decoder). Historically a codec was a hardware device that
+ digitized analog symbols. More generally we use the word to mean a mechanism
+ for encoding analog speech signals into a digitized compressed representation that
+ can be efficiently stored and sent. Codecs are still used for compression, but for TTS
+ and also for spoken language models, we employ them for converting speech into
+ discrete tokens.
+ Of course the digital representation of speech we described in Chapter 14 is already discrete. For example 16 kHz speech stored in 16-bit format could be thought
+ of as a series of 216 = 65,536 symbols, with 16,000 of those symbols per second of
+ speech. But a system that generates 16,000 symbols per second makes the speech
+ signal too long to be feasibly processed by a language model, especially one based
+ on transformers with their inefficient quadratic attention. Instead we want symbols
+ that represent longer chunks of speech, perhaps something on the order of a few
+ hundred tokens a second.
+
+ En r
+ cod de
+ er co
+ De
+ Quantization
+ x zt qt,1 qt,2 … qt,N zqt x^
+ c
+
+ adapted from Mousavi et al. (2025). An input waveform x is encoded (generally using a series
+ of downsampling convolution networks) into a series of embeddings zt . Each embedding is
+ then passed through a quantizer to produce a series of quantized tokens qt . To regenerate the
+ speech signal, the quantized tokens are re-mapped back to a vector zq t and then encoded (usually using a series of upsampling convolution networks) back to a waveform. We’ll discuss
+ how the architecture is trained in Section 16.2.4.
+
+ Fig. 16.2 adapted from Mousavi et al. (2025). shows the standard architecture
+ of an audio tokenizer. Audio tokenizers take as input an audio waveform, and are
+4 C HAPTER 16 • T EXT- TO -S PEECH
+
+ trained to recreate the same audio waveform out, via an intermediate representation
+ consisting of discrete tokens created by vector quantization.
+ Audio tokenizers have three stages:
+ 1. an encoder maps the acoustic waveform, a series of T values x = x1 , x2 , ..., xT ,
+ to a sequence of τ embeddings z = z1 , z2 , ..., zτ . τ is typically 100-1000 times
+ smaller than T .
+ 2. a vector quantizer that takes each embedding zt corresponding to part of the
+ waveform, and represents it by a sequence of discrete tokens each taken from
+ one of the Nc codebooks, qt = qt,1 , qt,2 , ..., qt,Nc . The vector quantizer also
+ sums the vector codewords from each codebook to create a quantizer output
+ vector zq t .
+ 3. a decoder that generates a lossy reconstructed waveform span x̂ from the
+ quantizer output vector zq t .
+ Audio tokenizers are generally learned end-to-end, using loss functions that reward a tokenization that allows the system to reconstruct the input waveform.
+ In the following subsections we’ll go through the components of one particular
+ tokenizer, the E N C ODEC tokenizer of Défossez et al. (2023).
+
+ 16.2.1 The Encoder and Decoder for the E N C ODEC model
+
+ Decoder
+ Encoder
+
+ Embeddings @ 75Hz Embeddings @ 75Hz
+ … D D …
+
+ Conv1D (k=7, n=D) Conv1DT (k=7, n=D)
+
+ EncoderBlock (N, S) Residual Unit (N)
+ L S T M L S T M
+ DecoderBlock (N, S)
+ EncoderBlock
+ DecoderBlock
+
+ (N=16C, S=8)
+ Conv1D (N=16C, S=8)
+ (K=2S, N=C, Stride=S)
+ EncoderBlock Conv1D Conv1DT (K=2S, N=C)
+ (N=8C, S=5) (K=3, N=C)
+ DecoderBlock
+ (N=8C, S=5)
+ Residual Unit Residual Unit
+ EncoderBlock Conv1D
+ (K=3, N=C) DecoderBlock
+ (N=4C, S=4) (N=4C, S=4)
+
+ EncoderBlock DecoderBlock
+ (N=2C, S=2) (N=2C, S=2)
+
+ Conv1D (k=7, n=C) Conv1D (k=7, n=C)
+
+ Waveform @ 24kHz Waveform @ 24kHz
+
+Because the original signal was represented at 24kHz, this is a downsampling of 24000
+ 75 = 320 times. Between
+the encoder and decoder is a quantization step producing a lossy embedding zq t . The goal of the decoder is to
+take the lossy embedding zq t and upsample it, converting it back to a waveform.
+
+ The encoder and decoder of the E N C ODEC model (Défossez et al., 2023) are
+ sketched in Fig. 16.3. The goal of the encoder is to downsample a span of waveform
+ at time t, which is at 24kHz—one second of speech has 24,000 real values—to an
+ embedding representation zt at 75Hz—one second of audio is represented by 75
+ 16.2 • U SING A CODEC TO LEARN DISCRETE AUDIO TOKENS 5
+
+ vectors, each of dimensionality D. For the purposes of this explanation, we’ll use
+ D = 256.
+ This downsampling is accomplished by having a series of encoder blocks that are
+ made up of convolutional layers with strides larger than 1 that iteratively downsample the audio, as we discussed at the end of Section ??. The convolution blocks are
+ sketched in Fig. 16.3, and include a long series of convolutions as well as residual
+ units that add a convolution to the prior input.
+ The output of the encoder is an embedding zt at time t, 75 of which are produced
+ per second. This embedding is then quantized (as discussed in the next section),
+ turning each embedding zt into a series of Nc discrete symbols qt = qt,1 , qt,2 , ..., qt,Nc ,
+ and also turning the series of symbols into a new quantizer output vector zq t . Finally, the decoder takes the output embedding from the quantizer zq t and generates
+ a waveform via a symmetric set of convnets that upsample the audio.
+ In summary, a 24kHz waveform comes through, we encode/downsample it into
+ a vector zt of dimensionality D = 256, quantize it into discrete symbols qt , turn it
+ back into a vector zq t of dimensionality D = 256, and then decode/upsample that
+ vector back into a waveform at 24kHz.
+
+ 16.2.2 Vector Quantization
+ vector
+quantization The goal of the vector quantization or VQ step is to turn a series of vectors into a
+ VQ series of discrete symbols.
+ Historically vector quantization (Gray, 1984) was used to compress a speech
+ signal, to reduce the bit rate for transmission or storage. To compress a sequence
+ of vector representations of speech, we turn each vector into an integer, an index
+ representing a class or cluster. Then instead of transmitting a big vector of floating
+ point numbers, we transmit that integer index. At the other end of the transmission,
+ we reconstitute the vector from the index.
+ For TTS and other modern speech applications we use vector quantization for a
+ different reason: because VQ conveniently creates discrete tokens, and those fit well
+ into the language modeling paradigm, since language models do well at predicting
+ sequences of discrete tokens.
+ In practice for the E N C ODEC model and other audio tokenizers, we use a powerful from of vector quantization called residual vector quantization that we’ll define
+ in the following section. But it will be helpful to first see the basic VQ algorithm
+ before we extend it.
+ Vector quantization has a training phase and an inference phase. We already
+ introduced the core of the basic VQ training algorithm when we described k-means
+ clustering of vectors in Section ??, since k-means clustering is the most common
+ algorithm used to implement VQ. To review, in VQ training, we run a big set of
+ speech wavefiles through an encoder to generate N vectors, each one corresponding
+ to some frame of speech. Then we cluster all these N vectors into k clusters; k is set
+ by the designer as a parameter to the algorithm as the number of discrete symbols
+ we want, generally with k << N. In the simplest VQ algorithm, we use the iterative
+ k-means algorithm to learn the clusters. Recall from Section ?? that k-means is
+ a two-step algorithm based on iteratively updating a set of k centroid vectors. A
+ centroid centroid is the geometric center of a set of a points in n-dimensional space.
+ The k-means algorithm for clustering starts by assigning a random vector to each
+ cluster k. Then there are two iterative steps. In the assignment step, given a set of
+ k current centroids and the entire dataset of vectors, each vector is assigned to the
+ cluster whose codeword is the closest (by squared Euclidean distance). In the re-
+6 C HAPTER 16 • T EXT- TO -S PEECH
+
+ 256-d vector
+ Output:
+ to be quantized
+ Vector Quantizer discrete symbol
+ 0 1.2
+
+ 0.9
+ Encoder 0.1 Similarity 3
+ …
+
+ -55
+
+ 0.2
+
+ 1 2 3 4 5 … 1024 Cluster #
+ 255 -9
+
+ … 256-d codewords
+ (vectors)
+
+ Codebook
+
+ The input is a span of speech encoded by the encoder into a vector of dimensionality D =
+ 256. This vector is compared with each codeword (cluster centroid) in the codebook. The
+ codeword for cluster 3 is most similar, so the VQ outputs 3 as the discrete representation of
+ this vector.
+
+ estimation step, the codeword for each cluster is recomputed by recalculating a new
+ mean vector. The result is that the clusters and their centroids slowly adjust to the
+ training space. We iterate back and forth between these two steps until the algorithm
+ converges.
+ VQ can also be used as part of end-to-end training, as we will discuss below,
+ in which case instead of iterative k-means, we instead recompute the means during
+ minibatch training via online algorithms like exponential moving averages.
+ At the end of clustering, the cluster index can be used as a discrete symbol. Each
+ codeword cluster is also associated with a codeword, the vector which is the centroid of all
+ the vectors in the cluster. We call the list of cluster ids (tokens) together with their
+ codebook codeword the codebook, and we often call the cluster id the code.
+ code In inference, when a new vector comes in, we compare it to each vector in the
+ codebook. Whichever codeword is closest, we assign it to that codeword’s associated
+ cluster. Fig. 16.4 shows an intuition of this inference step in the context of speech
+ encoding:
+ 1. an input speech waveform is encoded into a vector v,
+ 2. this input vector v is compared to each of the 1024 possible codewords in the
+ codebook,
+ 3. v is found to be most similar to codeword 3,
+ 4. and so the output of VQ is the discrete symbol 3 as a representation of v.
+ As we will see below, for training the E N C ODEC model end-to-end we will need
+ a way to turn this discrete symbol back into a waveform. For simple VQ we do
+ that by directly using the codeword for that cluster, passing that codeword to the
+ decoder for it to reconstruct the waveform. Of course the codeword vector won’t
+ exactly match the original vector encoding of the input speech span, especially with
+ only 1024 possible codewords, but the hope is that it’s at least close if our codebook
+ is good, and the decoder will still produce reasonable speech. Nonetheless, more
+ powerful methods are usually used, as we’ll see in the next section.
+ 16.2 • U SING A CODEC TO LEARN DISCRETE AUDIO TOKENS 7
+
+ 16.2.3 Residual Vector Quantization
+ In practice, simple VQ doesn’t produce good enough reconstructions, at least not
+ with codebook sizes of 1024. 1024 codeword vectors just isn’t enough to represent
+ the wide variety of embeddings we get from encoding all possible speech waveforms. So what the E N C ODEC model (and many other audio tokenization methods)
+residual vector
+ quantization use instead is a more sophisticated variant called residual vector quantization, or
+ RVQ RVQ. In residual vector quantization, we use multiple codebooks arranged in a kind
+ of hierarchy.
+
+Figure
+ put 2: The neural
+ embedding audio codec
+ to produce modelsymbol
+ a discrete revisit. Because
+ and the RVQ is employed,
+ corresponding the first quantizer
+ codeword. We thenplays
+ look
+ the most important role in reconstruction, and the impact from others gradually decreases.
+ at the residual, the difference between the encoder output embedding zt and the codeword
+ chosen by VQ. We then take a second codebook and run VQ on this residual. We repeat the
+ we can explicitly
+ process until we control
+ have 8 the content in speech synthesis. Another direction is to apply pre-training
+ tokens.
+ to the neural TTS. Chung et al. [2018] pre-trains speech decoder in TTS through autoregressive
+ mel-spectrogram prediction. In Ao et al. [2022], the authors propose a unified-modal encoder-decoder
+ The idea
+ framework is verywhich
+ SpeechT5, simple. We rununlabeled
+ can leverage standardspeech
+ VQ with a codebook
+ and text just as
+ data to pre-train all in Fig. 16.4
+ components
+ in the prior
+ of TTS model.section.
+ Tjandra etThen for an
+ al. [2019] input unlabeled
+ quantizes embedding zt we
+ speech into take thetokens
+ discrete codeword vector
+ by a VQVAE
+ model
+ that is [van den Oord
+ produced, it zq1and
+ call2017],
+ et al.,
+ let’s fortrain
+ the az model
+ as with the token-to-speech
+ quantified by codebook sequence.
+ 1, and They
+ take the
+ demonstrate that the pre-trained modelt only requires t a small amount of real data for fine-tuning. Bai
+ difference between the two:
+ et al. [2022] proposes mask and reconstruction on mel spectrogram and showing better performance
+ on speech editing and synthesis. Previous TTS pre-training work leverages less than 1K hours of
+ (1)
+ data, whereas VALL-E is pre-trainedresidual
+ with 60K = zt −ofzdata.
+ hours q t Furthermore, VALL-E is the first (16.1)
+ to
+ use audio codec codes as intermediate representations, and emerge in-context learning capability in
+ residual zero-shot
+ This TTS. is the error in the VQ; the part of the original vector that the VQ
+ residual
+ didn’t capture. The residual is kind of a rounding error; it’s as if in VQ we ‘round’
+ 3 vector
+ the Background: Speech
+ to the nearest Quantization
+ codeword, and that creates some error. So we then take that
+ residual vector and pass it through another
+ Since audio is typically stored as a sequence of 16-bit vector
+ integerquantizer! That gives
+ values, a generative modelusisarequired
+ second
+ codeword 16that represents the residual part of the vector. We then take the residual
+ to output 2 = 65, 536 probabilities per timestep o synthesize the raw audio. In addition, the audio
+ samplethe
+ from ratesecond
+ exceeding ten thousand
+ codeword, leads
+ and dotothis
+ an extraordinarily
+ again. The long totalsequence length,
+ result is making it more
+ 8 codewords (the
+ intractable for raw audio synthesis. To this end, speech quantization is required to compress integer
+ original codeword and the 7 residuals).
+ values and sequence length. µ-law transformation can quantize each timestep to 256 values and
+ That means
+ reconstruct for RVQ
+ high-quality we represent
+ raw audio. It is widelytheusedoriginal
+ in speechspeech span
+ generative by asuch
+ models, sequence of 8
+ as WaveNet
+ [van den Oord
+ discrete et al.,(instead
+ symbols 2016], butofthe1 inference
+ discrete speed
+ symbolis still
+ in slow
+ basicsince
+ VQ).the Fig.
+ sequence
+ 16.5length
+ shows is not
+ the
+ reduced. Recently, vector quantization is widely applied in self-supervised speech models for feature
+ intuition.
+ extraction, such as vq-wav2vec [Baevski et al., 2020a] and HuBERT [Hsu et al., 2021]. The following
+ workWhat do we
+ [Lakhotia do2021,
+ et al., when Duwe want
+ et al., 2022]toshows
+ reconstruct
+ the codesthe speech?
+ from The method
+ self-supervised models canusedalsoin
+ Ereconstruct
+ N C ODEC content,
+ RVQand the inference
+ is again simple: speedweis faster than 8WaveNet.
+ take the codewordsHowever,
+ andthe speaker
+ add themidentity has
+ together!
+ been discarded and the reconstruction quality is low [Borsos et al., 2022]. AudioLM [Borsos et al.,
+ The resulting vector
+ 2022] trains speech-to-speech z is then passed through the decoder to generate a
+ q t language models on both k-means tokens from a self-supervised model waveform.
+ and .acoustic tokens from a neural codec model, leading to high-quality speech-to-speech generation.
+ In this paper, we follow AudioLM [Borsos et al., 2022] to leverage neural codec models to represent
+ 16.2.4 Training
+ speech in discrete tokens. the
+ To compress audio formodel
+ E N C ODEC network of audio tokens
+ transmission, codec models are able to
+ encode waveform into discrete acoustic codes and reconstruct high-quality waveform even if the
+ speaker
+ The E NisCunseen
+ ODEC in training.
+ model Compared
+ (like similartoaudio
+ traditional audio codec
+ tokenizer approaches,
+ models) the neural-based
+ is trained end to end.
+ codec is significantly better at low bitrates, and we believe the quantized tokens contain sufficient
+ The input isabout
+ information a waveform,
+ the speakeraand
+ span of speech
+ recording of perhaps
+ conditions. 1 or to
+ Compared 10other
+ seconds extracted
+ quantization from
+ methods,
+ athelonger original
+ audio codec waveform.
+ shows The
+ the following desired output
+ advantages: is theabundant
+ 1) It contains same waveform span, since
+ speaker information and
+ acoustic information, which could maintain speaker identity in reconstruction compared to HuBERT
+ codes [Hsu et al., 2021]. 2) There is an off-the-shelf codec decoder to convert discrete tokens into a
+ waveform, without the additional efforts on vocoder training like VQ-based methods that operated on
+ spectrum [Du et al., 2022]. 3) It could reduce the length of time steps for efficiency to address the
+ problem in µ-law transformation [van den Oord et al., 2016].
+
+8 C HAPTER 16 • T EXT- TO -S PEECH
+
+ the model is a kind of autoencoder that learns to map to itself. The model is trained
+ to do this reconstruction on large speech datasets like Common Voice (Ardila et al.,
+ 2020) (over 30,000 hours of speech in 133 languages) as well as other audio data
+ like Audio Set (Gemmeke et al., 2017) (1.7 million 10 sec excerpts from YouTube
+ videos labeled from a large ontology including natural, animal, and machine sounds,
+ music, and so on).
+
+ En
+ cod 𝓛 GAN de
+ r
+ er co
+ De
+ Quantization
+ x zt qt,1 qt,2 … qt,N zqt x^
+
+ 𝓛 VQ
+ c
+
+ 𝓛 reconstruction
+ (2025). The audio tokenizer is trained with a weighted combination of various loss functions,
+ summarized in the figure and described below.
+
+ The E N C ODEC model, like most audio tokenizers, is trained with a number of
+ reconstruction loss functions, as suggested in Fig. 16.6. The reconstruction loss Lreconstruction mealoss
+ sures how similar the output waveform is to the input waveform, for example by the
+ sum-squared difference between the original and reconstructed audio:
+
+ T
+ X
+ Lreconstruction (x, x̂) = ||xt − x̂t ||2 (16.2)
+ t=1
+
+ Similarity can additionally be measured in the frequency domain, by comparing the
+ original and reconstructed mel-spectrogram, again using sum-squared (L2) distance
+ or L1 distance or some combination.
+adversarial loss Another kind of loss is the adversarial loss LGAN . For this loss we train a
+ generative adversarial network, a generator and a binary discriminator D, which
+ is a classifier to distinguish between the true wavefile x and a generated one. We
+ want to train the model to fool this discriminator, so the better the discriminator, the
+ worse our reconstruction must be, and so we use the discriminator’s success as a loss
+ function, We can also incorporate various features from the generator.
+ Finally, we need a loss for the quantizer. This is because having a quantizer in
+ the middle of end-to-end training causes problems in propagation of the gradient in
+ the backward pass of training, because the quantization step is not differentiable.
+ We deal with this problem in two ways. First, we ignore the quantization step in
+ the backward pass. Instead we copy the gradients from the output of the quantizer
+ (zq t ) back to the input of the quantizer (zt ), a method called the straight-through
+ estimator (Van Den Oord et al., 2017).
+ But then we need a method to make sure the code words in the vector quantizer
+ step get updated during training. One method is to start these off using k-means
+ clustering of the vectors zt to get an initial clustering. Then we can add to a loss
+ component, LVQ , which will be a function of the difference between the encoder
+ 16.3 • VALL-E: G ENERATING AUDIO WITH 2- STAGE LM 9
+
+ output vector zt and the reconstructed vector after the quantization zq t , i.e. the codeword, summed over all the Nc codebooks and residuals.
+ Nc
+ T X
+ X (c)
+ LVQ (x, x̂) = ||z(c) t − zq t || (16.3)
+ t=1 c=1
+
+ The total loss function can then just be a weighted sum of these losses:
+
+ L(x, x̂) = λ1 Lreconstruction (x, x̂) + λ2 LGAN (x, x̂) + λ3 LVQ (x, x̂) (16.4)
+
+ As we summarized in the introduction, the structure of TTS systems like VALL-E
+ is to take as input a text to be synthesized and a sample of the voice to be used, and
+ tokenize both, using BPE for the text and an audio codec for the speech. We then
+ use a language model to conditionally generate discrete audio tokens corresponding
+ to the text prompt, in the voice of the speech sample.
+
+ Output code sequence …
+ …
+ Non-Autoregressive
+ CT’+1,1 CT’+2,1 CT,1
+ x C CT’+1,2
+ CT’+1,3
+ CT’+2,2
+ CT’+2,3
+ … CT,2
+ CT,3
+
+ Non-Autoregressive
+ CT’+1,1
+ CT’+2,1 CT,1
+ x C
+ …
+ CT’+1,2 CT’+2,2 CT,2
+
+ Non-Autoregressive
+ x C CT’+1,1 CT’+2,1 … CT,1
+
+ Autoregressive (AR) Transformer
+
+ x C
+ Text Audio Prompt
+
+ stage for the autoregressive transformer and the first 3 of the 7 non-autoregressive transformers. The output sequence of discrete audio codes is generated in two stages. First the autoregressive LM generates all the codes for the first quantizer from left to right. Then the
+ non-autoregressive model is called 7 times to generate the remaining codes conditioned on all
+ the codes from the preceding quantizer, including conditioning on the codes to the right.
+
+ Instead of doing this conditional generation with a single autoregressive language model, VALL-E does the conditional generation in a 2-stage process, using
+ two distinct language models. This architectural choice is influenced by the hierarchical nature of the RVQ quantizer that generates the audio tokens. The output of the
+ first RVQ quantizer is the most important token to the final speech, while the subsequent quantizers contribute less and less residual information to the final signal. So
+ 10 C HAPTER 16 • T EXT- TO -S PEECH
+
+ the language model generates the acoustic codes in two stages. First, an autoregressive LM generates the first-quantizer codes for the entire output sequence, given the
+ input text and enrolled audio. Then given those codes, a non-autoregressive LM is
+ run 7 times, each time taking as input the output of the initial autoregressive codes
+ and the prior non-autoregressive quantizer and thus generating the codes from the
+ remaining quantizers one by one. Fig. 16.7 shows the intuition for the inference
+ step.
+ Now let’s see the architecture in a bit more detail. For training, we are given
+ an audio sample y and its tokenized text transcription x = [x0 , x1 , . . . , xL ]. We use a
+ pretrained E N C ODEC to convert y into a code matrix C. Let T be the number of
+ downsampled vectors output by E N C ODEC, with 8 codes per vector. Then we can
+ represent the encoder output as
+ CT ×8 = E N C ODEC(y) (16.5)
+
+ Here C is a two-dimensional acoustic code matrix that has T × 8 entries, where the
+ columns represent time and the rows represent different quantizers. That is, the row
+ vector ct,: of the matrix contains the 8 codes for the t-th frame, and the column vector
+ c:, j contains the code sequence from the j-th vector quantizer where j ∈ [1, ..., 8].
+ Given the text x and audio C, we train the TTS as a conditional code language
+ model to maximize the likelihood of C conditioned on x:
+ L = − log p(C|x)
+ T
+ Y
+ = − log p(c<t,: , x) (16.6)
+CHEN et al.: NEURAL CODEC LANGUAGE MODELS ARE ZERO-SHOT TEXT TO SPEECH
+ t=0 SYNTHESIZERS 709
+
+ Figure
+Fig. 3. Training overview 16.8 We
+ of VALL-E. Training
+ regard TTSprocedure for VALL-E.
+ as a conditional Given
+ codec language the text
+ modeling task. prompt, theVALL-E
+ We structure autoregressive
+ as two conditional codec language
+models in a hierarchicaltransformer
+ structure. The is
+ ARfirst trained
+ model is usedtotogenerate eachcode
+ generate each code of the
+ of the first first-quantizer
+ code sequence incode sequence, manner,
+ an autoregressive autore-while the NAR model is
+used to generate each remaining code sequence based on the previous code sequences in a non-autoregressive manner.
+ gressively The the non-autoregressive transformer generates the rest of the codes. Figure from
+ Chen et al. (2025).
+
+ Fig.AR
+B. Hierarchical Structure: 16.8 andshows the intuition. On the left,
+ NAR Model we have an audio
+ simultaneously, sample the
+ thus reducing andtime
+ its trancomplexity from O(T )
+ scription, and both are tokenized. Then
+ As introduced in Section III, the codec codes derived from the wetoappend
+ O(1). an [ EOS ] and [ BOS ] token to x
+ and anwith
+neural audio codec model [ EOS ] token
+ RVQ to the
+ exhibit twoend
+ keyof C and train the autoregressive transformer to predict
+ properties:
+(1) A single speechthe acoustic
+ sample tokens,into
+ is encoded starting c0,1 ,sewithcode
+ multiple untilC.[ EOS
+ Training:
+ ], and Conditional Codec Language Modeling
+ then the non-autoregressive
+quences with multiple transformers
+ quantizers in to the
+ fill audio
+ in thecodec
+ other model.
+ tokens.(2) As depicted in Fig. 3, VALL-E is trained using the condiis presentinference,
+A hierarchical structure During where the code we are given afrom
+ sequence text sequence to belanguage
+ tional codec spoken as y0 , an enwell as method.
+ modeling It is noteworthy that
+ rolledmost
+the first quantizer covers speech
+ of thesample
+ acoustic from some unseen
+ information, whilespeaker, for which
+ the training we have requires
+ of VALL-E the transcription
+ only simple utterance-wise
+subsequent code sequences contain the residual acoustic infor- audio-transcription pair data, and no complex data such as
+mation from their predecessors, serving to refine and augment force-alignment information or additional audio clips of the
+the acoustic details. same speaker for reference. This greatly simplifies the process of
+ Inspired by these properties, we design VALL-E as two collecting and processing training data, facilitating scalability.
+conditional codec language models in a hierarchical structure: Specifically, for each audio and corresponding transcription
+an Autoregressive (AR) codec language model and a Non- in the training dataset, we initially utilize the audio codec
+ 16.4 • TTS E VALUATION 11
+
+ transcript(y0 ). We first run the codec to get an acoustic code matrix for y0 , which will
+ be CP = C:T 0 ,: = [c0,: , c1,: , . . . cT 0 ,: :]. Next we concatenate the transcription of y0 to
+ the text sequence to be spoken to create the total input text x, which we pass through
+ a text tokenizer. At this stage we thus have a tokenized text x and a tokenized audio
+ prompt CP .
+ Then we generate CT = C>T 0 ,: = [cT 0 +1,: , . . . cT,: ] conditioned on the text sequence x and the prompt CP :
+ CT = argmax p(CT |CP , x)
+ CT
+ T
+ Y
+ = argmax p(ct,: |c<t,: , x) (16.7)
+ CT t=T 0 +1
+ IEEE TRANSACTIONS ON AUDIO,
+ Then the generated SPEECH
+ tokens ANDbeLANGUAGE
+ CT can converted byPROCESSING, VOL.
+ the E N C ODEC 33, 2025
+ decoder into
+ a waveform. Fig. 16.9 shows the intuition.
+
+ The AR model is fed with
+nding code sequence with
+d at the end using a code
+attention mask strategy, the
+y attend to the text sequence
+ demonstrated in the lower
+
+ptimized by minimizing the
+ code sequence c:,1 condiθAR ) (10)
+
+ |c<t,1 , x; θAR ). (11)
+Fig. 4. Inference overview of VALL-E. We perform zero-shot TTS via promptscript for the 3 seconds of enrolled speech is first prepended to the text to be generated, and
+Language Modeling: Given ing
+ both the conditional
+ the codec
+ speech and text languageNext
+ are tokenized. model.
+ the autoregressive transformer starts generating
+by the AR model, the NAR the first codes ct 0 +1,1 conditioned on the transcript and acoustic prompt.
+
+ remaining code sequence See Chen et al. (2025) for more details on the transformer components and other
+ ence x and the preceding Overall,
+ details the NAR model is optimized by minimizing the
+ of training.
+ toregressive manner, where negative log likelihood of each j-th target code sequence c>T ′ ,j
+ conditioned on the text sequence x, all the code sequences of
+ e sequences of the prompt the acoustic condition C:T ′ ,: and the preceding j − 1 target code
+e speaker information of the sequences c>T ′ ,<j .
+ TTS systems are evaluated by humans, by playing an utterance to listeners and askitly split the code matrix MOSC ingLthem
+ NARto= give mean
+ −alog p(Copinion score
+ >T ′ ,>1 |x,(MOS),
+ C<T ′a,:rating
+ , c>Tof′ ,1how (15)
+ good)the synthesized
+ ; θNAR
+ d target code matrix C>T ′ ,: utterances are, usually on a scale from 1–5. We can then compare systems by com-
+The model is then optimized paring their MOS$ scores
+ 8 on the same sentences (using, e.g., paired t-tests to test for
+ significant=
+ differences).
+ − log p(c>T ′ ,j |x, C<T ′ ,: , C>T ′ ,<j ; θNAR ). (16)
+ e c>T ′ ,j conditioned on the
+ j=2
+ es in the acoustic condition
+nces in the target code matrix In practice, to optimize computational efficiency during training,
+ner. we do not calculate the training loss by iterating over all values of
+t of Fig. 3, we first obtain the j and aggregating the corresponding losses. Instead, during each
+12 C HAPTER 16 • T EXT- TO -S PEECH
+
+ If we are comparing exactly two systems (perhaps to see if a particular change
+ CMOS actually improved the system), we can also compare using CMOS (Comparative
+ MOS). where users give their preference on which of the two utterances is better.
+ CMOS scores range from -3 (the system is much worse than the reference) to 3 (the
+ system is better than the reference) Here we play the same sentence synthesized by
+ two different systems. The human listeners choose which of the two utterances they
+ like better. We do this for say 50 sentences (presented in random order) and compare
+ the number of sentences preferred for each system.
+ Although speech synthesis systems are best evaluated by human listeners, some
+ automatic metrics can be used to add more information. For example we can run the
+ output through an ASR system and compute the word error rate (WER) to see how
+ robust the synthesized output is. Or for measuring how well the voice output of the
+ TTS system matches the enrolled voice, we can treat the task as if it were speaker
+ verification, passing the two voices to a speaker verification system and using the
+ resulting score as a similarity score.
+
+ There are a wide variety of other speech-related tasks.
+ speaker Speaker diarization is the task of determining ‘who spoke when’ in a long
+ diarization
+ multi-speaker audio recording, marking the start and end of each speaker’s turns in
+ the interaction. This can be useful for transcribing meetings, classroom speech, or
+ medical interactions. Often diarization systems use voice activity detection (VAD) to
+ find segments of continuous speech, extract speaker embedding vectors, and cluster
+ the vectors to group together segments likely from the same speaker. More recent
+ work is investigating end-to-end algorithms to map directly from input speech to a
+ sequence of speaker labels for each frame.
+ speaker
+ recognition Speaker recognition, is the task of identifying a speaker. We generally distinspeaker guish the subtasks of speaker verification, where we make a binary decision (is
+ verification
+ this speaker X or not?), such as for security when accessing personal information
+ over the telephone, and speaker identification, where we make a one of N decision
+ trying to match a speaker’s voice against a database of many speakers.
+ language In the task of language identification, we are given a wavefile and must identify
+ identification
+ which language is being spoken; this is an important part of building multilingual
+ models, creating datasets, and even plays a role in online systems.
+ wake word The task of wake word detection is to detect a word or short phrase, usually in
+ order to wake up a voice-enable assistant like Alexa, Siri, or the Google Assistant.
+ The goal with wake words is build the detection into small devices at the computing
+ edge, to maintain privacy by transmitting the least amount of user speech to a cloudbased server. Thus wake word detectors need to be fast, small footprint software that
+ can fit into embedded devices. Wake word detectors usually use the same frontend
+ feature extraction we saw for ASR, often followed by a whole-word classifier.
+
+ TBD
+ 16.7 • S UMMARY 13
+
+ This chapter introduced the fundamental algorithms of text-to-speech (TTS).
+ • A common modern algorithm for TTS is to use conditional generation with a
+ language model over audio tokens learned by a codec model.
+ • A neural audio codec, short for coder/decoder, is a system that encodes analog speech signals into a digitized, discrete compressed representation for
+ compression.
+ • The discrete symbols that a codec produces as its compressed representation
+ can be used as discrete codes for language modeling.
+ • A codec includes an encoder that uses convnets to downsample speech into
+ a downsampled embedding, a quantizer that converts the embedding into a
+ series of discrete tokens, and a decoder that uses convnets to upsample the
+ tokens/embedding back into a lossy reconstructed waveform.
+ • Vector Quantization (VQ) is a method for turning a series of vectors into a
+ series of discrete symbols. This can be done by using k-means clustering, and
+ then creating a codebook in which each code is represented by a vector at the
+ centroid of each cluster, called a codeword. Input vector can be assigned the
+ nearest codeword cluster.
+ • Residual Vector Quantization (RVQ) is a hierarchical version of vector
+ quantization that produces multiple codes for an input vector by first quantizing a vector into a codebook, and then quantizing the residual (the difference
+ between the codeword and the input vector) and then iterating.
+ • TTS systems like VALL-E take a text to be synthesized and a sample of the
+ voice to be used, tokenize with BPE (text) and an audio codec (speech) and
+ then use an LM to conditionally generate discrete audio tokens corresponding
+ to the text prompt, in the voice of the speech sample.
+ • TTS is evaluated by playing a sentence to human listeners and having them
+ give a mean opinion score (MOS).
+
+Historical Notes
+ As we noted at the beginning of the chapter, speech synthesis is one of the earliest
+ fields of speech and language processing. The 18th century saw a number of physical
+ models of the articulation process, including the von Kempelen model mentioned
+ above, as well as the 1773 vowel model of Kratzenstein in Copenhagen using organ
+ pipes.
+ The early 1950s saw the development of three early paradigms of waveform
+ synthesis: formant synthesis, articulatory synthesis, and concatenative synthesis.
+ Formant synthesizers originally were inspired by attempts to mimic human
+ speech by generating artificial spectrograms. The Haskins Laboratories Pattern
+ Playback Machine generated a sound wave by painting spectrogram patterns on a
+ moving transparent belt and using reflectance to filter the harmonics of a waveform (Cooper et al., 1951); other very early formant synthesizers include those of
+ Lawrence (1953) and Fant (1951). Perhaps the most well-known of the formant
+ synthesizers were the Klatt formant synthesizer and its successor systems, including the MITalk system (Allen et al., 1987) and the Klattalk software used in Digital
+ Equipment Corporation’s DECtalk (Klatt, 1982). See Klatt (1975) for details.
+14 C HAPTER 16 • T EXT- TO -S PEECH
+
+ A second early paradigm, concatenative synthesis, seems to have been first proposed by Harris (1953) at Bell Laboratories; he literally spliced together pieces of
+ magnetic tape corresponding to phones. Soon afterwards, Peterson et al. (1958) proposed a theoretical model based on diphones, including a database with multiple
+ copies of each diphone with differing prosody, each labeled with prosodic features
+ including F0, stress, and duration, and the use of join costs based on F0 and formant
+ distance between neighboring units. But such diphone synthesis models were not
+ actually implemented until decades later (Dixon and Maxey 1968, Olive 1977). The
+ 1980s and 1990s saw the invention of unit selection synthesis, based on larger units
+ of non-uniform length and the use of a target cost, (Sagisaka 1988, Sagisaka et al.
+ 1992, Hunt and Black 1996, Black and Taylor 1994, Syrdal et al. 2000).
+ A third paradigm, articulatory synthesizers attempt to synthesize speech by
+ modeling the physics of the vocal tract as an open tube. Representative models
+ include Stevens et al. (1953), Flanagan et al. (1975), and Fant (1986). See Klatt
+ (1975) and Flanagan (1972) for more details.
+ Most early TTS systems used phonemes as input; development of the text analysis components of TTS came somewhat later, drawing on NLP. Indeed the first
+ true text-to-speech system seems to have been the system of Umeda and Teranishi
+ (Umeda et al. 1968, Teranishi and Umeda 1968, Umeda 1976), which included a
+ parser that assigned prosodic boundaries, as well as accent and stress.
+ History of codecs and modern history of neural TTS TBD.
+
+Exercises
+ Exercises 15
+
+Allen, J., M. S. Hunnicut, and D. H. Klatt. 1987. From Text Olive, J. P. 1977. Rule synthesis of speech from dyadic units.
+ to Speech: The MITalk system. Cambridge University ICASSP77.
+ Press. Peterson, G. E., W. S.-Y. Wang, and E. Sivertsen. 1958.
+Ardila, R., M. Branson, K. Davis, M. Kohler, J. Meyer, Segmentation techniques in speech synthesis. JASA,
+ M. Henretty, R. Morais, L. Saunders, F. Tyers, and G. We- 30(8):739–742.
+ ber. 2020. Common voice: A massively-multilingual Sagisaka, Y. 1988. Speech synthesis by rule using an optimal
+ speech corpus. LREC. selection of non-uniform synthesis units. ICASSP.
+Black, A. W. and P. Taylor. 1994. CHATR: A generic speech Sagisaka, Y., N. Kaiki, N. Iwahashi, and K. Mimura. 1992.
+ synthesis system. COLING. Atr – ν-talk speech synthesis system. ICSLP.
+Chen, S., C. Wang, Y. Wu, Z. Zhang, L. Zhou, S. Liu, Stevens, K. N., S. Kasowski, and G. M. Fant. 1953. An elec-
+Z. Chen, Y. Liu, H. Wang, J. Li, L. He, S. Zhao, and trical analog of the vocal tract. JASA, 25(4):734–742.
+ F. Wei. 2025. Neural codec language models are zeroshot text to speech synthesizers. IEEE Trans. on TASLP, Syrdal, A. K., C. W. Wightman, A. Conkie, Y. Stylianou,
+ 33:705–718. M. Beutnagel, J. Schroeter, V. Strom, and K.-S. Lee.
+ 2000. Corpus-based techniques in the AT&T NEXTGEN
+Cooper, F. S., A. M. Liberman, and J. M. Borst. 1951. The
+ synthesis system. ICSLP.
+ interconversion of audible and visible patterns as a basis
+ for research in the perception of speech. Proceedings of Teranishi, R. and N. Umeda. 1968. Use of pronouncing dicthe National Academy of Sciences, 37(5):318–325. tionary in speech synthesis experiments. 6th International
+ Congress on Acoustics.
+Défossez, A., J. Copet, G. Synnaeve, and Y. Adi. 2023. High
+ fidelity neural audio compression. TMLR. Umeda, N. 1976. Linguistic rules for text-to-speech synthesis. Proceedings of the IEEE, 64(4):443–451.
+Dixon, N. and H. Maxey. 1968. Terminal analog synthesis of
+ continuous speech using the diphone method of segment Umeda, N., E. Matui, T. Suzuki, and H. Omura. 1968. Synassembly. IEEE Transactions on Audio and Electroacous- thesis of fairy tale using an analog vocal tract. 6th Intertics, 16(1):40–50. national Congress on Acoustics.
+Fant, G. M. 1951. Speech communication research. Ing. Van Den Oord, A., O. Vinyals, and K. Kavukcuoglu. 2017.
+ Vetenskaps Akad. Stockholm, Sweden, 24:331–337. Neural discrete representation learning. NeurIPS.
+Fant, G. M. 1986. Glottal flow: Models and interaction.
+ Journal of Phonetics, 14:393–399.
+Flanagan, J. L. 1972. Speech Analysis, Synthesis, and Perception. Springer.
+Flanagan, J. L., K. Ishizaka, and K. L. Shipley. 1975. Synthesis of speech from a dynamic model of the vocal
+ cords and vocal tract. The Bell System Technical Journal, 54(3):485–506.
+Gemmeke, J. F., D. P. Ellis, D. Freedman, A. Jansen,
+ W. Lawrence, R. C. Moore, M. Plakal, and M. Ritter.
+ 2017. Audio Set: An ontology and human-labeled dataset
+ for audio events. ICASSP.
+Gray, R. M. 1984. Vector quantization. IEEE Transactions
+ on ASSP, ASSP-1(2):4–29.
+Harris, C. M. 1953. A study of the building blocks in speech.
+ JASA, 25(5):962–969.
+Hunt, A. J. and A. W. Black. 1996. Unit selection in a concatenative speech synthesis system using a large speech
+ database. ICASSP.
+Klatt, D. H. 1975. Voice onset time, friction, and aspiration
+ in word-initial consonant clusters. Journal of Speech and
+ Hearing Research, 18:686–706.
+Klatt, D. H. 1982. The Klattalk text-to-speech conversion
+ system. ICASSP.
+Lawrence, W. 1953. The synthesis of speech from signals
+ which have a low information rate. In W. Jackson, ed.,
+ Communication Theory, 460–469. Butterworth.
+Mousavi, P., G. Maimon, A. Moumen, D. Petermann,
+ J. Shi, H. Wu, H. Yang, A. Kuznetsova, A. Ploujnikov,
+ R. Marxer, B. Ramabhadran, B. Elizalde, L. Lugosch,
+ J. Li, C. Subakan, P. Woodland, M. Kim, H. yi Lee,
+ S. Watanabe, Y. Adi, and M. Ravanelli. 2025. Discrete
+ audio tokens: More than a survey! ArXiv preprint.

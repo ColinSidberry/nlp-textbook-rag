@@ -1,0 +1,1421 @@
+rights reserved. Draft of August 24, 2025.
+
+CHAPTER
+
+22 Lexicons for Sentiment, Affect,
+ and Connotation
+ Some day we’ll be able to measure the power of words
+ Maya Angelou
+
+ affective In this chapter we turn to tools for interpreting affective meaning, extending our
+ study of sentiment analysis in Appendix K. We use the word ‘affective’, following
+ the tradition in affective computing (Picard, 1995) to mean emotion, sentiment, persubjectivity sonality, mood, and attitudes. Affective meaning is closely related to subjectivity,
+ the study of a speaker or writer’s evaluations, opinions, emotions, and speculations
+ (Wiebe et al., 1999).
+ How should affective meaning be defined? One influential typology of affective states comes from Scherer (2000), who defines each class of affective states by
+ factors like its cognitive realization and time course (Fig. 22.1).
+
+ Emotion: Relatively brief episode of response to the evaluation of an external
+ or internal event as being of major significance.
+ (angry, sad, joyful, fearful, ashamed, proud, elated, desperate)
+ Mood: Diffuse affect state, most pronounced as change in subjective feeling, of
+ low intensity but relatively long duration, often without apparent cause.
+ (cheerful, gloomy, irritable, listless, depressed, buoyant)
+ Interpersonal stance: Affective stance taken toward another person in a specific interaction, coloring the interpersonal exchange in that situation.
+ (distant, cold, warm, supportive, contemptuous, friendly)
+ Attitude: Relatively enduring, affectively colored beliefs, preferences, and predispositions towards objects or persons.
+ (liking, loving, hating, valuing, desiring)
+ Personality traits: Emotionally laden, stable personality dispositions and behavior tendencies, typical for a person.
+ (nervous, anxious, reckless, morose, hostile, jealous)
+
+ We can design extractors for each of these kinds of affective states. Appendix K
+ already introduced sentiment analysis, the task of extracting the positive or negative
+ orientation that a writer expresses in a text. This corresponds in Scherer’s typology
+ to the extraction of attitudes: figuring out what people like or dislike, from affectrich texts like consumer reviews of books or movies, newspaper editorials, or public
+ sentiment in blogs or tweets.
+ Detecting emotion and moods is useful for detecting whether a student is confused, engaged, or certain when interacting with a tutorial system, whether a caller
+ to a help line is frustrated, whether someone’s blog posts or tweets indicated depression. Detecting emotions like fear in novels, for example, could help us trace what
+ groups or situations are feared and how that changes over time.
+2 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ Detecting different interpersonal stances can be useful when extracting information from human-human conversations. The goal here is to detect stances like
+ friendliness or awkwardness in interviews or friendly conversations, for example for
+ summarizing meetings or finding parts of a conversation where people are especially
+ excited or engaged, conversational hot spots that can help in meeting summarization. Detecting the personality of a user—such as whether the user is an extrovert
+ or the extent to which they are open to experience— can help improve conversational agents, which seem to work better if they match users’ personality expectations (Mairesse and Walker, 2008). And affect is important for generation as well
+ as recognition; synthesizing affect is important for conversational agents in various
+ domains, including literacy tutors such as children’s storybooks, or computer games.
+ In Appendix K we introduced the use of naive Bayes classification to classify a
+ document’s sentiment. Various classifiers have been successfully applied to many of
+ these tasks, using all the words in the training set as input to a classifier which then
+ determines the affect status of the text.
+ In this chapter we focus on an alternative model, in which instead of using every
+ word as a feature, we focus only on certain words, ones that carry particularly strong
+ cues to affect or sentiment. We call these lists of words affective lexicons or sentiment lexicons. These lexicons presuppose a fact about semantics: that words have
+ connotations affective meanings or connotations. The word connotation has different meanings
+ in different fields, but here we use it to mean the aspects of a word’s meaning that
+ are related to a writer or reader’s emotions, sentiment, opinions, or evaluations. In
+ addition to their ability to help determine the affective status of a text, connotation
+ lexicons can be useful features for other kinds of affective tasks, and for computational social science analysis.
+ In the next sections we introduce basic theories of emotion, show how sentiment
+ lexicons are a special case of emotion lexicons, and mention some useful lexicons.
+ We then survey three ways for building lexicons: human labeling, semi-supervised,
+ and supervised. Finally, we talk about how to detect affect toward a particular entity,
+ and introduce connotation frames.
+
+ emotion One of the most important affective classes is emotion, which Scherer (2000) defines
+ as a “relatively brief episode of response to the evaluation of an external or internal
+ event as being of major significance”.
+ Detecting emotion has the potential to improve a number of language processing
+ tasks. Emotion recognition could help dialogue systems like tutoring systems detect
+ that a student was unhappy, bored, hesitant, confident, and so on. Automatically
+ detecting emotions in reviews or customer responses (anger, dissatisfaction, trust)
+ could help businesses recognize specific problem areas or ones that are going well.
+ Emotion can play a role in medical NLP tasks like helping diagnose depression or
+ suicidal intent. Detecting emotions expressed toward characters in novels might
+ play a role in understanding how different social groups were viewed by society at
+ different times.
+ Computational models of emotion in NLP have mainly been based on two families of theories of emotion (out of the many studied in the field of affective science).
+ In one of these families, emotions are viewed as fixed atomic units, limited in numbasic emotions ber, and from which others are generated, often called basic emotions (Tomkins
+ 22.1 • D EFINING E MOTION 3
+
+1962, Plutchik 1962), a model dating back to Darwin. Perhaps the most well-known
+of this family of theories are the 6 emotions proposed by Ekman (e.g., Ekman 1999)
+to be universally present in all cultures: surprise, happiness, anger, fear, disgust,
+sadness. Another atomic theory is the Plutchik (1980) wheel of emotion, consisting
+of 8 basic emotions in four opposing pairs: joy–sadness, anger–fear, trust–disgust,
+and anticipation–surprise, together with the emotions derived from them, shown in
+Fig. 22.2.
+
+ The second class of emotion theories widely used in NLP views emotion as a
+space in 2 or 3 dimensions (Russell, 1980). Most models include the two dimensions
+valence and arousal, and many add a third, dominance. These can be defined as:
+ valence: the pleasantness of the stimulus
+ arousal: the level of alertness, activeness, or energy provoked by the stimulus
+ dominance: the degree of control or dominance exerted by the stimulus or the
+ emotion
+Sentiment can be viewed as a special case of this second view of emotions as points
+in space. In particular, the valence dimension, measuring how pleasant or unpleasant
+a word is, is often used directly as a measure of sentiment.
+ In these lexicon-based models of affect, the affective meaning of a word is generally fixed, irrespective of the linguistic context in which a word is used, or the
+dialect or culture of the speaker. By contrast, other models in affective science represent emotions as much richer processes involving cognition (Barrett et al., 2007). In
+appraisal theory, for example, emotions are complex processes, in which a person
+considers how an event is congruent with their goals, taking into account variables
+like the agency, certainty, urgency, novelty and control associated with the event
+(Moors et al., 2013). Computational models in NLP taking into account these richer
+theories of emotion will likely play an important role in future work.
+4 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ A wide variety of affect lexicons have been created and released. The most basic
+ lexicons label words along one dimension of semantic variability, generally called
+ “sentiment” or “valence”.
+ In the simplest lexicons this dimension is represented in a binary fashion, with
+ a wordlist for positive words and a wordlist for negative words. The oldest is the
+ General
+ Inquirer General Inquirer (Stone et al., 1966), which drew on content analysis and on early
+ work in the cognitive psychology of word meaning (Osgood et al., 1957). The General Inquirer has a lexicon of 1915 positive words and a lexicon of 2291 negative
+ words (as well as other lexicons discussed below). The MPQA Subjectivity lexicon
+ (Wilson et al., 2005) has 2718 positive and 4912 negative words drawn from prior
+ lexicons plus a bootstrapped list of subjective words and phrases (Riloff and Wiebe,
+ 2003). Each entry in the lexicon is hand-labeled for sentiment and also labeled for
+ reliability (strongly subjective or weakly subjective). The polarity lexicon of Hu
+ and Liu (2004) gives 2006 positive and 4783 negative words, drawn from product
+ reviews, labeled using a bootstrapping method from WordNet.
+
+Positive admire, amazing, assure, celebration, charm, eager, enthusiastic, excellent, fancy, fantastic, frolic, graceful, happy, joy, luck, majesty, mercy, nice, patience, perfect, proud,
+ rejoice, relief, respect, satisfactorily, sensational, super, terrific, thank, vivid, wise, wonderful, zest
+Negative abominable, anger, anxious, bad, catastrophe, cheap, complaint, condescending, deceit,
+ defective, disappointment, embarrass, fake, fear, filthy, fool, guilt, hate, idiot, inflict, lazy,
+ miserable, mourn, nervous, objection, pest, plot, reject, scream, silly, terrible, unfriendly,
+ vile, wicked
+MPQA Subjectivity lexicon (Wilson et al., 2005), and the polarity lexicon of Hu and Liu (2004).
+
+ Slightly more general than these sentiment lexicons are lexicons that assign each
+ word a value on all three affective dimensions. The NRC Valence, Arousal, and
+ Dominance (VAD) lexicon (Mohammad, 2018a) assigns valence, arousal, and dominance scores to 20,000 words. Some examples are shown in Fig. 22.4.
+
+ Valence Arousal Dominance
+ vacation .840 enraged .962 powerful .991
+ delightful .918 party .840 authority .935
+ whistle .653 organized .337 saxophone .482
+ consolation .408 effortless .120 discouraged .0090
+ torture .115 napping .046 weak .045
+
+ EmoLex The NRC Word-Emotion Association Lexicon, also called EmoLex (Mohammad and Turney, 2013), uses the Plutchik (1980) 8 basic emotions defined above.
+ The lexicon includes around 14,000 words including words from prior lexicons as
+ well as frequent nouns, verbs, adverbs and adjectives. Values from the lexicon for
+ some sample words:
+ 22.3 • C REATING A FFECT L EXICONS BY H UMAN L ABELING 5
+
+ anticipation
+
+ negative
+ surprise
+
+ positive
+ sadness
+ disgust
+ anger
+
+ trust
+ fear
+ joy
+ Word
+ reward 0 1 0 0 1 0 1 1 1 0
+ worry 0 1 0 1 0 1 0 0 0 1
+ tenderness 0 0 0 0 1 0 0 0 1 0
+ sweetheart 0 1 0 0 1 1 0 1 1 0
+ suddenly 0 0 0 0 0 0 1 0 0 0
+ thirst 0 1 0 0 0 1 1 0 0 0
+ garbage 0 0 1 0 0 0 0 0 0 1
+
+ For a smaller set of 5,814 words, the NRC Emotion/Affect Intensity Lexicon
+ (Mohammad, 2018b) contains real-valued scores of association for anger, fear, joy,
+ and sadness; Fig. 22.5 shows examples.
+
+ Anger Fear Joy Sadness
+ outraged 0.964 horror 0.923 superb 0.864 sad 0.844
+ violence 0.742 anguish 0.703 cheered 0.773 guilt 0.750
+ coup 0.578 pestilence 0.625 rainbow 0.531 unkind 0.547
+ oust 0.484 stressed 0.531 gesture 0.387 difficulties 0.421
+ suspicious 0.484 failing 0.531 warms 0.391 beggar 0.422
+ nurture 0.059 confident 0.094 hardship .031 sing 0.017
+ Mohammad (2018b).
+
+ LIWC LIWC, Linguistic Inquiry and Word Count, is a widely used set of 73 lexicons containing over 2300 words (Pennebaker et al., 2007), designed to capture
+ aspects of lexical meaning relevant for social psychological tasks. In addition to
+ sentiment-related lexicons like ones for negative emotion (bad, weird, hate, problem, tough) and positive emotion (love, nice, sweet), LIWC includes lexicons for
+ categories like anger, sadness, cognitive mechanisms, perception, tentative, and inhibition, shown in Fig. 22.6.
+ There are various other hand-built affective lexicons. The General Inquirer includes additional lexicons for dimensions like strong vs. weak, active vs. passive,
+ overstated vs. understated, as well as lexicons for categories like pleasure, pain,
+ virtue, vice, motivation, and cognitive orientation.
+ concrete Another useful feature for various tasks is the distinction between concrete
+ abstract words like banana or bathrobe and abstract words like belief and although. The
+ lexicon in Brysbaert et al. (2014) used crowdsourcing to assign a rating from 1 to 5
+ of the concreteness of 40,000 words, thus assigning banana, bathrobe, and bagel 5,
+ belief 1.19, although 1.07, and in between words like brisk a 2.5.
+
+ The earliest method used to build affect lexicons, and still in common use, is to have
+crowdsourcing humans label each word. This is now most commonly done via crowdsourcing:
+ breaking the task into small pieces and distributing them to a large number of anno-
+6 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ Positive Negative
+ Emotion Emotion Insight Inhibition Family Negate
+ appreciat* anger* aware* avoid* brother* aren’t
+ comfort* bore* believe careful* cousin* cannot
+ great cry decid* hesitat* daughter* didn’t
+ happy despair* feel limit* family neither
+ interest fail* figur* oppos* father* never
+ joy* fear know prevent* grandf* no
+ perfect* griev* knew reluctan* grandm* nobod*
+ please* hate* means safe* husband none
+ safe* panic* notice* stop mom nor
+ terrific suffers recogni* stubborn* mother nothing
+ value terrify sense wait niece* nowhere
+ wow* violent* think wary wife without
+ The * means the previous letters are a word prefix and all words with that prefix are included
+ in the category.
+
+ tators. Let’s take a look at some of the methodological choices for two crowdsourced
+ emotion lexicons.
+ The NRC Emotion Lexicon (EmoLex) (Mohammad and Turney, 2013), labeled
+ emotions in two steps. To ensure that the annotators were judging the correct sense
+ of the word, they first answered a multiple-choice synonym question that primed
+ the correct sense of the word (without requiring the annotator to read a potentially
+ confusing sense definition). These were created automatically using the headwords
+ associated with the thesaurus category of the sense in question in the Macquarie
+ dictionary and the headwords of 3 random distractor categories. An example:
+ Which word is closest in meaning (most related) to startle?
+ • automobile
+ • shake
+ • honesty
+ • entertain
+ For each word (e.g. startle), the annotator was then asked to rate how associated
+ that word is with each of the 8 emotions (joy, fear, anger, etc.). The associations
+ were rated on a scale of not, weakly, moderately, and strongly associated. Outlier
+ ratings were removed, and then each term was assigned the class chosen by the majority of the annotators, with ties broken by choosing the stronger intensity, and then
+ the 4 levels were mapped into a binary label for each word (no and weak mapped to
+ 0, moderate and strong mapped to 1).
+ The NRC VAD Lexicon (Mohammad, 2018a) was built by selecting words and
+ emoticons from prior lexicons and annotating them with crowd-sourcing using bestbest-worst
+ scaling worst scaling (Louviere et al. 2015, Kiritchenko and Mohammad 2017). In bestworst scaling, annotators are given N items (usually 4) and are asked which item is
+ the best (highest) and which is the worst (lowest) in terms of some property. The
+ set of words used to describe the ends of the scales are taken from prior literature.
+ For valence, for example, the raters were asked:
+ Q1. Which of the four words below is associated with the MOST happiness / pleasure / positiveness / satisfaction / contentedness / hopefulness
+ OR LEAST unhappiness / annoyance / negativeness / dissatisfaction /
+ 22.4 • S EMI - SUPERVISED I NDUCTION OF A FFECT L EXICONS 7
+
+ melancholy / despair? (Four words listed as options.)
+ Q2. Which of the four words below is associated with the LEAST happiness / pleasure / positiveness / satisfaction / contentedness / hopefulness OR MOST unhappiness / annoyance / negativeness / dissatisfaction
+ / melancholy / despair? (Four words listed as options.)
+ The score for each word in the lexicon is the proportion of times the item was chosen
+ as the best (highest V/A/D) minus the proportion of times the item was chosen as the
+ worst (lowest V/A/D). The agreement between annotations are evaluated by splitsplit-half
+ reliability half reliability: split the corpus in half and compute the correlations between the
+ annotations in the two halves.
+
+ Another common way to learn sentiment lexicons is to start from a set of seed words
+ that define two poles of a semantic axis (words like good or bad), and then find ways
+ to label each word w by its similarity to the two seed sets. Here we summarize two
+ families of seed-based semi-supervised lexicon induction algorithms, axis-based and
+ graph-based.
+
+ 22.4.1 Semantic Axis Methods
+ One of the most well-known lexicon induction methods, the Turney and Littman
+ (2003) algorithm, is given seed words like good or bad, and then for each word w to
+ be labeled, measures both how similar it is to good and how different it is from bad.
+ Here we describe a slight extension of the algorithm due to An et al. (2018), which
+ is based on computing a semantic axis.
+ In the first step, we choose seed words by hand. There are two methods for
+ dealing with the fact that the affect of a word is different in different contexts: (1)
+ start with a single large seed lexicon and rely on the induction algorithm to finetune
+ it to the domain, or (2) choose different seed words for different genres. Hellrich
+ et al. (2019) suggests that for modeling affect across different historical time periods,
+ starting with a large modern affect dictionary is better than small seedsets tuned to
+ be stable across time. As an example of the second approach, Hamilton et al. (2016)
+ define one set of seed words for general sentiment analysis, a different set for Twitter,
+ and yet another set for sentiment in financial text:
+
+Domain Positive seeds Negative seeds
+General good, lovely, excellent, fortunate, pleas- bad, horrible, poor, unfortunate, unant, delightful, perfect, loved, love, pleasant, disgusting, evil, hated, hate,
+ happy unhappy
+Twitter love, loved, loves, awesome, nice, hate, hated, hates, terrible, nasty, awful,
+ amazing, best, fantastic, correct, happy worst, horrible, wrong, sad
+Finance successful, excellent, profit, beneficial, negligent, loss, volatile, wrong, losses,
+ improving, improved, success, gains, damages, bad, litigation, failure, down,
+ positive negative
+ In the second step, we compute embeddings for each of the pole words. These
+ embeddings can be off-the-shelf word2vec embeddings, or can be computed directly
+8 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ on a specific corpus (for example using a financial corpus if a finance lexicon is the
+ goal), or we can finetune off-the-shelf embeddings to a corpus. Fine-tuning is especially important if we have a very specific genre of text but don’t have enough data
+ to train good embeddings. In finetuning, we begin with off-the-shelf embeddings
+ like word2vec, and continue training them on the small target corpus.
+ Once we have embeddings for each pole word, we create an embedding that
+ represents each pole by taking the centroid of the embeddings of each of the seed
+ words; recall that the centroid is the multidimensional version of the mean. Given
+ a set of embeddings for the positive seed words S+ = {E(w+ +
+ 1 ), E(w2 ), ..., E(wn )},
+ − − − −
+ and embeddings for the negative seed words S = {E(w1 ), E(w2 ), ..., E(wm )}, the
+ pole centroids are:
+ n
+ 1X
+ V+ = E(w+
+ i )
+ n
+ m
+ 1X
+ V− = E(w−
+ i ) (22.1)
+ m
+
+ The semantic axis defined by the poles is computed just by subtracting the two vectors:
+
+ Vaxis = V+ − V− (22.2)
+
+ Vaxis , the semantic axis, is a vector in the direction of positive sentiment. Finally,
+ we compute (via cosine similarity) the angle between the vector in the direction of
+ positive sentiment and the direction of w’s embedding. A higher cosine means that
+ w is more aligned with S+ than S− .
+
+ score(w) = cos E(w), Vaxis
+ 
+
+ E(w) · Vaxis
+ = (22.3)
+ kE(w)kkVaxis k
+
+ If a dictionary of words with sentiment scores is sufficient, we’re done! Or if we
+ need to group words into a positive and a negative lexicon, we can use a threshold
+ or other method to give us discrete lexicons.
+
+ 22.4.2 Label Propagation
+ An alternative family of methods defines lexicons by propagating sentiment labels
+ on graphs, an idea suggested in early work by Hatzivassiloglou and McKeown
+ (1997). We’ll describe the simple SentProp (Sentiment Propagation) algorithm of
+ Hamilton et al. (2016), which has four steps:
+ 1. Define a graph: Given word embeddings, build a weighted lexical graph by
+ connecting each word with its k nearest neighbors (according to cosine similarity). The weights of the edge between words wi and w j are set as:
+ !
+ wi > wj
+ Ei, j = arccos − . (22.4)
+ kwi kkwj k
+
+ 2. Define a seed set: Choose positive and negative seed words.
+ 22.4 • S EMI - SUPERVISED I NDUCTION OF A FFECT L EXICONS 9
+
+ 3. Propagate polarities from the seed set: Now we perform a random walk on
+ this graph, starting at the seed set. In a random walk, we start at a node and
+ then choose a node to move to with probability proportional to the edge probability. A word’s polarity score for a seed set is proportional to the probability
+ of a random walk from the seed set landing on that word (Fig. 22.7).
+ 4. Create word scores: We walk from both positive and negative seed sets,
+ resulting in positive (rawscore+ (wi )) and negative (rawscore− (wi )) raw label
+ scores. We then combine these values into a positive-polarity score as:
+
+ rawscore+ (wi )
+ score+ (wi ) = (22.5)
+ rawscore+ (wi ) + rawscore− (wi )
+ It’s often helpful to standardize the scores to have zero mean and unit variance
+ within a corpus.
+ 5. Assign confidence to each score: Because sentiment scores are influenced by
+ the seed set, we’d like to know how much the score of a word would change if
+ a different seed set is used. We can use bootstrap sampling to get confidence
+ regions, by computing the propagation B times over random subsets of the
+ positive and negative seed sets (for example using B = 50 and choosing 7 of
+ the 10 seed words each time). The standard deviation of the bootstrap sampled
+ polarity scores gives a confidence measure.
+
+ loathe loathe
+ like like
+ abhor abhor
+
+ idolize find idolize find
+ love hate love hate
+ dislike dislike
+ see uncover see uncover
+ adore despise adore despise
+ disapprove disapprove
+ appreciate notice appreciate notice
+
+ (a) (b)
+polarity scores (shown here as colors green or red) based on the frequency of random walk visits.
+
+ 22.4.3 Other Methods
+ The core of semisupervised algorithms is the metric for measuring similarity with
+ the seed words. The Turney and Littman (2003) and Hamilton et al. (2016) approaches above used embedding cosine as the distance metric: words were labeled
+ as positive basically if their embeddings had high cosines with positive seeds and
+ low cosines with negative seeds. Other methods have chosen other kinds of distance
+ metrics besides embedding cosine.
+ For example the Hatzivassiloglou and McKeown (1997) algorithm uses syntactic
+ cues; two adjectives are considered similar if they were frequently conjoined by and
+ and rarely conjoined by but. This is based on the intuition that adjectives conjoined
+ by the words and tend to have the same polarity; positive adjectives are generally
+ coordinated with positive, negative with negative:
+ fair and legitimate, corrupt and brutal
+ but less often positive adjectives coordinated with negative:
+ *fair and brutal, *corrupt and legitimate
+10 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ By contrast, adjectives conjoined by but are likely to be of opposite polarity:
+ fair but brutal
+ Another cue to opposite polarity comes from morphological negation (un-, im-,
+ -less). Adjectives with the same root but differing in a morphological negative (adequate/inadequate, thoughtful/thoughtless) tend to be of opposite polarity.
+ Yet another method for finding words that have a similar polarity to seed words
+ is to make use of a thesaurus like WordNet (Kim and Hovy 2004, Hu and Liu 2004).
+ A word’s synonyms presumably share its polarity while a word’s antonyms probably
+ have the opposite polarity. After a seed lexicon is built, each lexicon is updated as
+ follows, possibly iterated.
+ Lex+ : Add synonyms of positive words (well) and antonyms (like fine) of negative
+ words
+ Lex− : Add synonyms of negative words (awful) and antonyms (like evil) of positive
+ words
+ An extension of this algorithm assigns polarity to WordNet senses, called Senti-
+SentiWordNet WordNet (Baccianella et al., 2010). Fig. 22.8 shows some examples.
+
+Synset Pos Neg Obj
+good#6 ‘agreeable or pleasing’ 1 0 0
+respectable#2 honorable#4 good#4 estimable#2 ‘deserving of esteem’ 0.75 0 0.25
+estimable#3 computable#1 ‘may be computed or estimated’ 0 0 1
+sting#1 burn#4 bite#2 ‘cause a sharp or stinging pain’ 0 0.875 .125
+acute#6 ‘of critical importance and consequence’ 0.625 0.125 .250
+acute#4 ‘of an angle; less than 90 degrees’ 0 0 1
+acute#1 ‘having or experiencing a rapid onset and short but severe course’ 0 0.5 0.5
+of homonymous words: estimable#3 is purely objective, while estimable#2 is positive; acute can be positive
+(acute#6), negative (acute#1), or neutral (acute #4).
+
+ In this algorithm, polarity is assigned to entire synsets rather than words. A
+ positive lexicon is built from all the synsets associated with 7 positive words, and a
+ negative lexicon from synsets associated with 7 negative words. A classifier is then
+ trained from this data to take a WordNet gloss and decide if the sense being defined
+ is positive, negative or neutral. A further step (involving a random-walk algorithm)
+ assigns a score to each WordNet synset for its degree of positivity, negativity, and
+ neutrality.
+ In summary, semisupervised algorithms use a human-defined set of seed words
+ for the two poles of a dimension, and use similarity metrics like embedding cosine,
+ coordination, morphology, or thesaurus structure to score words by how similar they
+ are to the positive seeds and how dissimilar to the negative seeds.
+
+ Semi-supervised methods require only minimal human supervision (in the form of
+ seed sets). But sometimes a supervision signal exists in the world and can be made
+ use of. One such signal is the scores associated with online reviews.
+ The web contains an enormous number of online reviews for restaurants, movies,
+ books, or other products, each of which have the text of the review along with an
+ 22.5 • S UPERVISED L EARNING OF W ORD S ENTIMENT 11
+
+ associated review score: a value that may range from 1 star to 5 stars, or scoring 1
+ to 10. Fig. 22.9 shows samples extracted from restaurant, book, and movie reviews.
+
+ Movie review excerpts (IMDb)
+10 A great movie. This film is just a wonderful experience. It’s surreal, zany, witty and slapstick
+ all at the same time. And terrific performances too.
+1 This was probably the worst movie I have ever seen. The story went nowhere even though they
+ could have done some interesting stuff with it.
+ Restaurant review excerpts (Yelp)
+5 The service was impeccable. The food was cooked and seasoned perfectly... The watermelon
+ was perfectly square ... The grilled octopus was ... mouthwatering...
+2 ...it took a while to get our waters, we got our entree before our starter, and we never received
+ silverware or napkins until we requested them...
+ Book review excerpts (GoodReads)
+1 I am going to try and stop being deceived by eye-catching titles. I so wanted to like this book
+ and was so disappointed by it.
+5 This book is hilarious. I would recommend it to anyone looking for a satirical read with a
+ romantic twist and a narrator that keeps butting in
+ Product review excerpts (Amazon)
+5 The lid on this blender though is probably what I like the best about it... enables you to pour
+ into something without even taking the lid off! ... the perfect pitcher! ... works fantastic.
+1 I hate this blender... It is nearly impossible to get frozen fruit and ice to turn into a smoothie...
+ You have to add a TON of liquid. I also wish it had a spout ...
+IMDb, which is on a scale of 1 to 10 stars.
+
+ We can use this review score as supervision: positive words are more likely to
+ appear in 5-star reviews; negative words in 1-star reviews. And instead of just a
+ binary polarity, this kind of supervision allows us to assign a word a more complex
+ representation of its polarity: its distribution over stars (or other scores).
+ Thus in a ten-star system we could represent the sentiment of each word as a
+ 10-tuple, each number a score representing the word’s association with that polarity
+ level. This association can be a raw count, or a likelihood P(w|c), or some other
+ function of the count, for each class c from 1 to 10.
+ For example, we could compute the IMDb likelihood of a word like disappoint(ed/ing) occurring in a 1 star review by dividing the number of times disappoint(ed/ing) occurs in 1-star reviews in the IMDb dataset (8,557) by the total number of words occurring in 1-star reviews (25,395,214), so the IMDb estimate of
+ P(disappointing|1) is .0003.
+ A slight modification of this weighting, the normalized likelihood, can be used
+ as an illuminating visualization (Potts, 2011)1
+ count(w, c)
+ P(w|c) = P
+ w∈C count(w, c)
+ P(w|c)
+ PottsScore(w) = P (22.6)
+ c P(w|c)
+
+ Dividing the IMDb estimate P(disappointing|1) of .0003 by the sum of the likelihood P(w|c) over all categories gives a Potts score of 0.10. The word disappointing
+ 1 Each element of the Potts score of a word w and category c can be shown to be a variant of the
+ pointwise mutual information pmi(w, c) without the log term; see Exercise 22.1.
+ Example: atten
+ IMDB
+
+ Cat = 0.3
+ Cat^2 = -
+
+12 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+ 0.15
+
+ 0.09
+
+ thus is associated with the vector [.10, .12, .14, .14, .13, .11, .08, .06, .06, .05]. The 0.05
+
+ Potts diagram Potts diagram (Potts, 2011) is a visualization of these word scores, representing the
+
+ -0.50
+ -0.39
+ -0.28
+ prior sentiment of a word as a distribution over the rating categories.
+ Fig. 22.10 shows the Potts diagrams for 3 positive and 3 negative scalar adjectives. Note that the curve for strongly positive scalars have the shape of the letter
+ J, while strongly negative scalars look like a reverse J. By contrast, weakly positive and negative scalars have a hump-shape, with the maximum either below the
+
+ “Potts&diagrams”
+ mean (weakly negative words like disappointing) or above the mean (weakly positive words like good). These shapes offer an illuminating typology of affective
+ IMDB
+ Potts,&Christopher.& 2011.&NSF&wor
+ restructuring& adjectives. Ca
+ meaning. Cat^
+
+ Negative scalars Emphatics 0.17
+ Atten
+ Positive scalars 0.09
+ totally 0.04 som
+ good disappointing
+
+ -0.50
+ -0.39
+ -0.28
+ 1 2 3 4 5 6 7 8 9 10 1 2 3 4
+ 1 2 3 4 5 6 7 8 9 10 rating
+ rating 1 2 3 4 5 6 7 8 9 10
+ rating
+ absolutely f
+ great bad
+ IMDB
+
+ 1 2 3 4 5 6 7 8 9 10 1 2 3 4Ca
+ rating Cat
+ 1 2 3 4 5 6 7 8 9 10 1 2 3 4 5 6 7 8 9 10
+ rating rating
+ utterly p
+ excellent terrible 0.13
+ 0.09
+ 0.05
+
+ 1 2 3 4 5 6 7 8 9 10 1 2 3 4
+
+ -0.50
+ -0.39
+ -0.28
+ rating
+ 1 2 3 4 5 6 7 8 9 10 1 2 3 4 5 6 7 8 9 10
+ rating rating
+
+ hump-shape for more weakly polarized adjectives.
+
+ Fig. 22.11 shows the Potts diagrams for emphasizing and attenuating adverbs.
+ Note that emphatics tend to have a J-shape (most likely to occur in the most positive reviews) or a U-shape (most likely to occur in the strongly positive and negative). Attenuators all have the hump-shape, emphasizing the middle of the scale and
+ downplaying both extremes. The diagrams can be used both as a typology of lexical
+ sentiment, and also play a role in modeling sentiment compositionality.
+ In addition to functions like posterior P(c|w), likelihood P(w|c), or normalized
+ likelihood (Eq. 22.6) many other functions of the count of a word occurring with a
+ sentiment label have been used. We’ll introduce some of these on page 16, including
+ ideas like normalizing the counts per writer in Eq. 22.14.
+
+ 22.5.1 Log Odds Ratio Informative Dirichlet Prior
+ One thing we often want to do with word polarity is to distinguish between words
+ that are more likely to be used in one category of texts than in another. We may, for
+ example, want to know the words most associated with 1 star reviews versus those
+ associated with 5 star reviews. These differences may not be just related to sentiment. We might want to find words used more often by Democratic than Republican
+ -0.
+ -0.
+ -0.
+ -0.
+ -0.
+
+ 0.
+ 0.
+ 0.
+ 0.
+ 0.
+
+ -0.
+
+ -0.
+
+ 0.
+
+ 0.
+
+ 0.
+
+ -0.
+
+ -0.
+
+ 0.
+ Category Category Category
+
+ fairly/r
+
+ “Potts&diagrams” Potts,&Christopher.& 2011.&NSF&workshop&on&
+ restructuring&
+ • S UPERVISED L EARNINGCat^2 W ORD
+ IMDB – 33,515 tokens
+
+ S ENTIMENT
+ Cat = -0.13 (p = 0.284)
+ OF= -5.37 (p < 0.001) 13 (p = 0.007)
+ Cat = 0.2 (p = 0.265)
+ Cat^2 = -4.16
+ OpenTable – 2,829 tokens Goodreads – 1,806
+
+ Cat = -0.87 (p
+ Cat^2 = -5.74 (p
+ 0.35
+ 0.31
+
+ Negative scalars Emphatics 0.17
+ Attenuators 0.18
+ve scalars 0.09 0.12
+ totally 0.04 somewhat 0.08
+ 0.05
+good disappointing
+
+ -0.50
+ -0.39
+ -0.28
+ -0.17
+ -0.06
+
+ 0.06
+ 0.17
+ 0.28
+ 0.39
+ 0.50
+
+ -0.50
+
+ -0.25
+
+ 0.00
+
+ 0.25
+
+ 0.50
+
+ -0.50
+
+ -0.25
+
+ 0.00
+ Category Category Category
+
+ 1 2 3 4 5 6 7 8 9 10 1 2 3 4 5 6 7 8 9 10
+ 5 6 7 8 9 10 rating
+ rating 1 2 3 4 5 6 7 8 9 10 rating
+ rating
+ absolutely fairly
+great bad pretty/r
+ IMDB – 176,264 tokens OpenTable – 8,982 tokens Goodreads – 11,89
+
+ 1 2 3 4 5 6 7 8 9 10 1 2 3 4Cat5= -0.43
+ 6 7(p 8< 0.001)
+ 9 10 Cat = -0.64 (p = 0.035) Cat = -0.71 (p
+ rating Cat^2 = -3.6 (p < 0.001)
+ rating Cat^2 = -4.47 (p = 0.007) Cat^2 = -4.59 (p
+ 5 6 7 8 9 10 1 2 3 4 5 6 7 8 9 10
+ 0.34
+ rating rating 0.32
+
+ utterly pretty
+xcellent terrible 0.13
+ 0.19
+ 0.15
+ 0.14
+ 0.09
+
+ 1 2 3 4 5 6 7 8 9 10 1 2 3 4 5 6 7 8 9 10
+
+ -0.50
+ -0.39
+ -0.28
+ -0.17
+ -0.06
+
+ 0.06
+ 0.17
+ 0.28
+ 0.39
+ 0.50
+
+ -0.50
+
+ -0.25
+
+ 0.00
+
+ 0.25
+
+ 0.50
+
+ -0.50
+
+ -0.25
+
+ 0.00
+ rating rating
+ Category Category Category
+4 5 6 7 8 9 10 1 2 3 4 5 6 7 8 9 10
+ rating rating Figure 22.11 Potts diagrams (Potts, 2011) for emphatic and attenuating adverbs.
+
+ members of Congress, or words used more often in menus of expensive restaurants
+ than cheap restaurants.
+ Given two classes of documents, to find words more associated with one category than another, we could measure the difference in frequencies (is a word w more
+ frequent in class A or class B?). Or instead of the difference in frequencies we could
+ compute the ratio of frequencies, or compute the log odds ratio (the log of the ratio
+ between the odds of the two words). We could then sort words by whichever association measure we pick, ranging from words overrepresented in category A to words
+ overrepresented in category B.
+ The problem with simple log-likelihood or log odds methods is that they overemphasize differences in very rare words, and often also in very frequent words. Very
+ rare words will seem to occur very differently in the two corpora since with tiny
+ counts there may be statistical fluctuations, or even zero occurrences in one corpus
+ compared to non-zero occurrences in the other. Very frequent words will also seem
+ different since all counts are large.
+ In this section we walk through the details of one solution to this problem: the
+ “log odds ratio informative Dirichlet prior” method of Monroe et al. (2008) that is a
+ particularly useful method for finding words that are statistically overrepresented in
+ one particular category of texts compared to another. It’s based on the idea of using
+ another large corpus to get a prior estimate of what we expect the frequency of each
+ word to be.
+ Let’s start with the goal: assume we want to know whether the word horrible
+ log likelihood occurs more in corpus i or corpus j. We could compute the log likelihood ratio,
+ ratio
+ using f i (w) to mean the frequency of word w in corpus i, and ni to mean the total
+ number of words in corpus i:
+
+ Pi (horrible)
+ llr(horrible) = log
+ P j (horrible)
+ = log Pi (horrible) − log P j (horrible)
+ fi (horrible) f j (horrible)
+ = log i
+ − log (22.7)
+ n nj
+14 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ log odds ratio Instead, let’s compute the log odds ratio: does horrible have higher odds in i or in
+ j:
+
+ Pi (horrible) P j (horrible)
+    
+ lor(horrible) = log − log
+ 1 − Pi (horrible) 1 − P j (horrible)
+  i  j
+ f (horrible) f (horrible)
+  
+
+ = log 
+  ni  − log 
+   nj 
+ fi (horrible) f j (horrible)
+ 
+ 1− i 1− j
+ n n
+  i
+ f (horrible) f j (horrible)
+   
+ = log i i − log (22.8)
+ n − f (horrible) n j − f j (horrible)
+ The Dirichlet intuition is to use a large background corpus to get a prior estimate of
+ what we expect the frequency of each word w to be. We’ll do this very simply by
+ adding the counts from that corpus to the numerator and denominator, so that we’re
+ essentially shrinking the counts toward that prior. It’s like asking how large are the
+ differences between i and j given what we would expect given their frequencies in
+ a well-estimated large background corpus.
+ The method estimates the difference between the frequency of word w in two
+ (i− j)
+ corpora i and j via the prior-modified log odds ratio for w, δw , which is estimated
+ as:
+
+ fwj + αw
+ !
+ fwi + αw
+  
+ (i− j)
+ δw = log i − log (22.9)
+ n + α0 − ( fwi + αw ) n j + α0 − ( fwj + αw )
+
+ (where ni is the size of corpus i, n j is the size of corpus j, fwi is the count of word
+ w in corpus i, fwj is the count of word w in corpus j, α0 is the scaled size of the
+ background corpus, and αw is the scaled count of word w in the background corpus.)
+ In addition, Monroe et al. (2008) make use of an estimate for the variance of the
+ log–odds–ratio:
+ 
+ (i− j)
+  1 1
+ σ 2 δ̂w ≈ i + j (22.10)
+ fw + αw fw + αw
+
+ The final statistic for a word is then the z–score of its log–odds–ratio:
+ (i− j)
+ δ̂w
+ r (22.11)
+ (i− j)
+  
+ σ 2 δ̂w
+
+ The Monroe et al. (2008) method thus modifies the commonly used log odds ratio
+ in two ways: it uses the z-scores of the log odds ratio, which controls for the amount
+ of variance in a word’s frequency, and it uses counts from a background corpus to
+ provide a prior count for words.
+ Fig. 22.12 shows the method applied to a dataset of restaurant reviews from
+ Yelp, comparing the words used in 1-star reviews to the words used in 5-star reviews
+ (Jurafsky et al., 2014). The largest difference is in obvious sentiment words, with the
+ 1-star reviews using negative sentiment words like worse, bad, awful and the 5-star
+ reviews using positive sentiment words like great, best, amazing. But there are other
+ illuminating differences. 1-star reviews use logical negation (no, not), while 5-star
+ reviews use emphatics and emphasize universality (very, highly, every, always). 1star reviews use first person plurals (we, us, our) while 5 star reviews use the second
+ 22.6 • U SING L EXICONS FOR S ENTIMENT R ECOGNITION 15
+
+ person. 1-star reviews talk about people (manager, waiter, customer) while 5-star
+ reviews talk about dessert and properties of expensive restaurants like courses and
+ atmosphere. See Jurafsky et al. (2014) for more details.
+
+Class Words in 1-star reviews Class Words in 5-star reviews
+Negative worst, rude, terrible, horrible, bad, Positive great, best, love(d), delicious, amazing,
+ awful, disgusting, bland, tasteless, favorite, perfect, excellent, awesome,
+ gross, mediocre, overpriced, worse, friendly, fantastic, fresh, wonderful, inpoor credible, sweet, yum(my)
+Negation no, not Emphatics/ very, highly, perfectly, definitely, absouniversals lutely, everything, every, always
+1Pl pro we, us, our 2 pro you
+3 pro she, he, her, him Articles a, the
+Past verb was, were, asked, told, said, did, Advice try, recommend
+ charged, waited, left, took
+ Sequencers after, then Conjunct also, as, well, with, and
+ Nouns manager, waitress, waiter, customer, Nouns atmosphere, dessert, chocolate, wine,
+ customers, attitude, waste, poisoning, course, menu
+ money, bill, minutes
+ Irrealis would, should Auxiliaries is/’s, can, ’ve, are
+ modals
+ Comp to, that Prep, other in, of, die, city, mouth
+900,000 reviews, using the Monroe et al. (2008) method (Jurafsky et al., 2014).
+
+ In Appendix K we introduced the naive Bayes algorithm for sentiment analysis. The
+ lexicons we have focused on throughout the chapter so far can be used in a number
+ of ways to improve sentiment detection.
+ In the simplest case, lexicons can be used when we don’t have sufficient training
+ data to build a supervised sentiment analyzer; it can often be expensive to have a
+ human assign sentiment to each document to train the supervised classifier.
+ In such situations, lexicons can be used in a rule-based algorithm for classification. The simplest version is just to use the ratio of positive to negative words: if a
+ document has more positive than negative words (using the lexicon to decide the polarity of each word in the document), it is classified as positive. Often a threshold λ
+ is used, in which a document is classified as positive only if the ratio is greater than
+ λ . If the sentiment lexicon includes positive and negative weights for each word,
+ θw+ and θw− , these can be used as well. Here’s a simple such sentiment algorithm:
+ X
+ f+ = θw+ count(w)
+ w s.t. w∈positivelexicon
+ X
+ −
+ f = θw− count(w)
+ w s.t. w∈negativelexicon
+ if ff − > λ
+ 
+ 
+  +
+ 
+ −
+ 
+ sentiment = − if ff + > λ (22.12)
+ 
+ 0 otherwise.
+ 
+ 
+16 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ If supervised training data is available, these counts computed from sentiment lexicons, sometimes weighted or normalized in various ways, can also be used as features in a classifier along with other lexical or non-lexical features. We return to
+ such algorithms in Section 22.7.
+
+ Detection of emotion (and the other kinds of affective meaning described by Scherer
+ (2000)) can be done by generalizing the algorithms described above for detecting
+ sentiment.
+ The most common algorithms involve supervised classification: a training set is
+ labeled for the affective meaning to be detected, and a classifier is built using features
+ extracted from the training set. As with sentiment analysis, if the training set is large
+ enough, and the test set is sufficiently similar to the training set, simply using all the
+ words or all the bigrams as features in a powerful classifier like logistic regression or
+ SVM is an excellent algorithm whose performance is hard to beat. Thus we can treat
+ affective meaning classification of a text sample as simple document classification.
+ Some modifications are nonetheless often necessary for very large datasets. For
+ example, the Schwartz et al. (2013) study of personality, gender, and age using 700
+ million words of Facebook posts used only a subset of the n-grams of lengths 1-
+3. Only words and phrases used by at least 1% of the subjects were included as
+ features, and 2-grams and 3-grams were only kept if they had sufficiently high PMI
+ (PMI greater than 2 ∗ length, where length is the number of words):
+
+ p(phrase)
+ pmi(phrase) = log Y (22.13)
+ p(w)
+ w∈phrase
+
+ Various weights can be used for the features, including the raw count in the training
+ set, or some normalized probability or log probability. Schwartz et al. (2013), for
+ example, turn feature counts into phrase likelihoods by normalizing them by each
+ subject’s total word use.
+
+ freq(phrase, subject)
+ p(phrase|subject) = X (22.14)
+ freq(phrase0 , subject)
+ phrase ∈vocab(subject)
+
+ If the training data is sparser, or not as similar to the test set, any of the lexicons
+ we’ve discussed can play a helpful role, either alone or in combination with all the
+ words and n-grams.
+ Many possible values can be used for lexicon features. The simplest is just an
+ indicator function, in which the value of a feature fL takes the value 1 if a particular
+ text has any word from the relevant lexicon L. Using the notation of Appendix K, in
+ which a feature value is defined for a particular output class c and document x.
+
+ 1 if ∃w : w ∈ L & w ∈ x & class = c
+ 
+ fL (c, x) =
+ 0 otherwise
+
+ Alternatively the value of a feature fL for a particular lexicon L can be the total
+ 22.8 • L EXICON - BASED METHODS FOR E NTITY-C ENTRIC A FFECT 17
+
+ number of word tokens in the document that occur in L:
+ X
+ fL = count(w)
+ w∈L
+
+ For lexica in which each word is associated with a score or weight, the count can be
+ multiplied by a weight θwL :
+
+ θwL count(w)
+ X
+ fL =
+ w∈L
+
+ Counts can alternatively be logged or normalized per writer as in Eq. 22.14.
+ However they are defined, these lexicon features are then used in a supervised
+ classifier to predict the desired affective category for the text or document. Once
+ a classifier is trained, we can examine which lexicon features are associated with
+ which classes. For a classifier like logistic regression the feature weight gives an
+ indication of how associated the feature is with the class.
+
+ What if we want to get an affect score not for an entire document, but for a particular
+ entity in the text? The entity-centric method of Field and Tsvetkov (2019) combines
+ affect lexicons with contextual embeddings to assign an affect score to an entity in
+ text. In the context of affect about people, they relabel the Valence/Arousal/Dominance
+ dimension as Sentiment/Agency/Power. The algorithm first trains classifiers to map
+ embeddings to scores:
+ 1. For each word w in the training corpus:
+ (a) Use off-the-shelf pretrained encoders (like BERT) to extract a contextual
+ embedding e for each instance of the word. No additional finetuning is
+ done.
+ (b) Average over the e embeddings of each instance of w to obtain a single
+ embedding vector for one training point w.
+ (c) Use the NRC VAD Lexicon to get S, A, and P scores for w.
+ 2. Train (three) regression models on all words w to predict V, A, D scores from
+ a word’s average embedding.
+ Now given an entity mention m in a text, we assign affect scores as follows:
+ 1. Use the same pretrained LM to get contextual embeddings for m in context.
+ 2. Feed this embedding through the 3 regression models to get S, A, P scores for
+ the entity.
+ This results in a (S,A,P) tuple for a given entity mention; To get scores for the representation of an entity in a complete document, we can run coreference resolution
+ and average the (S,A,P) scores for all the mentions. Fig. 22.13 shows the scores
+ from their algorithm for characters from the movie The Dark Knight when run on
+ Wikipedia plot summary texts with gold coreference.
+18 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ weakly Rachel Dent Gordan Batman Joker powerfully weakly Rachel Joker Dent Gordan Batm
+
+ Power Score Power Score
+
+ negative Joker Dent Gordan Rachel Batman positive negative Joker Gordan Batman Dent Rach
+
+ Sentiment Score Sentiment Score
+
+ dull Rachel Dent GordanBatman Joker
+ dull Dent Gordan Rachel Batman Joker scary
+
+ Agency Score
+ Agency Score
+
+ characters
+ in the movie TheFigure 1: Power,
+ Dark Knight sentiment,
+ computed and agency
+ from embeddings scores
+ trained onfor
+ thechar-
+NRC VADacters
+ Lexicon.
+ in The Dark Night as learned throug
+ acters(Batman)
+ Note the protagonist in The Dark Night
+ and the as learned
+ antagonist through
+ (the Joker) thehigh
+ have regrespower and agency
+ ELMo embeddings. These scores reflect th
+ sion model with ELMo embeddings. Scores generally
+ scores but differ in sentiment, while the love interest Rachel has low power and agency but
+ terns as the regression model with greater
+ high sentiment. align with character archetypes, i.e. the antagonist has
+ between characters.
+ the lowest sentiment score.
+ ment have resulted in his effective removal from vey Dent (ally to Batman who turns
+ the industry.
+ The lexicons we’ve described so While articles
+ far define a wordabout
+ as a the in affective Rachel
+ point#MeToo space. ADawes (primary love interest).
+ connotation
+ frame connotation frame, by contrast,
+ movement portray is amen
+ lexicon
+ likethat incorporates
+ Weinstein itate
+ a richer kind of gramas unpow- extracting example sentences, we
+ matical structure, by combining
+ erful, affective lexicons
+ we can speculate that thewith the frame
+ corpora usedsemantic
+ to instance
+ lexicons of these entities in the narrative
+ of Chapter 21. The basic insight of connotation frame lexicons is that a and predicate
+ average across instances to obtain
+ train ELMo and BERT portray them as powerful.
+ like a verb expresses connotations about the verb’s arguments (Rashkin et score al. 2016,for the document.9 To maximiz
+ Thus, in a corpus where traditional power roles
+ Rashkin et al. 2017).
+ have been by capturing every mention of an entit
+ Consider sentences like: inverted, the embeddings extracted
+ from ELMo and BERT perform worse than ran- form co-reference resolution by hand.
+ (22.15) Country A violated the sovereignty of Country B ally, based on our results from Table 3
+ dom, as they are biased towards the power struc-
+ (22.16) the teenager ... survived the Boston Marathon bombing” the use of Wikipedia data in training
+ tures in the data they are trained on. Further ev-
+By using the verb violate
+ idence of in
+ this(22.15),
+ existstheinauthor is expressing their
+ the performance model
+ sympathies
+ of the with(Peters et al., 2018), we use ELM
+ Country B, portraying Country B as a victim, and expressing antagonism toward
+ dings for our analysis.
+ BERT-masked embeddings - whereas these emthe agent Country A. By contrast, in using the verb survive, the author of (22.16) is
+ Figures 1 and 2 show results.
+ expressing thatbeddings
+ the bombing generally capture
+ is a negative power and
+ experience, poorly as comthe subject of the sentence,
+ the teenager, ispared to the character.
+ sympathetic unmaskedThese embeddings
+ aspects of (Table ence,
+ 2), are inherent
+ connotation we show the entity scores as co
+ in the meaningthey outperform
+ of the verbs violate theand
+ unmasked
+ survive, asembeddings
+ shown in Fig. on22.14.
+ this one polar opposite pair identified by
+ The connotation frame
+ task, and evenlexicons of Rashkin
+ outperform et al. (2016)
+ the frequency and Rashkin
+ baseline the etregression
+ al. model and ASP show s
+ (2017) also express
+ in oneother connotative
+ setting. aspects of
+ Nevertheless, theythedo
+ predicate terns.
+ toward each
+ not outper- argu-Batman has high power, while R
+ ment, including the effect (something bad happened to x) value: (x is valuable), low and
+ power. Additionally, the Joker is
+ form Field et al. (2019), likely because they do not
+ mental state: (x is distressed by the event). Connotation frames can also with mark the the most negative sentiment, but
+ capture
+ power differential affecttheinformation
+ between as wellthe
+ arguments (using as verb
+ the unmasked
+ implore means that the
+ embeddings (Tablethan est
+ 2). the agent), and the agency of each argument agency. Throughout the plot sum
+ theme argument has greater power
+ (waited is low agency). Fig. 22.15 shows a visualization from Sap et al. (2017). movie progresses by the Joker taking
+ Connotation frames can be built by hand (Sap et al., 2017), or they can be sive action and the other characters r
+ learned
+ by supervised learning (Rashkin et al., 2016), for example using hand-labeled train- see this dynamic reflected in t
+ We can
+ Finally, we qualitatively analyze how well our
+ ing data to supervise classifiers for each of the individual relations, e.g.,profile whetherscore, as a high-powered, hi
+ method captures affect dimensions by analyzing
+ S(writer → Role1) is + or -, and then improving accuracy via global constraints low-sentiment character, who is the pri
+ single documents in detail. We conduct this analacross all relations. driver. In general, ASP shows a greater
+ ysis in a domain where we expect entities to fulfill
+ between characters than the regression m
+ traditional power roles and where entity portrayhypothesize that this occurs because AS
+ als are known. Following Bamman et al. (2013),
+ the dimensions of interest, while the reg
+ we analyze the Wikipedia plot summary of the
+ proach captures other confounds, such
+ movie The Dark Knight,7 focusing on Batman
+ (protagonist),8 the Joker (antagonist), Jim Gordan 9
+ When we used this averaging metric in othe
+ 22.10 • S UMMARY 19
+
+ Connotation Frame for “Role1 survives Role2” Connotation Frame for “Role1 violates Role2”
+
+ )
+
+ S(
+ le1
+ )
+
+ S(
+ le1
+
+ wr
+ ro
+ wr
+ ro
+ Writer
+ _ +
+
+ ite
+ r→
+ Writer
+
+ ite
+ r→
+
+ r→
+ r→
+
+ ite
+ ite
+
+ ro
+ wr
+ ro
+ wr
+
+ le2
+ le2
+
+ S(
+ S(role1→role2)
+ S(
+
+ S(role1→role2)
+
+ )
+ )
+ Role1 is a _ There is Role1 is the
+ antagonist Role1
+ _ Role2
+ Role2 is a
+ sympathetic
+ sympathetic Role1 Role2 some type
+ victim of hardship victim
+
+ _ _ +
+ + Reader
+ Reader
+
+ (a) (b)
+sentiment toward Role1, the subject, and negative sentiment toward Role2, the direct object. (b) For violate, the
+writer and reader have positive sentiment instead toward Role2, the direct object.
+
+ He implored the tribunal to show mercy. power(AG<TH) power(AG>TH)
+
+ VERB
+ AGENT THEME
+ implore
+
+ power(AG < TH)
+
+ The princess waited for her prince.
+ VERB
+ AGENT THEME
+ wait agency(AG)= agency(AG)=+
+ agency(AG) = -
+
+ implies the agent has Figure 2: The
+ lower power thanformal notation
+ the theme of the connotation
+ (in contrast, say, with a verb like demanded),
+ and showing the low frames
+ level of of power
+ agency of and agency.of The
+ the subject firstFigure
+ waited. example
+ from Sap et al. (2017).
+ shows the relative power differential implied by
+ a position of less power than the theme (“the tri- Figure 3: Sample verbs in the connotation frame
+ bunal”). In contrast, “He demanded the tribunal with high annotator agreement. Size is indicativ
+ show mercy” implies that the agent has authority of verb frequency in our corpus (bigger = mor
+ • Many kinds of affective states can be distinguished, including emotions, moods,
+ over the theme. The second example shows the frequent), color differences are only for legibility
+ attitudes (which include sentiment), interpersonal stance, and personality.
+ low level of agency implied by the verb “waited”.
+ • Emotion can be represented by fixed atomic units often called basic emoone another. For example, if the agent “dom
+ tions, or as points in space defined by dimensions like valenceinates” and arousal.
+ the theme (denoted as power(AG>TH)
+ interactive demo website of our findings (see Fig-
+ • Words have ure connotational
+ 5 in the appendix aspects
+ for related to these
+ a screenshot). affective states,
+ 2 Further- then theand this
+ agent is implied to have a level of contro
+ connotationalmore,
+ aspect of word meaning can be represented
+ as will be seen in Section 4.1, connotation in lexicons.
+ over the theme. Alternatively, if the agent “hon
+ • Affective lexicons
+ frames can
+ offerbenew built by hand,
+ insights using crowd
+ that complement and sourcing
+ de- ors”tothe theme
+ label the(denoted as power(AG<TH)), th
+ affective content
+ viateof each
+ from theword.
+ well-known Bechdel test (Bechdel, writer implies that the theme is more important o
+ • Lexicons can1986).be builtInwith
+ particular, high-agency from seed words used AMT crowdsourcing to la
+ we find thatbootstrapping
+ semi-supervised, authoritative. We
+ women through bel 1700 transitive verbs for power differential
+ using similarity metrics likethe lens of connotation
+ embedding cosine. frames are
+ With three annotators per verb, the inter-annotato
+ • Lexicons canrare be inlearned
+ modern films. It is, in part, because some
+ in a fully supervised manner, whenagreement a convenient
+ is 0.34 (Krippendorff’s ↵).
+ movies (e.g., Snow White) accidentally pass the
+ training signal can be found in the world, such as ratings assigned by users on
+ Bechdel test and also because even movies with Agency The agency attributed to the agent of th
+ a review site.
+ strong female characters are not entirely free from verb denotes whether the action being describe
+ • Words can betheassigned weights inbiases
+ deeply ingrained a lexicon by using
+ in social norms.various functions of word
+ implies that the agent is powerful, decisive, an
+ counts in training texts, and ratio metrics like log odds ratio informative
+ capable of pushing forward their own storyline
+ 2 Connotation Frames of Power and
+ Dirichlet prior.
+ For example, a person who is described as “ex
+ Agencyjust like sentiment, by using standard supervised text
+ • Affect can be detected, periencing” things does not seem as active and de
+ classificationWetechniques, using all the words or bigrams
+ create two new connotation relations, power in a text as as
+ cisive features.
+ someone who is described as “determin
+ and agency (examples in Figure 3), as an expan- ing” things. AMT workers labeled 2000 trans
+ sion of the existing connotation frame lexicons.3 tive verbs for implying high/moderate/low agenc
+ Three AMT crowdworkers annotated the verbs (inter-annotator agreement of 0.27). We denot
+ with placeholders to avoid gender bias in the con- high agency as agency(AG)=+, and low agenc
+ text (e.g., X rescued Y; an example task is shown as agency(AG)= .
+ in the appendix in Figure 7). We define the anno-
+20 C HAPTER 22 • L EXICONS FOR S ENTIMENT, A FFECT, AND C ONNOTATION
+
+ Additional features can be drawn from counts of words in lexicons.
+ • Lexicons can also be used to detect affect in a rule-based classifier by picking
+ the simple majority sentiment based on counts of words in each lexicon.
+ • Connotation frames express richer relations of affective meaning that a predicate encodes about its arguments.
+
+Historical Notes
+ The idea of formally representing the subjective meaning of words began with Osgood et al. (1957), the same pioneering study that first proposed the vector space
+ model of meaning described in Chapter 5. Osgood et al. (1957) had participants rate
+ words on various scales, and ran factor analysis on the ratings. The most significant
+ factor they uncovered was the evaluative dimension, which distinguished between
+ pairs like good/bad, valuable/worthless, pleasant/unpleasant. This work influenced
+ the development of early dictionaries of sentiment and affective meaning in the field
+ of content analysis (Stone et al., 1966).
+ subjectivity Wiebe (1994) began an influential line of work on detecting subjectivity in text,
+ beginning with the task of identifying subjective sentences and the subjective characters who are described in the text as holding private states, beliefs or attitudes.
+ Learned sentiment lexicons such as the polarity lexicons of Hatzivassiloglou and
+ McKeown (1997) were shown to be a useful feature in subjectivity detection (Hatzivassiloglou and Wiebe 2000, Wiebe 2000).
+ The term sentiment seems to have been introduced in 2001 by Das and Chen
+ (2001), to describe the task of measuring market sentiment by looking at the words in
+ stock trading message boards. In the same paper Das and Chen (2001) also proposed
+ the use of a sentiment lexicon. The list of words in the lexicon was created by
+ hand, but each word was assigned weights according to how much it discriminated
+ a particular class (say buy versus sell) by maximizing across-class variation and
+ minimizing within-class variation. The term sentiment, and the use of lexicons,
+ caught on quite quickly (e.g., inter alia, Turney 2002). Pang et al. (2002) first showed
+ the power of using all the words without a sentiment lexicon; see also Wang and
+ Manning (2012).
+ Most of the semi-supervised methods we describe for extending sentiment dictionaries drew on the early idea that synonyms and antonyms tend to co-occur in the
+ same sentence (Miller and Charles 1991, Justeson and Katz 1991, Riloff and Shepherd 1997). Other semi-supervised methods for learning cues to affective meaning rely on information extraction techniques, like the AutoSlog pattern extractors
+ (Riloff and Wiebe, 2003). Graph based algorithms for sentiment were first suggested by Hatzivassiloglou and McKeown (1997), and graph propagation became
+ a standard method (Zhu and Ghahramani 2002, Zhu et al. 2003, Zhou et al. 2004,
+ Velikovich et al. 2010). Crowdsourcing can also be used to improve precision by
+ filtering the result of semi-supervised lexicon learning (Riloff and Shepherd 1997,
+ Fast et al. 2016).
+ Much recent work focuses on ways to learn embeddings that directly encode sentiment or other properties, such as the D ENSIFIER algorithm of Rothe et al. (2016)
+ that learns to transform the embedding space to focus on sentiment (or other) information.
+ E XERCISES 21
+
+Exercises
+ Score in Eq. 22.6 is a variant of the pointwise mutual information pmi(w, c)
+ without the log term.
+22 Chapter 22 • Lexicons for Sentiment, Affect, and Connotation
+
+An, J., H. Kwak, and Y.-Y. Ahn. 2018. SemAxis: A Mohammad, S. M. 2018a. Obtaining reliable human ratings
+ lightweight framework to characterize domain-specific of valence, arousal, and dominance for 20,000 English
+ word semantics beyond sentiment. ACL. words. ACL.
+Baccianella, S., A. Esuli, and F. Sebastiani. 2010. Senti- Mohammad, S. M. 2018b. Word affect intensities. LREC.
+ wordnet 3.0: An enhanced lexical resource for sentiment Mohammad, S. M. and P. D. Turney. 2013. Crowdsourcing a
+ analysis and opinion mining. LREC. word-emotion association lexicon. Computational Intel-
+Barrett, L. F., B. Mesquita, K. N. Ochsner, and J. J. Gross. ligence, 29(3):436–465.
+ 2007. The experience of emotion. Annual Review of Psy- Monroe, B. L., M. P. Colaresi, and K. M. Quinn. 2008.
+ chology, 58:373–403. Fightin’words: Lexical feature selection and evaluation
+Brysbaert, M., A. B. Warriner, and V. Kuperman. 2014. for identifying the content of political conflict. Political
+ Concreteness ratings for 40 thousand generally known Analysis, 16(4):372–403.
+ English word lemmas. Behavior Research Methods, Moors, A., P. C. Ellsworth, K. R. Scherer, and N. H. Frijda.
+ 46(3):904–911. 2013. Appraisal theories of emotion: State of the art and
+Das, S. R. and M. Y. Chen. 2001. Yahoo! for Ama- future development. Emotion Review, 5(2):119–124.
+ zon: Sentiment parsing from small talk on the web. Osgood, C. E., G. J. Suci, and P. H. Tannenbaum. 1957. The
+ EFA 2001 Barcelona Meetings. http://ssrn.com/ Measurement of Meaning. University of Illinois Press.
+ abstract=276189. Pang, B., L. Lee, and S. Vaithyanathan. 2002. Thumbs
+Ekman, P. 1999. Basic emotions. In T. Dalgleish and M. J. up? Sentiment classification using machine learning tech-
+Power, eds, Handbook of Cognition and Emotion, 45–60. niques. EMNLP.
+ Wiley. Pennebaker, J. W., R. J. Booth, and M. E. Francis. 2007.
+Fast, E., B. Chen, and M. S. Bernstein. 2016. Empath: Un- Linguistic Inquiry and Word Count: LIWC 2007. Austin,
+ derstanding Topic Signals in Large-Scale Text. CHI. TX.
+Field, A. and Y. Tsvetkov. 2019. Entity-centric contextual Picard, R. W. 1995. Affective computing. Technical Reaffective analysis. ACL. port 321, MIT Media Lab Perceputal Computing Technical Report. Revised November 26, 1995.
+Hamilton, W. L., K. Clark, J. Leskovec, and D. Jurafsky.
+ 2016. Inducing domain-specific sentiment lexicons from Plutchik, R. 1962. The emotions: Facts, theories, and a new
+ unlabeled corpora. EMNLP. model. Random House.
+Hatzivassiloglou, V. and K. McKeown. 1997. Predicting the Plutchik, R. 1980. A general psychoevolutionary theory of
+ semantic orientation of adjectives. ACL. emotion. In R. Plutchik and H. Kellerman, eds, Emotion:
+ Theory, Research, and Experience, Volume 1, 3–33. Aca-
+Hatzivassiloglou, V. and J. Wiebe. 2000. Effects of adjecdemic Press.
+ tive orientation and gradability on sentence subjectivity.
+ COLING. Potts, C. 2011. On the negativity of negation. In N. Li and
+ D. Lutz, eds, Proceedings of Semantics and Linguistic
+Hellrich, J., S. Buechel, and U. Hahn. 2019. Modeling word Theory 20, 636–659. CLC Publications, Ithaca, NY.
+ emotion in historical language: Quantity beats supposed
+ stability in seed word selection. 3rd Joint SIGHUM Work- Rashkin, H., E. Bell, Y. Choi, and S. Volkova. 2017. Multishop on Computational Linguistics for Cultural Heritage, lingual connotation frames: A case study on social media
+ Social Sciences, Humanities and Literature. for targeted sentiment analysis and forecast. ACL.
+ Rashkin, H., S. Singh, and Y. Choi. 2016. Connotation
+Hu, M. and B. Liu. 2004. Mining and summarizing customer
+ frames: A data-driven investigation. ACL.
+ reviews. SIGKDD-04.
+ Riloff, E. and J. Shepherd. 1997. A corpus-based approach
+Jurafsky, D., V. Chahuneau, B. R. Routledge, and N. A.
+ for building semantic lexicons. EMNLP.
+ Smith. 2014. Narrative framing of consumer sentiment
+ in online restaurant reviews. First Monday, 19(4). Riloff, E. and J. Wiebe. 2003. Learning extraction patterns
+ for subjective expressions. EMNLP.
+Justeson, J. S. and S. M. Katz. 1991. Co-occurrences of
+ antonymous adjectives and their contexts. Computational Rothe, S., S. Ebert, and H. Schütze. 2016. Ultradense Word
+ linguistics, 17(1):1–19. Embeddings by Orthogonal Transformation. NAACL
+ HLT.
+Kim, S. M. and E. H. Hovy. 2004. Determining the sentiment
+ of opinions. COLING. Russell, J. A. 1980. A circumplex model of affect. Journal
+ of personality and social psychology, 39(6):1161–1178.
+Kiritchenko, S. and S. M. Mohammad. 2017. Best-worst
+ scaling more reliable than rating scales: A case study on Sap, M., M. C. Prasettio, A. Holtzman, H. Rashkin, and
+ sentiment intensity annotation. ACL. Y. Choi. 2017. Connotation frames of power and agency
+ in modern films. EMNLP.
+Louviere, J. J., T. N. Flynn, and A. A. J. Marley. 2015. Best-
+Scherer, K. R. 2000. Psychological models of emotion. In
+ worst scaling: Theory, methods and applications. Cam-
+J. C. Borod, ed., The neuropsychology of emotion, 137–
+ bridge University Press.
+ 162. Oxford.
+Mairesse, F. and M. A. Walker. 2008. Trainable generation of
+ Schwartz, H. A., J. C. Eichstaedt, M. L. Kern, L. Dziurzynbig-five personality styles through data-driven parameter
+ ski, S. M. Ramones, M. Agrawal, A. Shah, M. Kosinestimation. ACL.
+ ski, D. Stillwell, M. E. P. Seligman, and L. H. Ungar.
+Miller, G. A. and W. G. Charles. 1991. Contextual corre- 2013. Personality, gender, and age in the language of
+ lates of semantics similarity. Language and Cognitive social media: The open-vocabulary approach. PloS one,
+ Processes, 6(1):1–28. 8(9):e73791.
+ Exercises 23
+
+Stone, P., D. Dunphry, M. Smith, and D. Ogilvie. 1966.
+ The General Inquirer: A Computer Approach to Content
+ Analysis. MIT Press.
+Tomkins, S. S. 1962. Affect, imagery, consciousness: Vol. I.
+ The positive affects. Springer.
+Turney, P. D. 2002. Thumbs up or thumbs down? Semantic
+ orientation applied to unsupervised classification of reviews. ACL.
+Turney, P. D. and M. Littman. 2003. Measuring praise and
+ criticism: Inference of semantic orientation from association. ACM Transactions on Information Systems (TOIS),
+ 21:315–346.
+Velikovich, L., S. Blair-Goldensohn, K. Hannan, and R. Mc-
+Donald. 2010. The viability of web-derived polarity lexicons. NAACL HLT.
+Wang, S. and C. D. Manning. 2012. Baselines and bigrams:
+ Simple, good sentiment and topic classification. ACL.
+Wiebe, J. 1994. Tracking point of view in narrative. Computational Linguistics, 20(2):233–287.
+Wiebe, J. 2000. Learning subjective adjectives from corpora.
+ AAAI.
+Wiebe, J., R. F. Bruce, and T. P. O’Hara. 1999. Development and use of a gold-standard data set for subjectivity
+ classifications. ACL.
+Wilson, T., J. Wiebe, and P. Hoffmann. 2005. Recognizing contextual polarity in phrase-level sentiment analysis.
+ EMNLP.
+Zhou, D., O. Bousquet, T. N. Lal, J. Weston, and
+ B. Schölkopf. 2004. Learning with local and global consistency. NeurIPS.
+Zhu, X. and Z. Ghahramani. 2002. Learning from labeled
+ and unlabeled data with label propagation. Technical Report CMU-CALD-02, CMU.
+Zhu, X., Z. Ghahramani, and J. Lafferty. 2003. Semisupervised learning using gaussian fields and harmonic
+ functions. ICML.

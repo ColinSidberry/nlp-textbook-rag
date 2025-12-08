@@ -1,0 +1,118 @@
+{
+  "timestamp": "2025-12-07T18:09:17.217227",
+  "tests": [
+    {
+      "test": "out_of_scope",
+      "question": "Who is the president of the United States?",
+      "category": "current_events",
+      "answer": "This question is outside the scope of the provided context. The textbook excerpts do not contain information about who the current or past president of the United States is. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, etc.",
+      "properly_declined": true,
+      "has_hallucination": false,
+      "passed": true
+    },
+    {
+      "test": "out_of_scope",
+      "question": "What is the capital of France?",
+      "category": "general_knowledge",
+      "answer": "The capital of France was not explicitly mentioned in the provided context. However, the examples given suggest that a language model could be used to answer such a question if it has been trained with the relevant fact.",
+      "properly_declined": false,
+      "has_hallucination": false,
+      "passed": false
+    },
+    {
+      "test": "out_of_scope",
+      "question": "How do I cook pasta?",
+      "category": "unrelated_topic",
+      "answer": "This question is outside the scope of the provided NLP textbook excerpts. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, etc.",
+      "properly_declined": true,
+      "has_hallucination": false,
+      "passed": true
+    },
+    {
+      "test": "out_of_scope",
+      "question": "What is quantum mechanics?",
+      "category": "different_field",
+      "answer": "The provided context does not contain any information about quantum mechanics. This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, etc.",
+      "properly_declined": true,
+      "has_hallucination": false,
+      "passed": true
+    },
+    {
+      "test": "valid_nlp_question",
+      "question": "How do transformers use attention mechanisms?",
+      "answer": "Transformers use attention mechanisms as a way to build contextual representations of a token's meaning by attending to and integrating information from surrounding tokens. This helps the model learn how tokens relate to each other over large spans (Excerpt 2). The attention mechanism in transformers allows the model to attend to all the inputs up to, and including, a specific input (Excerpt 3). The actual attention head used in transformers is produced by a specific structured layer called an \"",
+      "citations": [
+        "[Chapter: 8 Transformers] (Source: transformers.txt)"
+      ],
+      "incorrectly_declined": false,
+      "has_keywords": true,
+      "has_relevant_citations": true,
+      "hallucination_risk": false,
+      "passed": true
+    },
+    {
+      "test": "valid_nlp_question",
+      "question": "What are word embeddings?",
+      "answer": "Word embeddings are vector representations of the meaning of words that are learned directly from word distributions in texts. They lie at the heart of large language models and other modern applications (Excerpt 5). In static embeddings, each word is mapped to a fixed embedding (Excerpt 6). The concept of word embeddings is introduced as a helpful way to understand the representation of word meaning using vectors (Excerpt 3).",
+      "citations": [
+        "[Chapter: Embeddings 5 \u8343\u8005\u6240\u4ee5\u5728\u9c7c\uff0c\u5f97\u9c7c\u800c\u5fd8\u8343 Nets are for fish; Once you get the fish, you can forget the net.] (Source: embeddings.txt)"
+      ],
+      "incorrectly_declined": false,
+      "has_keywords": true,
+      "has_relevant_citations": true,
+      "hallucination_risk": false,
+      "passed": true
+    },
+    {
+      "test": "valid_nlp_question",
+      "question": "Explain n-gram language models",
+      "answer": "N-gram language models are a type of Markov model used in natural language processing to estimate the probability of a sequence of words or tokens based on preceding words or tokens. They operate by considering a fixed window of previous words (n) and calculating the frequency of each n-gram (a contiguous sequence of n items from the training corpus) to predict the next word in a sentence. The context provided mentions that these models were first introduced in the 1980s, with further developmen",
+      "citations": [
+        "[Chapter: N-gram Language Models] (Source: n-gram.txt)"
+      ],
+      "incorrectly_declined": false,
+      "has_keywords": true,
+      "has_relevant_citations": true,
+      "hallucination_risk": false,
+      "passed": true
+    },
+    {
+      "test": "context_grounding",
+      "question": "What is backpropagation in neural networks?",
+      "answer": "Backpropagation in neural networks is an algorithm used to compute the gradients of a loss function for a network. It is a method of backward differentiation on a computation graph, which is particularly useful for neural networks. The intuition behind backpropagation is to pass gradients back from the final node to all the nodes in the graph (Excerpt 3). This process helps in training neural networks by optimization algorithms like gradient descent (Excerpt 2). It was invented specifically for ",
+      "hallucination_patterns_found": [],
+      "true_hallucinations": [],
+      "passed": true
+    },
+    {
+      "test": "citation_accuracy",
+      "question": "How do RNNs handle sequential data?",
+      "citations": [
+        "[Chapter: RNNs and LSTMs 13 Time will explain. Jane Austen, Persuasion] (Source: 13.RNNs and LSTMs.txt)"
+      ],
+      "cited_chapters": [
+        "rnns and lstms 13 time will explain. jane austen, persuasion"
+      ],
+      "retrieved_chapters": [
+        "rnns and lstms 13 time will explain. jane austen, persuasion"
+      ],
+      "incorrect_citations": [],
+      "missing_important_sources": false,
+      "passed": true
+    },
+    {
+      "test": "insufficient_context",
+      "question": "What is the exact formula for the third derivative of the loss function in transformers?",
+      "answer": "I don't have enough information in the provided context to calculate the third derivative of the loss function in Transformers. The context only provides the formula for the first and second derivatives. To find the third derivative, we would need additional information about how the loss function is defined in the context of Transformers, which is not given in the excerpts provided.",
+      "shows_uncertainty": true,
+      "makes_up_formula": false,
+      "passed": true
+    }
+  ],
+  "summary": {
+    "total": 10,
+    "passed": 9,
+    "failed": 1,
+    "warnings": 0
+  }
+}

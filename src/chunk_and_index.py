@@ -57,14 +57,14 @@ class TextbookChunker:
         chunks = []
         chunk_index = 0
 
-        # Use sliding window with overlap
+        # Use sliding window with overlap - completely raw text, no manipulation
         start = 0
         step_size = self.max_chunk_chars - self.overlap_chars
 
         while start < len(content):
-            # Extract chunk
+            # Extract chunk with NO text manipulation whatsoever
             end = min(start + self.max_chunk_chars, len(content))
-            chunk_text = content[start:end].strip()
+            chunk_text = content[start:end]
 
             # Only add if meets minimum length
             if len(chunk_text) >= self.min_chunk_chars:
@@ -281,10 +281,10 @@ def main():
 
     # Step 2: Initialize chunker
     print("\nStep 2: Initializing chunker...")
-    # Overlapping sliding window chunking to achieve ≥10,000 total chunks from 7 chapters
-    # 100 chars with 50% overlap creates dense chunk coverage
-    chunker = TextbookChunker(max_chunk_chars=100, min_chunk_chars=30, overlap_ratio=0.5)
-    print("✓ Chunker initialized (sliding window: 100 chars, 50% overlap, min: 30 chars)")
+    # Overlapping sliding window chunking to achieve ≥10,000 total chunks from 35 chapters
+    # 280 chars with 20% overlap optimized for 2.2MB corpus (~10,000 chunks)
+    chunker = TextbookChunker(max_chunk_chars=280, min_chunk_chars=50, overlap_ratio=0.2)
+    print("✓ Chunker initialized (sliding window: 280 chars, 20% overlap, min: 50 chars)")
 
     # Step 3: Chunk all documents
     print("\nStep 3: Chunking documents...")

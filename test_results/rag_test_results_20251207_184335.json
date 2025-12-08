@@ -1,0 +1,131 @@
+{
+  "timestamp": "2025-12-07T18:42:42.130588",
+  "tests": [
+    {
+      "test": "out_of_scope",
+      "question": "Who is the president of the United States?",
+      "category": "current_events",
+      "answer": "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+      "properly_declined": true,
+      "has_hallucination": false,
+      "passed": true
+    },
+    {
+      "test": "out_of_scope",
+      "question": "What is the capital of France?",
+      "category": "general_knowledge",
+      "answer": "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+      "properly_declined": true,
+      "has_hallucination": false,
+      "passed": true
+    },
+    {
+      "test": "out_of_scope",
+      "question": "How do I cook pasta?",
+      "category": "unrelated_topic",
+      "answer": "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+      "properly_declined": true,
+      "has_hallucination": false,
+      "passed": true
+    },
+    {
+      "test": "out_of_scope",
+      "question": "What is quantum mechanics?",
+      "category": "different_field",
+      "answer": "This question is outside the scope of the NLP textbook. Please ask about natural language processing concepts like transformers, embeddings, language models, parsing, sentiment analysis, etc.",
+      "properly_declined": true,
+      "has_hallucination": false,
+      "passed": true
+    },
+    {
+      "test": "valid_nlp_question",
+      "question": "How do transformers use attention mechanisms?",
+      "answer": "Transformers use attention mechanisms as a way to build contextual representations of a token\u2019s meaning by attending to and integrating information from surrounding tokens. This helps the model learn how tokens relate to each other over large spans. The actual attention head used in transformers is produced by a specific structured layer called an \"attention head\". (Excerpt 2, Excerpt 4)",
+      "citations": [
+        "[Chapter: 8 Transformers] (Source: transformers.txt)"
+      ],
+      "incorrectly_declined": false,
+      "has_keywords": true,
+      "has_relevant_citations": true,
+      "hallucination_risk": false,
+      "passed": true
+    },
+    {
+      "test": "valid_nlp_question",
+      "question": "What are word embeddings?",
+      "answer": "Word embeddings are vector representations of the meaning of words that are learned directly from word distributions in texts. This concept is introduced in Chapter 5 \"Embeddings\" of the textbook.",
+      "citations": [
+        "[Chapter: Embeddings 5 \u8343\u8005\u6240\u4ee5\u5728\u9c7c\uff0c\u5f97\u9c7c\u800c\u5fd8\u8343 Nets are for fish; Once you get the fish, you can forget the net.] (Source: embeddings.txt)"
+      ],
+      "incorrectly_declined": false,
+      "has_keywords": true,
+      "has_relevant_citations": true,
+      "hallucination_risk": false,
+      "passed": true
+    },
+    {
+      "test": "valid_nlp_question",
+      "question": "Explain n-gram language models",
+      "answer": "N-gram language models are a type of Markov model used to estimate words based on a fixed window of previous words. They offer a way to assign a probability to a sequence of words or tokens and predict a word from preceding words or tokens. The models can be trained by counting the occurrences of n-grams in a training corpus and normalizing them (Excerpt 2, Excerpt 3). The first work on n-gram language models was distributed as an IBM technical report in 1985 (Excerpt 1).",
+      "citations": [
+        "[Chapter: N-gram Language Models] (Source: n-gram.txt)"
+      ],
+      "incorrectly_declined": false,
+      "has_keywords": true,
+      "has_relevant_citations": true,
+      "hallucination_risk": false,
+      "passed": true
+    },
+    {
+      "test": "valid_nlp_question",
+      "question": "What is RAG?",
+      "answer": "The term RAG refers to Retrieval-Augmented Generation. It is a method used in natural language processing where information retrieval techniques are employed to retrieve documents that might help answer a question, and then a large language model is used to generate an answer based on the retrieved passages (Excerpt 1, Excerpt 2, Excerpt 4). The components of RAG are sometimes referred to as the retriever and the reader (Excerpt 1).",
+      "citations": [
+        "[Chapter: Information Retrieval and 11 Retrieval-Augmented Generation] (Source: 11-RAG.txt)"
+      ],
+      "incorrectly_declined": false,
+      "has_keywords": true,
+      "has_relevant_citations": true,
+      "hallucination_risk": false,
+      "passed": true
+    },
+    {
+      "test": "context_grounding",
+      "question": "What is backpropagation in neural networks?",
+      "answer": "Backpropagation in neural networks is an algorithm used to compute the gradients of the loss function for a network. It's specifically mentioned in the context as being instrumental for training neural networks (Excerpt 2). The intuition behind backpropagation is passing gradients back from the final node to all the nodes in the graph (Excerpt 3). This process is also referred to as backward differentiation, which depends on the notion of computation graphs (Excerpt 4 and Excerpt 5).",
+      "hallucination_patterns_found": [],
+      "true_hallucinations": [],
+      "passed": true
+    },
+    {
+      "test": "citation_accuracy",
+      "question": "How do RNNs handle sequential data?",
+      "citations": [
+        "[Chapter: RNNs and LSTMs 13 Time will explain. Jane Austen, Persuasion] (Source: 13.RNNs and LSTMs.txt)"
+      ],
+      "cited_chapters": [
+        "rnns and lstms 13 time will explain. jane austen, persuasion"
+      ],
+      "retrieved_chapters": [
+        "rnns and lstms 13 time will explain. jane austen, persuasion"
+      ],
+      "incorrect_citations": [],
+      "missing_important_sources": false,
+      "passed": true
+    },
+    {
+      "test": "insufficient_context",
+      "question": "What is the exact formula for the third derivative of the loss function in transformers?",
+      "answer": "I don't have enough information in the retrieved context to answer this question. The provided textbook excerpts do not contain sufficient details about the third derivative of the loss function in transformers.",
+      "shows_uncertainty": true,
+      "makes_up_formula": false,
+      "passed": true
+    }
+  ],
+  "summary": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "warnings": 0
+  }
+}
