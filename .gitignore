@@ -25,6 +25,7 @@ build/
 # Data files
 data/chroma_backup_20251207/
 data/chroma/
+data/export/
 *.pyc
 
 # Environment variables
@@ -38,3 +39,6 @@ data/chroma/
 *.log
 
 scrap-docs/
+
+# Tooling
+.serena/
