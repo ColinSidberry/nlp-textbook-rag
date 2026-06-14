@@ -1,272 +1,82 @@
-"use client";
+import { ProjectLanding, type ProjectConfig } from '@/components/project/ProjectLanding';
 
-import { useState } from "react";
-import Link from "next/link";
+const writeup = `
+## The problem
 
-type Chunk = {
-  id: string;
-  document: string;
-  chapter: string;
-  filename: string;
-  chunk_index: number;
-  similarity: number;
+A textbook is a terrible interface for a question. Jurafsky & Martin's *Speech and
+Language Processing* is the canonical NLP reference — 35 chapters, ~1,000 pages — and
+when you actually have a question ("how does attention work?", "what's an n-gram?")
+you don't want to skim a PDF. You want a direct answer. But the usual fix, asking a
+general chatbot, trades one problem for a worse one: it answers confidently from its
+own training, with no way to know whether it's quoting the book or making something up.
+
+## What it does
+
+Ask a question and get an answer grounded **only** in the textbook — with citations and
+the exact passages it used, shown inline. If the book doesn't cover something, the app
+says so instead of inventing an answer. Every answer is auditable: the retrieved chunks
+are right there, and the **Database** viewer lets you browse all 10,170 indexed passages
+directly.
+
+## How it works
+
+This is retrieval-augmented generation (RAG) with an anti-hallucination contract:
+
+- **Chunking** — each chapter is split into ~280-character passages with 20% overlap, so
+  a concept that straddles a boundary still lands intact in at least one chunk. That
+  yields **10,170 chunks**, one source file per chapter.
+- **Embeddings** — both the corpus and each incoming question are encoded with the same
+  \`all-MiniLM-L6-v2\` model (384-dim). Using the *identical* model for documents and
+  queries is what makes cosine similarity meaningful — the query vectors were verified to
+  match the original index to cosine 1.0, so retrieval is bit-identical to the source build.
+- **pgvector search** — vectors live in Supabase Postgres with an HNSW cosine index; the
+  top-5 nearest passages are pulled per query.
+- **Out-of-scope guard** — an adaptive relevance threshold rejects weak matches, so a
+  question the book doesn't address returns "not covered" rather than a forced answer.
+- **Grounded generation** — the retrieved passages plus a 7-point anti-hallucination
+  prompt go to the LLM, which is instructed to answer strictly from the supplied context
+  and cite the chapters it drew from. Acronyms and comparison phrasings are expanded first
+  to sharpen retrieval.
+
+## Architecture
+
+- **Frontend / API** — Next.js (App Router) on Vercel. Query embedding runs in the request
+  via a hosted MiniLM endpoint — no Python, no separate model server.
+- **Vector store** — Supabase \`pgvector\`, free tier, kept warm by a daily GitHub Action
+  so the database never pauses.
+- **LLM** — a free Groq model (\`llama-3.3-70b-versatile\`) by default, or **bring your own
+  key** for Anthropic / OpenAI. The key is used only for that request and never stored.
+  BYOK is the through-line: the whole app costs nothing to sit live at a URL.
+
+## Why I rewrote it
+
+The original worked but wasn't truly *live* — it was Python + Streamlit + ChromaDB with
+generation pinned to a Mistral model on an always-on, paid GCP VM. That VM was the
+blocker. This rewrite is fully Vercel-native TypeScript: the document vectors are reused
+verbatim from the original ChromaDB index (no re-embed), everything else is free-tier, and
+all the parts that made the original good — the anti-hallucination prompt, the adaptive
+threshold, acronym expansion, citations, the database viewer — are preserved.
+
+## What's next
+
+- **Streaming answers** so the response renders token-by-token instead of all at once.
+- **Reranking** the top-k passages with a cross-encoder before generation to lift precision.
+- **Chapter-scoped questions** — let a reader pin retrieval to a specific chapter or section.
+`;
+
+const config: ProjectConfig = {
+  name: 'NLP Textbook RAG',
+  tagline:
+    'Ask the canonical NLP textbook a question and get an answer grounded only in its pages — with citations and the exact passages, nothing made up.',
+  stack: ['Next.js', 'Supabase pgvector', 'Groq', 'MiniLM embeddings', 'Vercel'],
+  liveHref: '/ask',
+  codeHref: '/code',
+  dbHref: '/viewer',
+  demoVideoId: '',
+  pipeline: ['Chunk', 'Embed (MiniLM)', 'pgvector search', 'Ground', 'Groq answer'],
+  writeup,
 };
-
-type QueryResult = {
-  answer: string;
-  citations: string[];
-  chunks: Chunk[];
-};
-
-type ProviderChoice = "default" | "anthropic" | "openai" | "groq";
-
-const SAMPLES = [
-  "How do transformers use attention mechanisms?",
-  "What are word embeddings and how are they created?",
-  "How do n-gram language models work?",
-  "Explain logistic regression for text classification",
-];
 
 export default function Home() {
-  const [question, setQuestion] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<QueryResult | null>(null);
-  const [elapsed, setElapsed] = useState<number | null>(null);
-
-  const [showByok, setShowByok] = useState(false);
-  const [provider, setProvider] = useState<ProviderChoice>("default");
-  const [apiKey, setApiKey] = useState("");
-  const [model, setModel] = useState("");
-
-  async function ask(q: string) {
-    if (q.trim().length < 3) {
-      setError("Please enter a longer question (at least 3 characters).");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    setElapsed(null);
-    const started = performance.now();
-
-    const payload: Record<string, string> = { question: q.trim() };
-    if (provider !== "default" && apiKey.trim()) {
-      payload.provider = provider;
-      payload.apiKey = apiKey.trim();
-      if (model.trim()) payload.model = model.trim();
-    }
-
-    try {
-      const res = await fetch("/api/query", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data?.error || "Something went wrong.");
-      } else {
-        setResult(data);
-        setElapsed((performance.now() - started) / 1000);
-      }
-    } catch {
-      setError("Network error. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <main className="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">
-      <header className="mb-8">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            NLP Textbook RAG
-          </h1>
-          <Link
-            href="/viewer"
-            className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-          >
-            Database Viewer →
-          </Link>
-        </div>
-        <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-          Ask about NLP concepts from Jurafsky &amp; Martin&apos;s{" "}
-          <em>Speech and Language Processing</em>. Answers are grounded in 10,170
-          indexed chunks and cited — nothing is made up.
-        </p>
-      </header>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          ask(question);
-        }}
-        className="space-y-3"
-      >
-        <textarea
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-              e.preventDefault();
-              ask(question);
-            }
-          }}
-          rows={3}
-          placeholder="e.g. How do transformers use attention mechanisms?"
-          className="w-full resize-y rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-stone-700 dark:bg-stone-900"
-        />
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-500 disabled:opacity-60"
-          >
-            {loading ? "Searching…" : "Ask"}
-          </button>
-          <span className="text-xs text-stone-500">⌘/Ctrl + Enter</span>
-          <button
-            type="button"
-            onClick={() => setShowByok((s) => !s)}
-            className="ml-auto text-xs font-medium text-stone-600 hover:underline dark:text-stone-400"
-          >
-            {showByok ? "Hide API key options" : "Use your own API key"}
-          </button>
-        </div>
-      </form>
-
-      {showByok && (
-        <div className="mt-3 space-y-3 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm dark:border-stone-800 dark:bg-stone-900/50">
-          <p className="text-xs text-stone-500">
-            Default uses a free Groq model. Bring your own key for Anthropic or
-            OpenAI — it&apos;s sent only with this request and never stored.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <select
-              value={provider}
-              onChange={(e) => setProvider(e.target.value as ProviderChoice)}
-              className="rounded-lg border border-stone-300 bg-white px-3 py-2 dark:border-stone-700 dark:bg-stone-900"
-            >
-              <option value="default">Default (free Groq)</option>
-              <option value="anthropic">Anthropic</option>
-              <option value="openai">OpenAI</option>
-              <option value="groq">Groq (own key)</option>
-            </select>
-            {provider !== "default" && (
-              <>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="API key"
-                  className="min-w-[14rem] flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2 dark:border-stone-700 dark:bg-stone-900"
-                />
-                <input
-                  type="text"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  placeholder="model (optional)"
-                  className="w-40 rounded-lg border border-stone-300 bg-white px-3 py-2 dark:border-stone-700 dark:bg-stone-900"
-                />
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
-          {error}
-        </div>
-      )}
-
-      {!result && !error && !loading && (
-        <div className="mt-8">
-          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">
-            Try
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {SAMPLES.map((s) => (
-              <button
-                key={s}
-                onClick={() => {
-                  setQuestion(s);
-                  ask(s);
-                }}
-                className="rounded-full border border-stone-300 px-3 py-1.5 text-xs text-stone-700 transition hover:border-indigo-400 hover:text-indigo-600 dark:border-stone-700 dark:text-stone-300"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {result && (
-        <section className="mt-8 space-y-6">
-          <div>
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
-              Answer
-            </h2>
-            <div className="whitespace-pre-wrap rounded-xl border border-stone-200 bg-white p-4 text-[15px] leading-relaxed shadow-sm dark:border-stone-800 dark:bg-stone-900">
-              {result.answer}
-            </div>
-            {elapsed !== null && (
-              <p className="mt-2 text-xs text-stone-500">
-                {elapsed.toFixed(1)}s · {result.chunks.length} chunks ·{" "}
-                {result.citations.length} sources
-              </p>
-            )}
-          </div>
-
-          {result.citations.length > 0 && (
-            <div>
-              <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
-                Citations
-              </h2>
-              <ul className="flex flex-wrap gap-2">
-                {result.citations.map((c) => (
-                  <li
-                    key={c}
-                    className="rounded-lg border-l-2 border-indigo-500 bg-stone-100 px-3 py-1.5 font-mono text-xs dark:bg-stone-800"
-                  >
-                    {c}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {result.chunks.length > 0 && (
-            <details className="group rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
-              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium text-stone-700 dark:text-stone-300">
-                Retrieved chunks ({result.chunks.length})
-                <span className="ml-2 text-xs text-stone-400 group-open:hidden">
-                  show
-                </span>
-              </summary>
-              <div className="space-y-4 border-t border-stone-200 px-4 py-4 dark:border-stone-800">
-                {result.chunks.map((c, i) => (
-                  <div key={c.id}>
-                    <div className="mb-1 flex items-center justify-between text-xs text-stone-500">
-                      <span className="font-mono">
-                        #{i + 1} · {c.filename}
-                      </span>
-                      <span>sim {c.similarity.toFixed(3)}</span>
-                    </div>
-                    <p className="rounded-lg bg-stone-50 p-3 font-mono text-xs leading-relaxed text-stone-700 dark:bg-stone-950 dark:text-stone-300">
-                      {c.document}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </details>
-          )}
-        </section>
-      )}
-    </main>
-  );
+  return <ProjectLanding config={config} />;
 }

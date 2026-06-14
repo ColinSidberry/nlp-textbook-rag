@@ -57,7 +57,7 @@ export default function ViewerPage() {
           </p>
         </div>
         <Link
-          href="/"
+          href="/ask"
           className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
         >
           ← Back to search
