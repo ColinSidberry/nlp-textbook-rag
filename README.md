@@ -18,9 +18,10 @@ the app could never just sit at a URL for free.
 This rewrite is fully **Vercel-native TypeScript** — no Python at serve time, no
 ChromaDB, no Ollama, no separate backend host:
 
-- **Embeddings run in the serverless function** via `transformers.js` — the *exact*
-  same MiniLM model the corpus was built with (verified: query vectors match the
-  original Chroma vectors to cosine 1.0), so there's no embedding API key anywhere.
+- **Query embedding via a hosted endpoint** running the *exact same* MiniLM model
+  the corpus was built with (`all-MiniLM-L6-v2`) — verified: query vectors match
+  the original Chroma vectors to cosine 1.0, so the existing vectors are reused
+  with no re-embed and retrieval is unchanged.
 - **Vectors live in Supabase pgvector** (free tier).
 - **Generation is bring-your-own-key**: a free Groq model by default, or paste your
   own Anthropic / OpenAI key. BYOK is the through-line — the app costs nothing to run.
@@ -45,7 +46,7 @@ query
 |---|---|
 | Frontend / API | Next.js 16 (App Router) + Tailwind, in `web/` |
 | Vector store | Supabase `pgvector`, HNSW cosine index |
-| Embeddings | `Xenova/all-MiniLM-L6-v2` (fp32) via `@huggingface/transformers` |
+| Embeddings | `all-MiniLM-L6-v2` via HuggingFace Inference API (free, same model as the corpus) |
 | Default LLM | Groq `llama-3.3-70b-versatile` (free tier) |
 | BYOK | Anthropic (`claude-opus-4-8`) / OpenAI, visitor-supplied key, never stored |
 | Auth | Shared `/code`-style password cookie, `.colinsidberry.com` SSO |
@@ -85,6 +86,7 @@ Environment (`web/.env.local`, all server-only — never `NEXT_PUBLIC_`):
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase secret key (server-side) |
 | `DATABASE_URL` | Direct Postgres URL — only used by `npm run ingest` |
 | `GROQ_API_KEY` | Free default LLM key ([console.groq.com](https://console.groq.com)) |
+| `HF_TOKEN` | Free HuggingFace token for query embedding ([hf.co/settings/tokens](https://huggingface.co/settings/tokens)) |
 | `SITE_SECRET`, `SITE_PASSWORD` | Password gate (shared across sites) |
 | `COOKIE_DOMAIN` | `.colinsidberry.com` in prod; blank locally |
 

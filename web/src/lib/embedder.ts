@@ -1,34 +1,46 @@
 /**
- * Query embedding via transformers.js — the EXACT MiniLM model the corpus was
- * embedded with (Xenova/all-MiniLM-L6-v2, 384-dim, mean-pooled + L2-normalized).
+ * Query embedding via the HuggingFace Inference API — the SAME model the corpus
+ * was built with (sentence-transformers/all-MiniLM-L6-v2), so query vectors land
+ * in the same 384-dim space as the stored document vectors. Running it as a
+ * hosted call (instead of transformers.js in-function) keeps the Vercel function
+ * tiny and avoids bundling onnxruntime's native binaries.
  *
- * No embedding API key anywhere: the model runs in the Vercel Node function.
- * `dtype: "fp32"` matches the fp32 doc vectors exported from Chroma, so query
- * and document vectors live in the same space. The first call pays a cold-start
- * cost (model download to /tmp + load); the module-level singleton keeps the
- * extractor warm for subsequent calls in the same instance.
+ * Requires HF_TOKEN (free at https://huggingface.co/settings/tokens).
+ * Output is L2-normalized to match the normalized document vectors.
  */
-import { pipeline, env, type FeatureExtractionPipeline } from "@huggingface/transformers";
+const MODEL = "sentence-transformers/all-MiniLM-L6-v2";
+const ENDPOINT = `https://router.huggingface.co/hf-inference/models/${MODEL}/pipeline/feature-extraction`;
 
-// Vercel's bundle is read-only except /tmp; always fetch the model remotely and
-// cache it there rather than trying to write into the deployment directory.
-env.allowLocalModels = false;
-env.cacheDir = "/tmp/hf-cache";
-
-const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
-
-let extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
-
-function getExtractor(): Promise<FeatureExtractionPipeline> {
-  if (!extractorPromise) {
-    extractorPromise = pipeline("feature-extraction", MODEL_ID, { dtype: "fp32" });
-  }
-  return extractorPromise;
+function l2normalize(v: number[]): number[] {
+  let norm = 0;
+  for (const x of v) norm += x * x;
+  norm = Math.sqrt(norm) || 1;
+  return v.map((x) => x / norm);
 }
 
-/** Embed a query string into a 384-dim L2-normalized vector. */
 export async function embedQuery(text: string): Promise<number[]> {
-  const extractor = await getExtractor();
-  const output = await extractor(text, { pooling: "mean", normalize: true });
-  return Array.from(output.data as Float32Array);
+  const token = process.env.HF_TOKEN;
+  if (!token) throw new Error("Missing HF_TOKEN");
+
+  const res = await fetch(ENDPOINT, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ inputs: text, options: { wait_for_model: true } }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`HF embedding failed (${res.status}): ${(await res.text()).slice(0, 200)}`);
+  }
+
+  const data = (await res.json()) as number[] | number[][];
+  // feature-extraction returns a flat 384-vector for a single string; some
+  // deployments wrap it as [[...]]. Handle both.
+  const vec = Array.isArray(data[0]) ? (data[0] as number[]) : (data as number[]);
+  if (vec.length !== 384) {
+    throw new Error(`Unexpected embedding length ${vec.length}`);
+  }
+  return l2normalize(vec);
 }
