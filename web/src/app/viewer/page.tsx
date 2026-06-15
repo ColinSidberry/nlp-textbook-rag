@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type Entry = {
   id: string;
@@ -58,9 +59,10 @@ export default function ViewerPage() {
         </div>
         <Link
           href="/ask"
-          className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+          aria-label="Back to search"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          ← Back to search
+          <ArrowLeft className="h-4 w-4" /> Back to search
         </Link>
       </header>
 
