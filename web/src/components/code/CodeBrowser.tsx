@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { ArrowLeft, ChevronDown, ChevronRight, FileCode } from 'lucide-react';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { ChevronDown, ChevronRight, FileCode } from 'lucide-react';
+import { SiteHeader } from '@/components/project/SiteHeader';
+import { projectConfig } from '@/components/project/config';
 import type { CodeData, TreeNode } from '@/lib/code-files';
 
 // Lazy shiki highlighter singleton — only loaded when /code is opened.
@@ -128,22 +129,7 @@ export function CodeBrowser({ data }: { data: CodeData }) {
 
   return (
     <div className="h-screen flex flex-col bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b border-border shrink-0">
-        <div className="px-4 h-14 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <a href="/" aria-label="Back" className="text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="h-5 w-5" />
-            </a>
-            <span className="text-border">/</span>
-            <h1 className="font-mono text-lg font-semibold tracking-tight">code</h1>
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground border border-border rounded-full px-2.5 py-0.5">
-              read-only · source viewer
-            </span>
-          </div>
-          <ThemeToggle />
-        </div>
-      </header>
+      <SiteHeader config={projectConfig} active="code" fluid />
 
       <div className="flex-1 flex min-h-0">
         {/* File tree */}

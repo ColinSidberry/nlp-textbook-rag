@@ -1,74 +1,24 @@
 'use client';
 
-import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { ArrowLeft, Play, ArrowUpRight, Code2, Database, ChevronRight, X } from 'lucide-react';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { ArrowUpRight, ChevronRight } from 'lucide-react';
+import { SiteHeader } from './SiteHeader';
+import type { ProjectConfig } from './config';
+
+export type { ProjectConfig } from './config';
 
 /**
  * Reusable project-page template shared across portfolio projects
  * (writing-agent, homes, nlp-rag). Drive it with a ProjectConfig.
  *
- * Sticky centered nav (Demo · Live · Code · Database) + hero + pipeline strip +
- * markdown write-up + closing CTA. "Demo" opens an in-page video modal.
+ * Persistent SiteHeader (Demo · Live · Code · Database) + hero + pipeline strip +
+ * markdown write-up + closing CTA. The same SiteHeader rides every sub-view.
  */
-export interface ProjectConfig {
-  name: string;
-  tagline: string;
-  stack: string[];
-  /** Back-arrow target — the portfolio hub. */
-  hubUrl?: string;
-  liveHref: string;
-  codeHref: string;
-  dbHref: string;
-  /** YouTube video id for the embedded demo. Empty = "coming soon" state. */
-  demoVideoId?: string;
-  /** Stage names rendered as a cobalt chip flow under the hero. */
-  pipeline?: string[];
-  /** Markdown write-up rendered as the page body. */
-  writeup: string;
-}
-
-const navCls =
-  'inline-flex items-center gap-1.5 text-sm font-medium px-2.5 py-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors';
 
 export function ProjectLanding({ config }: { config: ProjectConfig }) {
-  const [demoOpen, setDemoOpen] = useState(false);
-  const hub = config.hubUrl ?? 'https://colinsidberry.com';
-
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Sticky header nav */}
-      <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-3xl mx-auto px-4 h-14 grid grid-cols-[1fr_auto_1fr] items-center">
-          <a href={hub} aria-label="Back to portfolio" className="justify-self-start text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-5 w-5" />
-          </a>
-
-          <nav className="justify-self-center flex items-center gap-0.5 sm:gap-1">
-            <button onClick={() => setDemoOpen(true)} className={navCls}>
-              <Play className="h-4 w-4 text-brand" />
-              <span className="hidden sm:inline">Demo</span>
-            </button>
-            <a href={config.liveHref} className={navCls}>
-              <ArrowUpRight className="h-4 w-4" />
-              <span className="hidden sm:inline">Live</span>
-            </a>
-            <a href={config.codeHref} className={navCls}>
-              <Code2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Code</span>
-            </a>
-            <a href={config.dbHref} className={navCls}>
-              <Database className="h-4 w-4" />
-              <span className="hidden sm:inline">Database</span>
-            </a>
-          </nav>
-
-          <div className="justify-self-end">
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      <SiteHeader config={config} />
 
       <main className="max-w-3xl mx-auto px-5">
         {/* Hero */}
@@ -128,40 +78,6 @@ export function ProjectLanding({ config }: { config: ProjectConfig }) {
           <span>{config.stack.join(' · ')}</span>
         </div>
       </footer>
-
-      {/* Demo modal */}
-      {demoOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={() => setDemoOpen(false)}>
-          <div
-            className="relative w-full max-w-3xl aspect-video bg-card rounded-xl border border-border overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setDemoOpen(false)}
-              aria-label="Close"
-              className="absolute top-2 right-2 z-10 text-white/80 hover:text-white"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            {config.demoVideoId ? (
-              <iframe
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${config.demoVideoId}?autoplay=1`}
-                title={`${config.name} demo`}
-                allow="accelerated-encoder; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-center gap-2 px-6">
-                <div className="font-mono text-sm text-muted-foreground">demo video coming soon</div>
-                <a href={config.liveHref} className="font-mono text-sm text-brand underline underline-offset-2">
-                  → try it live instead
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

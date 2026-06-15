@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { SiteHeader } from "@/components/project/SiteHeader";
+import { projectConfig } from "@/components/project/config";
 
 type Chunk = {
   id: string;
@@ -78,19 +79,13 @@ export default function Home() {
   }
 
   return (
+    <>
+    <SiteHeader config={projectConfig} active="live" />
     <main className="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">
       <header className="mb-8">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            NLP Textbook RAG
-          </h1>
-          <Link
-            href="/viewer"
-            className="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-          >
-            Database Viewer →
-          </Link>
-        </div>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          NLP Textbook RAG
+        </h1>
         <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
           Ask about NLP concepts from Jurafsky &amp; Martin&apos;s{" "}
           <em>Speech and Language Processing</em>. Answers are grounded in 10,170
@@ -268,5 +263,6 @@ export default function Home() {
         </section>
       )}
     </main>
+    </>
   );
 }

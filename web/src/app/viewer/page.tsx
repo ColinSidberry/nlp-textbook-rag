@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { SiteHeader } from "@/components/project/SiteHeader";
+import { projectConfig } from "@/components/project/config";
 
 type Entry = {
   id: string;
@@ -48,22 +48,15 @@ export default function ViewerPage() {
   }, [load]);
 
   return (
+    <>
+    <SiteHeader config={projectConfig} active="database" fluid />
     <main className="mx-auto w-full max-w-4xl px-5 py-12">
-      <header className="mb-6 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Database Viewer</h1>
-          <p className="mt-1 text-sm text-stone-500">
-            {feed ? feed.total.toLocaleString() : "—"} chunks · MiniLM 384-dim ·
-            cosine
-          </p>
-        </div>
-        <Link
-          href="/ask"
-          aria-label="Back to search"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to search
-        </Link>
+      <header className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight">Database Viewer</h1>
+        <p className="mt-1 text-sm text-stone-500">
+          {feed ? feed.total.toLocaleString() : "—"} chunks · MiniLM 384-dim ·
+          cosine
+        </p>
       </header>
 
       <div className="mb-5 flex flex-wrap gap-3">
@@ -153,5 +146,6 @@ export default function ViewerPage() {
         </>
       )}
     </main>
+    </>
   );
 }
