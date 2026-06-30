@@ -80,7 +80,7 @@ export default function Home() {
 
   return (
     <>
-    <SiteHeader config={projectConfig} active="live" />
+    <SiteHeader config={projectConfig} active="live" fluid />
     <main className="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">
       <header className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">

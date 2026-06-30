@@ -2,6 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { SiteHeader } from "@/components/project/SiteHeader";
+import { projectConfig } from "@/components/project/config";
 
 function LoginForm() {
   const router = useRouter();
@@ -67,10 +69,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex flex-1 items-center justify-center px-5 py-16">
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader config={projectConfig} fluid />
+      <div className="flex flex-1 items-center justify-center px-5 py-16">
+        <Suspense fallback={null}>
+          <LoginForm />
+        </Suspense>
+      </div>
     </div>
   );
 }
