@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 import { SiteHeader } from './SiteHeader';
@@ -12,13 +13,20 @@ export type { ProjectConfig } from './config';
  * (writing-agent, homes, nlp-rag). Drive it with a ProjectConfig.
  *
  * Persistent SiteHeader (Demo · Live · Code · Database) + hero + pipeline strip +
- * markdown write-up + closing CTA. The same SiteHeader rides every sub-view.
+ * bespoke body (or markdown write-up fallback) + closing CTA. The same SiteHeader
+ * rides every sub-view.
  */
 
-export function ProjectLanding({ config }: { config: ProjectConfig }) {
+export function ProjectLanding({
+  config,
+  children,
+}: {
+  config: ProjectConfig;
+  children?: ReactNode;
+}) {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader config={config} />
+      <SiteHeader config={config} active="home" fluid />
 
       <main className="max-w-3xl mx-auto px-5">
         {/* Hero */}
@@ -43,22 +51,26 @@ export function ProjectLanding({ config }: { config: ProjectConfig }) {
           </div>
         )}
 
-        {/* Write-up */}
-        <article
-          className="max-w-none
-            [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:mt-12 [&_h2]:mb-3 [&_h2]:scroll-mt-20
-            [&_h2]:pb-2 [&_h2]:border-b [&_h2]:border-border
-            [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-2
-            [&_p]:text-muted-foreground [&_p]:leading-[1.75] [&_p]:mb-4
-            [&_ul]:list-none [&_ul]:pl-0 [&_ul]:mb-4 [&_ul]:space-y-2
-            [&_li]:text-muted-foreground [&_li]:pl-6 [&_li]:relative
-            [&_li]:before:content-['→'] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:text-brand
-            [&_strong]:text-foreground [&_strong]:font-semibold
-            [&_code]:font-mono [&_code]:text-sm [&_code]:text-brand [&_code]:bg-brand/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded
-            [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-2"
-        >
-          <ReactMarkdown>{config.writeup}</ReactMarkdown>
-        </article>
+        {/* Bespoke body (preferred) or markdown write-up fallback */}
+        {children ? (
+          <div>{children}</div>
+        ) : (
+          <article
+            className="max-w-none
+              [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-tight [&_h2]:mt-12 [&_h2]:mb-3 [&_h2]:scroll-mt-20
+              [&_h2]:pb-2 [&_h2]:border-b [&_h2]:border-border
+              [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-2
+              [&_p]:text-muted-foreground [&_p]:leading-[1.75] [&_p]:mb-4
+              [&_ul]:list-none [&_ul]:pl-0 [&_ul]:mb-4 [&_ul]:space-y-2
+              [&_li]:text-muted-foreground [&_li]:pl-6 [&_li]:relative
+              [&_li]:before:content-['→'] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:text-brand
+              [&_strong]:text-foreground [&_strong]:font-semibold
+              [&_code]:font-mono [&_code]:text-sm [&_code]:text-brand [&_code]:bg-brand/5 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded
+              [&_a]:text-foreground [&_a]:underline [&_a]:underline-offset-2"
+          >
+            <ReactMarkdown>{config.writeup ?? ''}</ReactMarkdown>
+          </article>
+        )}
 
         {/* Closing CTA */}
         <div className="mt-10 pb-24">

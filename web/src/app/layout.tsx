@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NLP Textbook RAG",
+  title: "NLP Textbook RAG · Colin Sidberry",
   description:
     "Retrieval-augmented Q&A over Jurafsky & Martin's Speech and Language Processing.",
 };

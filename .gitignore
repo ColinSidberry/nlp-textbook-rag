@@ -42,3 +42,4 @@ scrap-docs/
 
 # Tooling
 .serena/
+.vercel

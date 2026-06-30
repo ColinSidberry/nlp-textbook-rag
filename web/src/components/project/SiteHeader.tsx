@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { ArrowLeft, Play, ArrowUpRight, Code2, Database, X } from 'lucide-react';
+import { Home, Play, ArrowUpRight, Code2, Database, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import type { ProjectConfig } from './config';
 
@@ -13,7 +13,7 @@ import type { ProjectConfig } from './config';
  * the behavior is identical on the landing and on every sub-page.
  */
 
-export type Section = 'demo' | 'live' | 'code' | 'database';
+export type Section = 'home' | 'demo' | 'live' | 'code' | 'database';
 
 const base =
   'inline-flex items-center gap-1.5 text-sm font-medium px-2.5 py-1.5 rounded-lg transition-colors';
@@ -47,20 +47,26 @@ export function SiteHeader({
     ? 'sticky top-0 z-40 border-b border-[#30363d] bg-[#0d1117]'
     : 'sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60';
 
-  const backCls = dark
-    ? 'justify-self-start text-[#7d8590] hover:text-[#e6edf3] transition-colors'
-    : 'justify-self-start text-muted-foreground hover:text-foreground transition-colors';
+  // The avatar (top-left) goes to the portfolio hub; a ring tuned per surface.
+  const avatarCls = dark
+    ? 'justify-self-start rounded-full ring-1 ring-[#30363d] hover:ring-[#8b949e] transition'
+    : 'justify-self-start rounded-full ring-1 ring-border hover:ring-foreground/40 transition';
 
   const container = fluid ? 'px-5 h-14' : 'max-w-3xl mx-auto px-4 h-14';
 
   return (
     <header className={headerCls}>
       <div className={`${container} grid grid-cols-[1fr_auto_1fr] items-center`}>
-        <a href={hub} aria-label="Back to portfolio" className={backCls}>
-          <ArrowLeft className="h-5 w-5" />
+        <a href={hub} aria-label="Back to Colin Sidberry's portfolio" className={avatarCls}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/me.jpg" alt="Colin Sidberry" className="h-8 w-8 rounded-full object-cover" />
         </a>
 
         <nav className="justify-self-center flex items-center gap-0.5 sm:gap-1">
+          <a href="/" className={item(active === 'home')}>
+            <Home className="h-4 w-4" />
+            <span className="hidden sm:inline">Home</span>
+          </a>
           <button onClick={() => setDemoOpen(true)} className={item(active === 'demo')}>
             <Play className="h-4 w-4 text-brand" />
             <span className="hidden sm:inline">Demo</span>
