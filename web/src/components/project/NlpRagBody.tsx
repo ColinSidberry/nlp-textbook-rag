@@ -79,11 +79,9 @@ const TECH: { group: string; items: TechItem[] }[] = [
     ],
   },
   {
-    group: 'LLM (BYOK)',
+    group: 'LLM',
     items: [
       { name: 'Groq', src: '/groq.png', wide: true, mono: true },
-      { name: 'Anthropic', slug: 'anthropic' },
-      { name: 'OpenAI', src: '/openai.svg', mono: true },
     ],
   },
   {
@@ -276,10 +274,10 @@ export function NlpRagBody() {
 
         <h3 className="mb-2 mt-7 text-base font-semibold text-foreground">LLM</h3>
         <P>
-          The final step sends the retrieved passages to a generative model. It defaults to a free Groq model
-          (future vision is to enable you to bring your own model), used only for that one request
-          and never stored. The model gets a strict anti-hallucination prompt: answer only from the
-          supplied passages, and cite the chapters it drew from.
+          The final step sends the retrieved passages to a generative model. It runs on a free Groq
+          model today, with bring-your-own-model support as a planned next step. The model gets a
+          strict anti-hallucination prompt: answer only from the supplied passages, and cite the
+          chapters it drew from.
         </P>
       </Section>
 
