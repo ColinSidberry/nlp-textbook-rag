@@ -33,7 +33,7 @@ type Kind = 'io' | 'brand';
 type Step = { n: number; name: string; desc: string; icon: typeof Binary; kind: Kind };
 
 const STEPS: Step[] = [
-  { n: 1, name: 'Question', desc: 'your question, in plain English', icon: MessageCircleQuestion, kind: 'io' },
+  { n: 1, name: 'Question', desc: 'your question, in plain English', icon: MessageCircleQuestion, kind: 'brand' },
   { n: 2, name: 'Embed', desc: 'MiniLM encodes it into a 384-dim vector', icon: Binary, kind: 'brand' },
   { n: 3, name: 'Retrieve', desc: 'pgvector pulls the top-5 nearest of 10,170 chunks', icon: Database, kind: 'brand' },
 ];
@@ -124,6 +124,25 @@ function Connector({ label }: { label?: string }) {
   );
 }
 
+/** Tree fork under the gate: one stem drops from the center, splits into a
+ *  horizontal bar, and two drops line up over the two branch columns below.
+ *  Desktop only; on mobile the branches just stack under a plain connector. */
+function Fork() {
+  return (
+    <>
+      <div className="sm:hidden">
+        <Connector />
+      </div>
+      <div className="relative hidden h-6 sm:block" aria-hidden>
+        <div className="absolute left-1/2 top-0 h-3 w-px -translate-x-1/2 bg-border" />
+        <div className="absolute left-1/4 right-1/4 top-3 border-t border-border" />
+        <div className="absolute left-1/4 top-3 h-3 w-px -translate-x-1/2 bg-border" />
+        <div className="absolute left-3/4 top-3 h-3 w-px -translate-x-1/2 bg-border" />
+      </div>
+    </>
+  );
+}
+
 /** Top-down RAG pipeline. At the relevance gate, a dashed branch peels off to a
  *  muted "Not covered" card; the main path continues to the grounded answer. */
 function RagFlow() {
@@ -140,25 +159,34 @@ function RagFlow() {
 
       <StepCard step={GATE} />
 
-      {/* the gate forks: a too-weak match dead-ends at "Not covered" */}
-      <Connector label="if the best match is too weak" />
-      <div className="flex items-start gap-3 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-3">
-        <Ban className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-        <span className="min-w-0">
-          <span className="block text-sm font-semibold text-foreground">Not covered</span>
-          <span className="block text-xs leading-snug text-muted-foreground">
-            it stops here: the book doesn&apos;t address it, so it says so instead of guessing
+      {/* the gate forks like a tree: too weak dead-ends at "Not covered",
+          otherwise the strong matches continue to the grounded answer */}
+      <Fork />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* dead-end branch */}
+        <div>
+          <span className="mb-1.5 block text-center text-[11px] uppercase tracking-wider text-muted-foreground/60">
+            too weak
           </span>
-        </span>
-      </div>
+          <div className="flex items-start gap-3 rounded-xl border border-dashed border-border bg-muted/40 px-4 py-3">
+            <Ban className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-foreground">Not covered</span>
+              <span className="block text-xs leading-snug text-muted-foreground">
+                it stops here: the book doesn&apos;t address it, so it says so instead of guessing
+              </span>
+            </span>
+          </div>
+        </div>
 
-      <div className="flex items-center gap-3 py-3 text-[11px] uppercase tracking-wider text-muted-foreground/60">
-        <span className="h-px flex-1 bg-border" />
-        otherwise
-        <span className="h-px flex-1 bg-border" />
+        {/* answer branch */}
+        <div>
+          <span className="mb-1.5 block text-center text-[11px] uppercase tracking-wider text-muted-foreground/60">
+            passes
+          </span>
+          <StepCard step={ANSWER} />
+        </div>
       </div>
-
-      <StepCard step={ANSWER} />
 
       {/* legend */}
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
@@ -186,7 +214,7 @@ export function NlpRagBody() {
         </P>
         <P>
           The goal was a system built on our course textbook, Jurafsky &amp; Martin&apos;s{' '}
-          <em>Speech and Language Processing</em> (35 chapters, ~1,000 pages), where the LLM answers
+          <em>Speech and Language Processing</em>{' '}(35 chapters, ~1,000 pages), where the LLM answers
           from the book itself rather than from whatever it absorbed during training. Every answer
           traces back to the actual pages, and when the book doesn&apos;t cover something, it says
           so instead of guessing.
@@ -221,30 +249,37 @@ export function NlpRagBody() {
         </P>
 
         <h3 className="mb-2 mt-7 text-base font-semibold text-foreground">Frontend</h3>
-        <P>
-          A Next.js (React) app with two surfaces over the pipeline. A live run you drive yourself:
-          ask a question and see the answer with the exact passages it retrieved shown inline. And a
-          database viewer that browses all 10,170 indexed chunks directly, so the index isn&apos;t a
-          black box.
-        </P>
+        <p className="mb-3 leading-[1.75] text-muted-foreground">
+          A Next.js app with two views over the pipeline:
+        </p>
+        <ol className="mb-4 ml-5 list-decimal space-y-2 leading-[1.75] text-muted-foreground marker:font-mono marker:text-muted-foreground/70">
+          <li>
+            <span className="font-medium text-foreground">A live run</span> you drive yourself: ask a
+            question and see the answer with the exact passages it retrieved shown inline.
+          </li>
+          <li>
+            <span className="font-medium text-foreground">A database viewer</span>{' '}that browses
+            all 10,170 indexed chunks directly, so the index isn&apos;t a black box.
+          </li>
+        </ol>
 
         <h3 className="mb-2 mt-7 text-base font-semibold text-foreground">Backend</h3>
         <P>
-          Retrieval runs in Vercel serverless functions, with no model server of its own. The
+          Retrieval runs in Vercel serverless functions, with no model server of its own
+          (a past life of this ran generation via Ollama on an always-on, paid GCP VM; going
+          serverless is what makes this version cheap enough to keep live). The
           question is embedded in-request through a hosted MiniLM endpoint, the same model used on
           the corpus, so the cosine distances are actually comparable. The vectors live in Supabase{' '}
-          <code className="rounded bg-brand/5 px-1 py-0.5 font-mono text-sm text-brand">pgvector</code>,
-          which runs the nearest-neighbor search, and a daily GitHub Action pings the database so the
+          pgvector, which runs the nearest-neighbor search, and a daily GitHub Action pings the database so the
           free tier never pauses.
         </P>
 
         <h3 className="mb-2 mt-7 text-base font-semibold text-foreground">LLM</h3>
         <P>
-          One call per question, at the end of the pipeline. It defaults to a free Groq model, or you
-          can bring your own key to run Anthropic or OpenAI instead, used only for that one request
+          The final step sends the retrieved passages to a generative model. It defaults to a free Groq model
+          (future vision is to enable you to bring your own model), used only for that one request
           and never stored. The model gets a strict anti-hallucination prompt: answer only from the
-          supplied passages, and cite the chapters it drew from. That bring-your-own-key default is
-          what lets the whole thing sit live at a URL for free.
+          supplied passages, and cite the chapters it drew from.
         </P>
       </Section>
 
