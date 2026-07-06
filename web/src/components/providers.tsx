@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeSync } from "@/components/theme-sync";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem={false}
       disableTransitionOnChange
     >
+      <ThemeSync />
       {children}
     </ThemeProvider>
   );

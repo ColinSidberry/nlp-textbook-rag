@@ -80,6 +80,52 @@
   --brand-foreground: oklch(0.17 0.02 264);
 }
 
+/* GitHub-styled surface for the developer views (/code, /viewer). Overrides the
+   semantic tokens with GitHub's Primer palette (light + dark) so existing utilities
+   render the GitHub look in both themes. Shared across sibling repos. */
+.gh {
+  --background: #ffffff;
+  --foreground: #1f2328;
+  --card: #f6f8fa;
+  --card-foreground: #1f2328;
+  --popover: #ffffff;
+  --popover-foreground: #1f2328;
+  --primary: #0969da;
+  --primary-foreground: #ffffff;
+  --secondary: #f6f8fa;
+  --secondary-foreground: #1f2328;
+  --muted: #eaeef2;
+  --muted-foreground: #656d76;
+  --accent: #eaeef2;
+  --accent-foreground: #1f2328;
+  --border: #d0d7de;
+  --input: #d0d7de;
+  --ring: #0969da;
+  --brand: #0969da;
+  --brand-foreground: #ffffff;
+}
+.dark .gh {
+  --background: #0d1117;
+  --foreground: #e6edf3;
+  --card: #161b22;
+  --card-foreground: #e6edf3;
+  --popover: #161b22;
+  --popover-foreground: #e6edf3;
+  --primary: #2f81f7;
+  --primary-foreground: #ffffff;
+  --secondary: #161b22;
+  --secondary-foreground: #e6edf3;
+  --muted: #21262d;
+  --muted-foreground: #7d8590;
+  --accent: #21262d;
+  --accent-foreground: #e6edf3;
+  --border: #30363d;
+  --input: #30363d;
+  --ring: #2f81f7;
+  --brand: #2f81f7;
+  --brand-foreground: #ffffff;
+}
+
 @layer base {
   * {
     border-color: var(--border);

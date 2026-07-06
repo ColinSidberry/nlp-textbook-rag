@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     "Retrieval-augmented Q&A over Jurafsky & Martin's Speech and Language Processing.",
 };
 
+// Seed next-themes from the cross-subdomain `theme` cookie before it initializes,
+// so a light/dark choice made on a sibling *.colinsidberry.com site is honored
+// here with no flash.
+const THEME_SEED = `try{var m=document.cookie.match(/(?:^|; )theme=(light|dark)/);if(m){localStorage.setItem('theme',m[1]);var e=document.documentElement;m[1]==='dark'?e.classList.add('dark'):e.classList.remove('dark');}}catch(e){}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,6 +37,7 @@ export default function RootLayout({
       className={`${poppins.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: THEME_SEED }} />
         <Providers>{children}</Providers>
       </body>
     </html>

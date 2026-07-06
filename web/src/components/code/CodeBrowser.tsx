@@ -128,7 +128,7 @@ export function CodeBrowser({ data }: { data: CodeData }) {
   }, [selected, resolvedTheme, data.files]);
 
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
+    <div className="gh h-screen flex flex-col bg-background text-foreground">
       <SiteHeader config={projectConfig} active="code" fluid />
 
       <div className="flex-1 flex min-h-0">
