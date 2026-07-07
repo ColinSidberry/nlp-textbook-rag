@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Home, Play, ArrowUpRight, Code2, Database, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import type { ProjectConfig } from './config';
@@ -35,6 +36,10 @@ export function SiteHeader({
   rightSlot?: ReactNode;
 }) {
   const [demoOpen, setDemoOpen] = useState(false);
+  // Portal the modal to <body> so the header's backdrop-blur (which establishes a
+  // containing block for `fixed`) doesn't clip it to the header strip.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const hub = config.hubUrl ?? 'https://colinsidberry.com';
   const dark = variant === 'dark';
 
@@ -91,8 +96,8 @@ export function SiteHeader({
         </div>
       </div>
 
-      {/* Demo modal */}
-      {demoOpen && (
+      {/* Demo modal — portaled to <body> to escape the header's containing block. */}
+      {demoOpen && mounted && createPortal(
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onClick={() => setDemoOpen(false)}>
           <div
             className="relative w-full max-w-3xl aspect-video bg-card rounded-xl border border-border overflow-hidden"
@@ -122,7 +127,8 @@ export function SiteHeader({
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </header>
   );

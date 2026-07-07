@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
-import { ChevronDown, ChevronRight, FileCode } from 'lucide-react';
+import { ChevronDown, ChevronRight, FileCode, Menu, X } from 'lucide-react';
 import { SiteHeader } from '@/components/project/SiteHeader';
 import { projectConfig } from '@/components/project/config';
 import type { CodeData, TreeNode } from '@/lib/code-files';
@@ -102,6 +102,7 @@ export function CodeBrowser({ data }: { data: CodeData }) {
   const [selected, setSelected] = useState<string | null>(() => firstFile(data.tree));
   const [html, setHtml] = useState('');
   const [loading, setLoading] = useState(false);
+  const [navOpen, setNavOpen] = useState(false); // mobile file-tree drawer
 
   useEffect(() => {
     if (!selected) return;
@@ -132,15 +133,46 @@ export function CodeBrowser({ data }: { data: CodeData }) {
       <SiteHeader config={projectConfig} active="code" fluid />
 
       <div className="flex-1 flex min-h-0">
-        {/* File tree */}
-        <aside className="w-64 shrink-0 border-r border-border overflow-y-auto py-2">
+        {/* File tree — static on desktop */}
+        <aside className="hidden md:block w-64 shrink-0 border-r border-border overflow-y-auto py-2">
           <Tree nodes={data.tree} selected={selected} onSelect={setSelected} depth={0} />
         </aside>
 
+        {/* File tree — slide-in drawer on mobile */}
+        {navOpen && (
+          <div className="md:hidden fixed inset-0 z-50">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setNavOpen(false)} />
+            <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] bg-background border-r border-border overflow-y-auto py-2">
+              <div className="flex items-center justify-between px-3 pb-2">
+                <span className="font-mono text-xs text-muted-foreground">Files</span>
+                <button onClick={() => setNavOpen(false)} aria-label="Close file tree">
+                  <X className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </div>
+              <Tree
+                nodes={data.tree}
+                selected={selected}
+                onSelect={(p) => {
+                  setSelected(p);
+                  setNavOpen(false);
+                }}
+                depth={0}
+              />
+            </aside>
+          </div>
+        )}
+
         {/* Code pane */}
         <main className="flex-1 min-w-0 flex flex-col">
-          <div className="border-b border-border px-4 py-2 shrink-0">
-            <span className="font-mono text-xs text-muted-foreground">{selected ?? 'select a file'}</span>
+          <div className="border-b border-border px-4 py-2 shrink-0 flex items-center gap-2">
+            <button
+              onClick={() => setNavOpen(true)}
+              aria-label="Open file tree"
+              className="md:hidden -ml-1 rounded p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+            <span className="font-mono text-xs text-muted-foreground truncate">{selected ?? 'select a file'}</span>
           </div>
           <div className="flex-1 overflow-auto">
             {loading ? (

@@ -27,6 +27,6 @@ export const projectConfig: ProjectConfig = {
   liveHref: '/ask',
   codeHref: '/code',
   dbHref: '/viewer',
-  demoVideoId: '',
+  demoVideoId: 'Jzgqzh0b7KE',
   pipeline: ['Chunk', 'Embed (MiniLM)', 'pgvector search', 'Ground', 'Groq answer'],
 };

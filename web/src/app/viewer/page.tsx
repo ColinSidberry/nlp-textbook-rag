@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { SiteHeader } from "@/components/project/SiteHeader";
 import { projectConfig } from "@/components/project/config";
 
@@ -29,6 +30,7 @@ export default function ViewerPage() {
   const [feed, setFeed] = useState<Feed | null>(null);
   const [filenames, setFilenames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [navOpen, setNavOpen] = useState(false); // mobile chapters drawer
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -53,6 +55,32 @@ export default function ViewerPage() {
 
   const chapters = [{ value: "", label: "All chapters" }, ...filenames.map((f) => ({ value: f, label: f }))];
 
+  const chapterNav = (
+    <nav className="pb-4">
+      {chapters.map(({ value, label }) => {
+        const isActive = filename === value;
+        return (
+          <button
+            key={value || "__all"}
+            onClick={() => {
+              setFilename(value);
+              setPage(1);
+              setNavOpen(false);
+            }}
+            className={`w-full text-left px-4 py-2 flex items-center gap-2 border-l-2 transition-colors ${
+              isActive ? "border-brand bg-muted/60" : "border-transparent hover:bg-muted/40"
+            }`}
+          >
+            <span className="font-mono text-sm truncate">{label}</span>
+          </button>
+        );
+      })}
+      {filenames.length === 0 && !loading && (
+        <div className="px-4 py-2 text-sm text-muted-foreground font-mono animate-pulse">connecting…</div>
+      )}
+    </nav>
+  );
+
   return (
     // Single vector-chunk store (not multiple collections) — presented in the same
     // two-pane shell as the sibling database views: chapters pick on the left,
@@ -60,35 +88,44 @@ export default function ViewerPage() {
     <div className="gh min-h-screen bg-background text-foreground">
       <SiteHeader config={projectConfig} active="database" fluid />
 
+      {/* Mobile: open-chapters bar */}
+      <div className="md:hidden flex items-center gap-3 border-b border-border px-4 py-2">
+        <button
+          onClick={() => setNavOpen(true)}
+          aria-label="Open chapters"
+          className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground"
+        >
+          <Menu className="h-4 w-4" /> Chapters
+        </button>
+        <span className="font-mono text-sm text-muted-foreground truncate">{filename || "All chapters"}</span>
+      </div>
+
       <div className="flex flex-col md:flex-row">
-        {/* Left: chapters (the "collections") */}
-        <aside className="md:w-72 md:shrink-0 border-b md:border-b-0 md:border-r border-border md:h-[calc(100vh-57px)] md:sticky md:top-14 overflow-y-auto">
+        {/* Left: chapters (desktop) */}
+        <aside className="hidden md:block md:w-72 md:shrink-0 md:border-r border-border md:h-[calc(100vh-57px)] md:sticky md:top-14 overflow-y-auto">
           <div className="px-4 pt-4 pb-2 text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
             Chapters
           </div>
-          <nav className="pb-4">
-            {chapters.map(({ value, label }) => {
-              const isActive = filename === value;
-              return (
-                <button
-                  key={value || "__all"}
-                  onClick={() => {
-                    setFilename(value);
-                    setPage(1);
-                  }}
-                  className={`w-full text-left px-4 py-2 flex items-center gap-2 border-l-2 transition-colors ${
-                    isActive ? "border-brand bg-muted/60" : "border-transparent hover:bg-muted/40"
-                  }`}
-                >
-                  <span className="font-mono text-sm truncate">{label}</span>
-                </button>
-              );
-            })}
-            {filenames.length === 0 && !loading && (
-              <div className="px-4 py-2 text-sm text-muted-foreground font-mono animate-pulse">connecting…</div>
-            )}
-          </nav>
+          {chapterNav}
         </aside>
+
+        {/* Left: chapters (mobile drawer) */}
+        {navOpen && (
+          <div className="md:hidden fixed inset-0 z-50">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setNavOpen(false)} />
+            <div className="absolute inset-y-0 left-0 w-72 max-w-[85vw] overflow-y-auto border-r border-border bg-background">
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <span className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground">
+                  Chapters
+                </span>
+                <button onClick={() => setNavOpen(false)} aria-label="Close chapters">
+                  <X className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </div>
+              {chapterNav}
+            </div>
+          </div>
+        )}
 
         {/* Right: chunks (the "documents") */}
         <main className="flex-1 min-w-0">
