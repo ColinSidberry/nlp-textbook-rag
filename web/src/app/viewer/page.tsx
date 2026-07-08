@@ -217,9 +217,9 @@ export default function ViewerPage() {
           </div>
 
           <div className="p-5">
-            {loading && <div className="flex py-1"><Dots label="loading…" /></div>}
+            {loading && <div className="flex justify-center py-12"><Dots label="loading…" /></div>}
 
-            {feed && (
+            {!loading && feed && (
               <>
                 <div className="space-y-3">
                   {feed.entries.map((e) => (

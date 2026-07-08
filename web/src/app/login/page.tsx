@@ -89,7 +89,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader config={projectConfig} fluid />
-      <div className="flex flex-1 items-center justify-center px-5 py-16">
+      <div className="flex flex-1 items-center justify-center px-5">
         <Suspense fallback={null}>
           <LoginForm />
         </Suspense>

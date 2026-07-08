@@ -82,7 +82,7 @@ function DirItem({
   onSelect: (p: string) => void;
   depth: number;
 }) {
-  const [open, setOpen] = useState(depth < 1);
+  const [open, setOpen] = useState(false);
   return (
     <li>
       <button
@@ -177,7 +177,7 @@ export function CodeBrowser({ data }: { data: CodeData }) {
           </div>
           <div className="flex-1 overflow-auto">
             {loading ? (
-              <div className="p-4"><Dots label="highlighting…" /></div>
+              <div className="p-4"><Dots label="loading…" /></div>
             ) : (
               <div
                 className="text-[13px] [&_pre]:p-4 [&_pre]:min-h-full [&_pre]:!bg-transparent [&_code]:font-mono"

@@ -37,7 +37,7 @@ export function ProjectLanding({
 
         {/* Pipeline strip */}
         {config.pipeline && config.pipeline.length > 0 && (
-          <div className="flex flex-wrap items-center gap-y-2 pb-12">
+          <div className="flex flex-wrap items-center gap-y-2">
             {config.pipeline.map((s, i) => (
               <span key={s} className="flex items-center">
                 <span className="font-mono text-xs rounded-full border border-brand/40 bg-brand/5 text-brand px-2.5 py-1">
