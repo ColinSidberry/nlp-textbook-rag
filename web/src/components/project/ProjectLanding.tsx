@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
 import { SiteHeader } from './SiteHeader';
+import { SiteFooter } from './SiteFooter';
 import type { ProjectConfig } from './config';
 
 export type { ProjectConfig } from './config';
@@ -84,12 +85,7 @@ export function ProjectLanding({
         </div>
       </main>
 
-      <footer className="border-t border-border">
-        <div className="max-w-3xl mx-auto px-5 py-6 flex flex-wrap justify-between gap-2 font-mono text-xs text-muted-foreground">
-          <span>Colin Sidberry</span>
-          <span>{config.stack.join(' · ')}</span>
-        </div>
-      </footer>
+      <SiteFooter config={config} />
     </div>
   );
 }

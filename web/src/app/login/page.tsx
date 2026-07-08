@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Code2, Database, Loader2 } from "lucide-react";
 import { SiteHeader } from "@/components/project/SiteHeader";
+import { SiteFooter } from "@/components/project/SiteFooter";
 import { projectConfig } from "@/components/project/config";
 
 const TARGETS: Record<string, { label: string; Icon: typeof Code2 }> = {
@@ -94,6 +95,7 @@ export default function LoginPage() {
           <LoginForm />
         </Suspense>
       </div>
+      <SiteFooter config={projectConfig} />
     </div>
   );
 }

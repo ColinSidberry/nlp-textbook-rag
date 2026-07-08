@@ -250,7 +250,7 @@ export function NlpRagBody() {
         <p className="mb-3 leading-[1.75] text-muted-foreground">
           A Next.js app with two views over the pipeline:
         </p>
-        <ol className="mb-4 ml-5 list-decimal space-y-2 leading-[1.75] text-muted-foreground marker:font-mono marker:text-muted-foreground/70">
+        <ol className="mb-4 ml-5 pl-5 list-decimal space-y-2 leading-[1.75] text-muted-foreground marker:font-mono marker:text-muted-foreground/70">
           <li>
             <span className="font-medium text-foreground">A live run</span> you drive yourself: ask a
             question and see the answer with the exact passages it retrieved shown inline.

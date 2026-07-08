@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { ChevronDown, ChevronRight, FileCode, Menu, X } from 'lucide-react';
 import { SiteHeader } from '@/components/project/SiteHeader';
+import { SiteFooter } from '@/components/project/SiteFooter';
 import { projectConfig } from '@/components/project/config';
 import { Dots } from '@/components/ui/Dots';
 import type { CodeData, TreeNode } from '@/lib/code-files';
@@ -130,7 +131,7 @@ export function CodeBrowser({ data }: { data: CodeData }) {
   }, [selected, resolvedTheme, data.files]);
 
   return (
-    <div className="gh h-screen flex flex-col bg-background text-foreground">
+    <div className="gh min-h-screen flex flex-col bg-background text-foreground">
       <SiteHeader config={projectConfig} active="code" fluid />
 
       <div className="flex-1 flex min-h-0">
@@ -177,7 +178,7 @@ export function CodeBrowser({ data }: { data: CodeData }) {
           </div>
           <div className="flex-1 overflow-auto">
             {loading ? (
-              <div className="p-4"><Dots label="loading…" /></div>
+              <div className="flex h-full items-center justify-center p-4"><Dots label="loading…" /></div>
             ) : (
               <div
                 className="text-[13px] [&_pre]:p-4 [&_pre]:min-h-full [&_pre]:!bg-transparent [&_code]:font-mono"
@@ -187,6 +188,8 @@ export function CodeBrowser({ data }: { data: CodeData }) {
           </div>
         </main>
       </div>
+
+      <SiteFooter config={projectConfig} />
     </div>
   );
 }

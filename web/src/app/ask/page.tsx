@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SiteHeader } from "@/components/project/SiteHeader";
+import { SiteFooter } from "@/components/project/SiteFooter";
 import { projectConfig } from "@/components/project/config";
 
 type Chunk = {
@@ -67,9 +68,9 @@ export default function Home() {
   }
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
     <SiteHeader config={projectConfig} active="live" fluid />
-    <main className="mx-auto w-full max-w-3xl px-5 py-12 sm:py-16">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-12 sm:py-16">
       <header className="mb-8">
         <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
           NLP Textbook RAG
@@ -204,6 +205,7 @@ export default function Home() {
         </section>
       )}
     </main>
-    </>
+    <SiteFooter config={projectConfig} />
+    </div>
   );
 }

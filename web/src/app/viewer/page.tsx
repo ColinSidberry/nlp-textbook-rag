@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { SiteHeader } from "@/components/project/SiteHeader";
+import { SiteFooter } from "@/components/project/SiteFooter";
 import { projectConfig } from "@/components/project/config";
 import { Dots } from "@/components/ui/Dots";
 
@@ -199,13 +200,13 @@ export default function ViewerPage() {
                 setQuery(search.trim());
                 setPage(1);
               }}
-              className="ml-auto flex gap-2"
+              className="ml-auto flex w-full gap-2 sm:w-auto"
             >
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search chunk text…"
-                className="min-w-[11rem] rounded-md border border-border bg-card px-3 py-1.5 text-base outline-none focus:border-brand"
+                className="min-w-0 flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-base outline-none focus:border-brand sm:min-w-[11rem] sm:flex-none"
               />
               <button
                 type="submit"
@@ -270,6 +271,8 @@ export default function ViewerPage() {
           )}
         </main>
       </div>
+
+      <SiteFooter config={projectConfig} />
     </div>
   );
 }
