@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes';
 import { ChevronDown, ChevronRight, FileCode, Menu, X } from 'lucide-react';
 import { SiteHeader } from '@/components/project/SiteHeader';
 import { projectConfig } from '@/components/project/config';
+import { Dots } from '@/components/ui/Dots';
 import type { CodeData, TreeNode } from '@/lib/code-files';
 
 // Lazy shiki highlighter singleton — only loaded when /code is opened.
@@ -176,7 +177,7 @@ export function CodeBrowser({ data }: { data: CodeData }) {
           </div>
           <div className="flex-1 overflow-auto">
             {loading ? (
-              <div className="p-4 font-mono text-sm text-muted-foreground animate-pulse">highlighting…</div>
+              <div className="p-4"><Dots label="highlighting…" /></div>
             ) : (
               <div
                 className="text-[13px] [&_pre]:p-4 [&_pre]:min-h-full [&_pre]:!bg-transparent [&_code]:font-mono"

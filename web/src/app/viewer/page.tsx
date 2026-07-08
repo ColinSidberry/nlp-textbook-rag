@@ -4,6 +4,22 @@ import { useCallback, useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { SiteHeader } from "@/components/project/SiteHeader";
 import { projectConfig } from "@/components/project/config";
+import { Dots } from "@/components/ui/Dots";
+
+// The store is a single pgvector table (no relations), so the "schema" view is
+// one entity — shown for parity with the sibling sites' ERD tabs.
+const SCHEMA = {
+  table: "nlp_chunks",
+  columns: [
+    { name: "id", type: "text · pk" },
+    { name: "document", type: "text" },
+    { name: "chapter", type: "text" },
+    { name: "filename", type: "text" },
+    { name: "chunk_index", type: "int4" },
+    { name: "embedding", type: "vector(384)" },
+  ],
+  note: "A single pgvector table — one row per textbook chunk, no relations. Retrieval is cosine similarity over the 384-dim MiniLM embedding.",
+};
 
 type Entry = {
   id: string;
@@ -31,6 +47,7 @@ export default function ViewerPage() {
   const [filenames, setFilenames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [navOpen, setNavOpen] = useState(false); // mobile chapters drawer
+  const [view, setView] = useState<"chunks" | "schema">("chunks");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -97,7 +114,9 @@ export default function ViewerPage() {
         >
           <Menu className="h-4 w-4" /> Chapters
         </button>
-        <span className="font-mono text-sm text-muted-foreground truncate">{filename || "All chapters"}</span>
+        {view !== "schema" && (
+          <span className="font-mono text-sm text-muted-foreground truncate">{filename || "All chapters"}</span>
+        )}
       </div>
 
       <div className="flex flex-col md:flex-row">
@@ -129,6 +148,46 @@ export default function ViewerPage() {
 
         {/* Right: chunks (the "documents") */}
         <main className="flex-1 min-w-0">
+          {/* tabs */}
+          <div className="border-b border-border px-5 pt-3">
+            <div className="flex items-center gap-1">
+              {(["chunks", "schema"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setView(t)}
+                  className={`px-3 py-2 text-sm font-mono border-b-2 -mb-px transition-colors ${
+                    view === t
+                      ? "border-foreground text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {view === "schema" ? (
+            <div className="p-5">
+              <div className="max-w-md overflow-hidden rounded-lg border border-border bg-card">
+                <div className="border-b border-border bg-muted/40 px-4 py-2 font-mono text-sm font-semibold text-foreground">
+                  {SCHEMA.table}
+                </div>
+                <table className="w-full text-left font-mono text-xs">
+                  <tbody>
+                    {SCHEMA.columns.map((c) => (
+                      <tr key={c.name} className="border-b border-border/50 last:border-0">
+                        <td className="px-4 py-1.5 text-foreground">{c.name}</td>
+                        <td className="px-4 py-1.5 text-right text-muted-foreground">{c.type}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="mt-3 max-w-md text-xs leading-relaxed text-muted-foreground">{SCHEMA.note}</p>
+            </div>
+          ) : (
+          <>
           <div className="border-b border-border px-5 py-3 flex flex-wrap items-center gap-x-3 gap-y-2">
             <h2 className="font-mono text-base font-semibold">{filename || "All chapters"}</h2>
             <span className="text-xs text-muted-foreground font-mono">
@@ -146,7 +205,7 @@ export default function ViewerPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search chunk text…"
-                className="min-w-[11rem] rounded-md border border-border bg-card px-3 py-1.5 text-sm outline-none focus:border-brand"
+                className="min-w-[11rem] rounded-md border border-border bg-card px-3 py-1.5 text-base outline-none focus:border-brand"
               />
               <button
                 type="submit"
@@ -158,7 +217,7 @@ export default function ViewerPage() {
           </div>
 
           <div className="p-5">
-            {loading && <p className="text-sm text-muted-foreground font-mono animate-pulse">loading…</p>}
+            {loading && <div className="flex py-1"><Dots label="loading…" /></div>}
 
             {feed && (
               <>
@@ -207,6 +266,8 @@ export default function ViewerPage() {
               </>
             )}
           </div>
+          </>
+          )}
         </main>
       </div>
     </div>

@@ -113,7 +113,7 @@ export function SiteHeader({
             {config.demoVideoId ? (
               <iframe
                 className="w-full h-full"
-                src={`https://www.youtube.com/embed/${config.demoVideoId}?autoplay=1`}
+                src={`https://www.youtube-nocookie.com/embed/${config.demoVideoId}?rel=0`}
                 title={`${config.name} demo`}
                 allow="accelerated-encoder; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

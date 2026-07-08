@@ -111,7 +111,7 @@ export default function Home() {
           }}
           rows={3}
           placeholder="e.g. How do transformers use attention mechanisms?"
-          className="w-full resize-y rounded-xl border border-stone-300 bg-white px-4 py-3 text-sm shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-stone-700 dark:bg-stone-900"
+          className="w-full resize-y rounded-xl border border-stone-300 bg-white px-4 py-3 text-base shadow-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-stone-700 dark:bg-stone-900"
         />
 
         <div className="flex flex-wrap items-center gap-3">
